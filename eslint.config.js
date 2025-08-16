@@ -7,4 +7,24 @@ module.exports = defineConfig([
   {
     ignores: ['dist/*'],
   },
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    plugins: {
+      prettier: require('eslint-plugin-prettier'),
+    },
+    rules: {
+      'prettier/prettier': 'error',
+      'arrow-body-style': 'off',
+      'prefer-arrow-callback': 'off',
+    },
+  },
 ]);
