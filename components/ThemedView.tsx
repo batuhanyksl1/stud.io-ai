@@ -1,3 +1,4 @@
+import { Spacing } from '@/constants/DesignTokens';
 import { useTheme } from '@/hooks/useTheme';
 import React, { ReactNode } from 'react';
 import { SafeAreaView, ViewStyle } from 'react-native';
@@ -6,8 +7,8 @@ interface ThemedViewProps {
   children: ReactNode;
   style?: ViewStyle;
   backgroundColor?: 'background' | 'surface' | 'surfaceElevated' | 'primary' | 'transparent';
-  padding?: keyof typeof import('@/constants/DesignTokens').Spacing;
-  margin?: keyof typeof import('@/constants/DesignTokens').Spacing;
+  padding?: keyof typeof Spacing;
+  margin?: keyof typeof Spacing;
 }
 
 /**
@@ -24,7 +25,6 @@ export default function ThemedView({
   margin,
 }: ThemedViewProps) {
   const { colors } = useTheme();
-  const { Spacing } = require('@/constants/DesignTokens');
 
   const viewStyle: ViewStyle[] = [
     {
