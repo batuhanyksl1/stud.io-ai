@@ -255,7 +255,7 @@ export default function HomeScreen() {
       >
         <View style={styles.carouselContent}>
           {/* <View style={styles.carouselIcon}> */}
-            {/* <Ionicon name={item.icon as any} size={40} color="white" /> */}
+          {/* <Ionicon name={item.icon as any} size={40} color="white" /> */}
           {/* </View> */}
           <ThemedText variant="h4" weight="bold" style={styles.carouselTitle}>
             {item.title}
@@ -397,7 +397,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView backgroundColor="surface" style={styles.container}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <View style={styles.headerContent}>
@@ -470,7 +470,12 @@ export default function HomeScreen() {
               />
 
               {/* Sayfa göstergeleri */}
-              <View style={styles.pagination}>
+              <View
+                style={[
+                  styles.pagination,
+                  { position: 'absolute', bottom: 50, left: 0, right: 0, zIndex: 10 },
+                ]}
+              >
                 {carouselData.map((_, index) => (
                   <View
                     key={index}
@@ -695,7 +700,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
-    marginTop: 16,
+    marginTop: 0,
   },
   quickActionContainer: {
     width: (width - 44) / 2, // 24px padding * 2 + 12px gap * 2
@@ -761,7 +766,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    marginBottom: 0,
+    marginBottom: 16,
   },
   servicesGrid: {
     gap: 16,
