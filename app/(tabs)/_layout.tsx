@@ -1,6 +1,7 @@
 import { useTheme } from '@/hooks/useTheme';
+import Fontisto from '@expo/vector-icons/Fontisto';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
-import { CreditCard as Edit3, Hammer, Settings, User } from 'lucide-react-native';
 import { Platform, StyleSheet } from 'react-native';
 
 export default function TabLayout() {
@@ -20,40 +21,61 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name='index'
+        name="index"
         options={{
           title: 'Create',
-          tabBarIcon: ({ size, color }) => <Hammer size={size} color={color} strokeWidth={2} />,
+          tabBarIcon: ({ size, color, focused }) =>
+            focused ? (
+              <Ionicons name="hammer" size={size} color={color} />
+            ) : (
+              <Ionicons name="hammer-outline" size={size} color={color} />
+            ),
         }}
       />
 
       <Tabs.Screen
-        name='editor'
+        name="editor"
         options={{
           title: 'Galeri',
-          tabBarIcon: ({ size, color }) => <Edit3 size={size} color={color} strokeWidth={2} />,
+          tabBarIcon: ({ size, color, focused }) =>
+            focused ? (
+              <Fontisto name="world" size={size} color={color} />
+            ) : (
+              <Fontisto name="world-o" size={size} color={color} />
+            ),
         }}
       />
       <Tabs.Screen
-        name='service-detail'
+        name="service-detail"
         options={{
           href: null, // Bu sayfa tab olarak görünmeyecek
         }}
       />
       <Tabs.Screen
-        name='settings'
+        name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ size, color }) => <Settings size={size} color={color} strokeWidth={2} />,
+          tabBarIcon: ({ size, color, focused }) =>
+            focused ? (
+              <Ionicons name="settings" size={size} color={color} />
+            ) : (
+              <Ionicons name="settings-outline" size={size} color={color} />
+            ),
         }}
       />
       <Tabs.Screen
-        name='profile'
+        name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ size, color }) => <User size={size} color={color} strokeWidth={2} />,
+          tabBarIcon: ({ size, color, focused }) =>
+            focused ? (
+              <Ionicons name="person" size={size} color={color} />
+            ) : (
+              <Ionicons name="person-outline" size={size} color={color} />
+            ),
         }}
       />
+
     </Tabs>
   );
 }

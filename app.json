@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "stud.io-ai",
-    "slug": "stud.io-ai",
+    "slug": "studio-ai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -40,6 +40,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e91f1bfd-89c2-4673-b0d5-4f01ecbf3a0d"
+      }
     }
   }
 }

@@ -3,34 +3,54 @@ import ThemedCard from '@/components/ThemedCard';
 import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
 import { useTheme } from '@/hooks/useTheme';
+import Icon from '@expo/vector-icons/Feather';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import {
-  ArrowRight,
-  Award,
-  Camera,
-  Clock,
-  Image as ImageIcon,
-  Palette,
-  Sparkles,
-  Star,
-  TrendingUp,
-  Users,
-  Zap,
-} from 'lucide-react-native';
-import React from 'react';
-import { Dimensions, Platform, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { Dimensions, FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
+// Carousel için örnek veriler
+const carouselData = [
+  {
+    id: 1,
+    title: 'Portre Düzenleme',
+    subtitle: 'Yüz güzelleştirme ve renk düzeltme',
+    icon: 'user',
+    gradient: ['#FF6B6B', '#FFE66D'],
+  },
+  {
+    id: 2,
+    title: 'Manzara Fotoğrafları',
+    subtitle: 'Doğal renkleri canlandırın',
+    icon: 'mountain',
+    gradient: ['#4ECDC4', '#44A08D'],
+  },
+  {
+    id: 3,
+    title: 'Ürün Fotoğrafları',
+    subtitle: 'Profesyonel görünüm',
+    icon: 'shopping-bag',
+    gradient: ['#A8E6CF', '#7FCDCD'],
+  },
+  {
+    id: 4,
+    title: 'Sokak Fotoğrafçılığı',
+    subtitle: 'Dramatik efektler ekleyin',
+    icon: 'camera',
+    gradient: ['#FF9A9E', '#FECFEF'],
+  },
+];
+
 // Ana servislerimiz
-const services = [
+const editingServices = [
   {
     id: 'profile-picture',
     title: 'Profil Fotoğrafı',
     subtitle: 'LinkedIn Ready',
     description: 'LinkedIn için profesyonel profil fotoğrafları oluşturun',
-    icon: Sparkles,
+    icon: 'zap',
     color: '#0077B5',
     gradient: ['#0077B5', '#005885'],
     features: ['Profesyonel filtreler', 'Otomatik boyutlandırma', 'LinkedIn uyumlu format'],
@@ -44,7 +64,7 @@ const services = [
     title: 'Arka Plan Kaldırma',
     subtitle: 'AI Powered',
     description: 'Fotoğraflarınızdan arka planı otomatik olarak kaldırın',
-    icon: ImageIcon,
+    icon: 'image',
     color: '#10B981',
     gradient: ['#10B981', '#059669'],
     features: ['AI destekli arka plan kaldırma', 'Hassas kenar tespiti', 'Şeffaf PNG çıktı'],
@@ -58,7 +78,7 @@ const services = [
     title: 'Fotoğraf İyileştirme',
     subtitle: 'Smart Enhancement',
     description: 'Fotoğraflarınızı AI ile otomatik olarak iyileştirin',
-    icon: Palette,
+    icon: 'palette',
     color: '#F59E0B',
     gradient: ['#F59E0B', '#D97706'],
     features: ['Otomatik parlaklık ayarı', 'Gürültü azaltma', 'Keskinlik artırma'],
@@ -72,7 +92,7 @@ const services = [
     title: 'Stil Transferi',
     subtitle: 'Artistic AI',
     description: 'Fotoğraflarınıza sanatsal stiller uygulayın',
-    icon: Zap,
+    icon: 'zap',
     color: '#8B5CF6',
     gradient: ['#8B5CF6', '#7C3AED'],
     features: ['Çoklu sanat stili', 'Gerçek zamanlı önizleme', 'Stil yoğunluğu ayarı'],
@@ -88,28 +108,28 @@ const quickActions = [
   {
     id: 'camera',
     title: 'Fotoğraf Çek',
-    icon: Camera,
+    icon: 'camera',
     color: '#3B82F6',
     gradient: ['#3B82F6', '#1D4ED8'],
   },
   {
     id: 'gallery',
     title: 'Galeriden Seç',
-    icon: ImageIcon,
+    icon: 'image',
     color: '#10B981',
     gradient: ['#10B981', '#059669'],
   },
   {
     id: 'recent',
     title: 'Son Düzenlemeler',
-    icon: Clock,
+    icon: 'clock',
     color: '#F59E0B',
     gradient: ['#F59E0B', '#D97706'],
   },
   {
     id: 'premium',
     title: 'Premium Özellikler',
-    icon: Award,
+    icon: 'award',
     color: '#8B5CF6',
     gradient: ['#8B5CF6', '#7C3AED'],
   },
@@ -149,27 +169,60 @@ const todayStats = [
     title: 'Bugün İşlenen',
     value: '24',
     change: '+12%',
-    icon: TrendingUp,
+    icon: 'trending-up',
     color: '#10B981',
   },
   {
     title: 'Bu Hafta',
     value: '156',
     change: '+8%',
-    icon: Users,
+    icon: 'users',
     color: '#3B82F6',
   },
   {
     title: 'Toplam Proje',
     value: '1.2K',
     change: '+24%',
-    icon: Award,
+    icon: 'award',
     color: '#8B5CF6',
   },
 ];
 
-export default function HomeTab() {
+export default function HomeScreen() {
+  const router = useRouter();
   const { colors } = useTheme();
+  const [currentPage, setCurrentPage] = useState(0);
+  const flatListRef = useRef<FlatList>(null);
+  const autoScrollInterval = useRef<number | null>(null);
+
+  // Otomatik kaydırma
+  useEffect(() => {
+    autoScrollInterval.current = setInterval(() => {
+      const nextPage = (currentPage + 1) % carouselData.length;
+      setCurrentPage(nextPage);
+      flatListRef.current?.scrollToIndex({
+        index: nextPage,
+        animated: true,
+      });
+    }, 3000); // 3 saniyede bir değişir
+
+    return () => {
+      if (autoScrollInterval.current) {
+        clearInterval(autoScrollInterval.current);
+      }
+    };
+  }, [currentPage]);
+
+  // Sayfa değiştiğinde
+  const onViewableItemsChanged = ({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      setCurrentPage(viewableItems[0].index);
+    }
+  };
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 50,
+  };
 
   const handleServicePress = (serviceId: string) => {
     router.push(`/service-detail?serviceId=${serviceId}`);
@@ -192,9 +245,36 @@ export default function HomeTab() {
     }
   };
 
-  const renderServiceCard = (service: (typeof editingServices)[0]) => {
-    const IconComponent = service.icon;
+  const renderCarouselItem = ({ item }: { item: (typeof carouselData)[0] }) => (
+    <View style={styles.carouselPage}>
+      <LinearGradient
+        colors={item.gradient as any}
+        style={styles.carouselCard}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <View style={styles.carouselContent}>
+          <View style={styles.carouselIcon}>
+            <Icon name={item.icon as any} size={40} color="white" />
+          </View>
+          <ThemedText variant="h4" weight="bold" style={styles.carouselTitle}>
+            {item.title}
+          </ThemedText>
+          <ThemedText variant="body" style={styles.carouselSubtitle}>
+            {item.subtitle}
+          </ThemedText>
+          <TouchableOpacity style={styles.carouselButton} onPress={() => router.push('/editor')}>
+            <ThemedText variant="body" weight="semiBold" style={styles.carouselButtonText}>
+              Dene
+            </ThemedText>
+            <Icon name="arrow-right" size={16} color="white" />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    </View>
+  );
 
+  const renderServiceCard = (service: (typeof editingServices)[0]) => {
     return (
       <TouchableOpacity
         key={service.id}
@@ -211,11 +291,11 @@ export default function HomeTab() {
           <View style={styles.serviceCardContent}>
             <View style={styles.serviceHeader}>
               <View style={styles.serviceIconWrapper}>
-                <IconComponent size={28} color="#FFFFFF" strokeWidth={2.5} />
+                <Icon name={service.icon as any} size={28} color="#FFFFFF" />
               </View>
               {service.isPopular && (
                 <View style={[styles.popularBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-                  <Star size={10} color="#FFD700" fill="#FFD700" />
+                  <Icon name="star" size={10} color="#FFD700" />
                   <ThemedText variant="caption" style={styles.popularText}>
                     {service.badge}
                   </ThemedText>
@@ -237,7 +317,7 @@ export default function HomeTab() {
 
             <View style={styles.serviceFooter}>
               <View style={styles.serviceStats}>
-                <Star size={12} color="#FFD700" fill="#FFD700" />
+                <Icon name="star" size={12} color="#FFD700" />
                 <ThemedText variant="caption" style={styles.rating}>
                   {service.rating}
                 </ThemedText>
@@ -245,7 +325,7 @@ export default function HomeTab() {
                   • {service.usageCount}
                 </ThemedText>
               </View>
-              <ArrowRight size={16} color="rgba(255,255,255,0.8)" strokeWidth={2} />
+              <Icon name="arrow-right" size={16} color="rgba(255,255,255,0.8)" />
             </View>
           </View>
         </LinearGradient>
@@ -254,8 +334,6 @@ export default function HomeTab() {
   };
 
   const renderQuickAction = (action: (typeof quickActions)[0]) => {
-    const IconComponent = action.icon;
-
     return (
       <TouchableOpacity
         key={action.id}
@@ -269,7 +347,7 @@ export default function HomeTab() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <IconComponent size={24} color="#FFFFFF" strokeWidth={2} />
+          <Icon name={action.icon as any} size={24} color="#FFFFFF" />
           <ThemedText variant="caption" weight="semiBold" style={styles.quickActionText}>
             {action.title}
           </ThemedText>
@@ -298,13 +376,11 @@ export default function HomeTab() {
   };
 
   const renderStatCard = (stat: (typeof todayStats)[0]) => {
-    const IconComponent = stat.icon;
-
     return (
       <ThemedCard key={stat.title} style={styles.statCard} padding="md" elevation="sm">
         <View style={styles.statHeader}>
           <View style={[styles.statIcon, { backgroundColor: stat.color + '20' }]}>
-            <IconComponent size={16} color={stat.color} strokeWidth={2} />
+            <Icon name={stat.icon as any} size={16} color={stat.color} />
           </View>
           <ThemedText variant="caption" color="secondary">
             {stat.title}
@@ -341,88 +417,132 @@ export default function HomeTab() {
         </View>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        {/* Hero Section */}
-        <ThemedView style={styles.heroSection}>
-          <LinearGradient
-            colors={[colors.primary + '20', colors.primary + '05']}
-            style={styles.heroGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <View style={styles.heroContent}>
-              <View style={styles.heroIcon}>
-                <Sparkles size={32} color={colors.primary} strokeWidth={2} />
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <ScrollView
+          style={[styles.scrollView, { backgroundColor: colors.background }]}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Hero Section */}
+          <ThemedView style={styles.heroSection}>
+            <LinearGradient
+              colors={[colors.primary + '20', colors.primary + '05']}
+              style={styles.heroGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <View style={styles.heroContent}>
+                <View style={styles.heroIcon}>
+                  <Icon name="zap" size={32} color={colors.primary} />
+                </View>
+                <ThemedText variant="h2" weight="bold" style={styles.heroTitle}>
+                  Merhaba! 👋
+                </ThemedText>
+                <ThemedText variant="body" color="secondary" style={styles.heroSubtitle}>
+                  Bugün hangi fotoğrafınızı düzenlemek istiyorsunuz?
+                </ThemedText>
               </View>
-              <ThemedText variant="h2" weight="bold" style={styles.heroTitle}>
-                Merhaba! 👋
-              </ThemedText>
-              <ThemedText variant="body" color="secondary" style={styles.heroSubtitle}>
-                Bugün hangi fotoğrafınızı düzenlemek istiyorsunuz?
-              </ThemedText>
+            </LinearGradient>
+          </ThemedView>
+
+          {/* Dinamik Carousel - EK OLARAK */}
+          <ThemedView style={styles.carouselSection}>
+            <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
+              Öne Çıkan Özellikler
+            </ThemedText>
+
+            <View style={styles.carouselContainer}>
+              <FlatList
+                ref={flatListRef}
+                data={carouselData}
+                renderItem={renderCarouselItem}
+                keyExtractor={(item) => item.id.toString()}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onViewableItemsChanged={onViewableItemsChanged}
+                viewabilityConfig={viewabilityConfig}
+                getItemLayout={(data, index) => ({
+                  length: width - 32,
+                  offset: (width - 32) * index,
+                  index,
+                })}
+              />
+
+              {/* Sayfa göstergeleri */}
+              <View style={styles.pagination}>
+                {carouselData.map((_, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.paginationDot,
+                      {
+                        backgroundColor: index === currentPage ? colors.primary : colors.border,
+                        width: index === currentPage ? 24 : 8,
+                      },
+                    ]}
+                  />
+                ))}
+              </View>
             </View>
-          </LinearGradient>
-        </ThemedView>
+          </ThemedView>
 
-        {/* Quick Actions */}
-        <ThemedView style={styles.quickActionsSection}>
-          <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
-            Hızlı Başlat
-          </ThemedText>
-          <View style={styles.quickActionsGrid}>{quickActions.map(renderQuickAction)}</View>
-        </ThemedView>
-
-        {/* Today Stats */}
-        <ThemedView style={styles.todayStatsSection}>
-          <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
-            Bugün
-          </ThemedText>
-          <View style={styles.statsGrid}>{todayStats.map(renderStatCard)}</View>
-        </ThemedView>
-
-        {/* Services Section */}
-        <ThemedView style={styles.servicesSection}>
-          <View style={styles.sectionHeader}>
+          {/* Quick Actions */}
+          <ThemedView style={styles.quickActionsSection}>
             <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
-              Tüm Servisler
+              Hızlı Başlat
             </ThemedText>
-            <TouchableOpacity>
-              <ThemedText variant="body" color="primary" weight="semiBold">
-                Tümünü Gör
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.servicesGrid}>{services.map(renderServiceCard)}</View>
-        </ThemedView>
+            <View style={styles.quickActionsGrid}>{quickActions.map(renderQuickAction)}</View>
+          </ThemedView>
 
-        {/* Recent Activity */}
-        <ThemedView style={styles.recentSection}>
-          <View style={styles.sectionHeader}>
+          {/* Today Stats */}
+          <ThemedView style={styles.todayStatsSection}>
             <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
-              Son Aktiviteler
+              Bugün
             </ThemedText>
-            <TouchableOpacity>
-              <ThemedText variant="body" color="primary" weight="semiBold">
-                Tümünü Gör
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
-          <ThemedCard
-            style={[styles.recentCard, { backgroundColor: colors.surface }] as any}
-            padding="sm"
-            elevation="sm"
-          >
-            {recentActivity.map(renderActivityItem)}
-          </ThemedCard>
-        </ThemedView>
+            <View style={styles.statsGrid}>{todayStats.map(renderStatCard)}</View>
+          </ThemedView>
 
-        {/* Bottom Spacing */}
-        <View style={{ height: 32 }} />
-      </ScrollView>
+          {/* Services Section */}
+          <ThemedView style={styles.servicesSection}>
+            <View style={styles.sectionHeader}>
+              <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
+                Tüm Servisler
+              </ThemedText>
+              <TouchableOpacity>
+                <ThemedText variant="body" color="primary" weight="semiBold">
+                  Tümünü Gör
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.servicesGrid}>{editingServices.map(renderServiceCard)}</View>
+          </ThemedView>
+
+          {/* Recent Activity */}
+          <ThemedView style={styles.recentSection}>
+            <View style={styles.sectionHeader}>
+              <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
+                Son Aktiviteler
+              </ThemedText>
+              <TouchableOpacity>
+                <ThemedText variant="body" color="primary" weight="semiBold">
+                  Tümünü Gör
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+            <ThemedCard
+              style={[styles.recentCard, { backgroundColor: colors.surface }] as any}
+              padding="sm"
+              elevation="sm"
+            >
+              {recentActivity.map(renderActivityItem)}
+            </ThemedCard>
+          </ThemedView>
+
+          {/* Bottom Spacing */}
+          <View style={{ height: 32 }} />
+        </ScrollView>
+      </View>
     </ThemedView>
   );
 }
@@ -435,7 +555,7 @@ const styles = StyleSheet.create({
   // Header
   header: {
     paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'ios' ? 8 : 16,
+    paddingTop: 8,
     paddingBottom: 16,
     borderBottomWidth: 1,
   },
@@ -446,6 +566,7 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     flex: 1,
+    flexDirection: 'row',
   },
   headerSubtitle: {
     marginTop: 4,
@@ -464,9 +585,10 @@ const styles = StyleSheet.create({
   // Scroll
   scrollView: {
     flex: 1,
+    marginHorizontal: 16,
   },
   scrollContent: {
-    paddingBottom: Platform.OS === 'ios' ? 34 : 24,
+    paddingBottom: 34,
   },
 
   // Hero Section
@@ -499,6 +621,71 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 
+  // Carousel Section - EK OLARAK
+  carouselSection: {
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+  carouselContainer: {
+    height: 280,
+  },
+  carouselPage: {
+    width: width - 32,
+    paddingHorizontal: 8,
+  },
+  carouselCard: {
+    borderRadius: 16,
+    padding: 24,
+    height: 240,
+    justifyContent: 'center',
+  },
+  carouselContent: {
+    alignItems: 'center',
+  },
+  carouselIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  carouselTitle: {
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  carouselSubtitle: {
+    color: 'white',
+    textAlign: 'center',
+    opacity: 0.9,
+    marginBottom: 20,
+  },
+  carouselButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 25,
+    gap: 8,
+  },
+  carouselButtonText: {
+    color: 'white',
+  },
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+    gap: 8,
+  },
+  paginationDot: {
+    height: 8,
+    borderRadius: 4,
+  },
+
   // Quick Actions
   quickActionsSection: {
     paddingHorizontal: 24,
@@ -511,7 +698,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   quickActionContainer: {
-    width: (width - 72) / 2, // 24px padding * 2 + 12px gap * 2
+    width: (width - 44) / 2, // 24px padding * 2 + 12px gap * 2
   },
   quickActionGradient: {
     borderRadius: 16,

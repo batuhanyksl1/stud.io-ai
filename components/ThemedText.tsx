@@ -55,6 +55,7 @@ export default function ThemedText({
           fontSize: Typography.fontSize.xxxxl,
           lineHeight: Typography.fontSize.xxxxl * Typography.lineHeight.tight,
           fontFamily: Typography.fontFamily.semiBold,
+          marginTop: 16,
         };
       case 'h4':
         return {

@@ -90,22 +90,22 @@ export default function SignInScreen() {
             minHeight: screenHeight,
             paddingVertical: 20,
           }}
-          keyboardShouldPersistTaps='handled'
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <View style={{ paddingHorizontal: 24, paddingTop: 40 }}>
             {/* Back Button */}
             <Button
-              title=''
+              title=""
               onPress={handleGoBack}
-              variant='ghost'
+              variant="ghost"
               icon={<ArrowLeft size={24} color={colorScheme === 'dark' ? 'white' : '#1f2937'} />}
               style={{ alignSelf: 'flex-start', marginBottom: 20 }}
             />
 
             {/* Header */}
             <View style={{ alignItems: 'center', marginBottom: 40 }}>
-              <Logo size='lg' variant='default' font='poppins' />
+              <Logo size="lg" variant="default" font="poppins" />
               <Text
                 style={{
                   fontSize: 28,
@@ -131,15 +131,15 @@ export default function SignInScreen() {
             </View>
 
             {/* Sign In Form */}
-            <Card variant='glass' padding='lg' blur>
+            <Card variant="glass" padding="lg" blur>
               <View style={{ gap: 20 }}>
                 <Controller
                   control={control}
-                  name='email'
+                  name="email"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
-                      label='E-posta'
-                      placeholder='E-posta adresinizi girin'
+                      label="E-posta"
+                      placeholder="E-posta adresinizi girin"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -147,19 +147,19 @@ export default function SignInScreen() {
                       leftIcon={
                         <Mail size={20} color={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'} />
                       }
-                      keyboardType='email-address'
-                      autoCapitalize='none'
+                      keyboardType="email-address"
+                      autoCapitalize="none"
                     />
                   )}
                 />
 
                 <Controller
                   control={control}
-                  name='password'
+                  name="password"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <Input
-                      label='Şifre'
-                      placeholder='Şifrenizi girin'
+                      label="Şifre"
+                      placeholder="Şifrenizi girin"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -173,10 +173,10 @@ export default function SignInScreen() {
                 />
 
                 <Button
-                  title='Şifremi Unuttum'
+                  title="Şifremi Unuttum"
                   onPress={handleForgotPassword}
-                  variant='ghost'
-                  size='sm'
+                  variant="ghost"
+                  size="sm"
                   style={{ alignSelf: 'flex-end', marginTop: -8 }}
                 />
 
@@ -186,7 +186,7 @@ export default function SignInScreen() {
                   loading={loading}
                   disabled={!isValid || loading}
                   gradient
-                  size='lg'
+                  size="lg"
                   style={{ marginTop: 10 }}
                 />
               </View>
@@ -204,9 +204,9 @@ export default function SignInScreen() {
                 Hesabınız yok mu?
               </Text>
               <Button
-                title='Hesap Oluştur'
+                title="Hesap Oluştur"
                 onPress={handleGoToSignUp}
-                variant='ghost'
+                variant="ghost"
                 style={{ marginTop: 8 }}
               />
             </View>
