@@ -2,6 +2,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { View, ViewStyle } from 'react-native';
+import { BorderRadius, SemanticColors, Shadows, Spacing } from '../../constants/DesignTokens';
 import { useTheme } from '../../hooks/useTheme';
 
 interface CardProps {
@@ -20,38 +21,48 @@ export const Card: React.FC<CardProps> = ({
   blur = false,
 }) => {
   const { colorScheme } = useTheme();
+  const colors = SemanticColors[colorScheme];
 
-  const getPaddingClasses = () => {
+  const getPaddingStyle = (): ViewStyle => {
     const paddingMap = {
-      none: '',
-      sm: 'p-3',
-      md: 'p-4',
-      lg: 'p-6',
-      xl: 'p-8',
+      none: { padding: 0 },
+      sm: { padding: Spacing.sm },
+      md: { padding: Spacing.md },
+      lg: { padding: Spacing.lg },
+      xl: { padding: Spacing.xl },
     };
     return paddingMap[padding];
   };
 
-  const getCardClasses = () => {
-    const baseClasses = 'rounded-2xl';
-
-    const variantClasses = {
-      default:
-        colorScheme === 'dark'
-          ? 'bg-secondary-800 border border-secondary-700'
-          : 'bg-white border border-secondary-200',
-      elevated:
-        colorScheme === 'dark'
-          ? 'bg-secondary-800 shadow-lg shadow-black/20'
-          : 'bg-white shadow-lg shadow-secondary-900/10',
-      glass:
-        colorScheme === 'dark'
-          ? 'bg-secondary-800/80 border border-secondary-700/50'
-          : 'bg-white/80 border border-secondary-200/50',
-      gradient: '',
+  const getCardStyle = (): ViewStyle => {
+    const baseStyle: ViewStyle = {
+      borderRadius: BorderRadius.lg,
     };
 
-    return `${baseClasses} ${variantClasses[variant]} ${getPaddingClasses()}`;
+    const variantStyles: Record<string, ViewStyle> = {
+      default: {
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+      },
+      elevated: {
+        backgroundColor: colors.surface,
+        ...Shadows.lg,
+      },
+      glass: {
+        backgroundColor:
+          colorScheme === 'dark' ? 'rgba(55, 65, 81, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+        borderWidth: 1,
+        borderColor: colorScheme === 'dark' ? 'rgba(55, 65, 81, 0.5)' : 'rgba(229, 231, 235, 0.5)',
+      },
+      gradient: {},
+    };
+
+    return {
+      ...baseStyle,
+      ...variantStyles[variant],
+      ...getPaddingStyle(),
+    };
   };
 
   if (variant === 'gradient') {
@@ -64,11 +75,23 @@ export const Card: React.FC<CardProps> = ({
         }
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className={`rounded-2xl ${getPaddingClasses()}`}
-        style={style}
+        style={[
+          {
+            borderRadius: BorderRadius.lg,
+            ...getPaddingStyle(),
+          },
+          style,
+        ]}
       >
         {blur ? (
-          <BlurView intensity={20} tint={colorScheme} className='rounded-2xl overflow-hidden'>
+          <BlurView
+            intensity={20}
+            tint={colorScheme}
+            style={{
+              borderRadius: BorderRadius.lg,
+              overflow: 'hidden',
+            }}
+          >
             {children}
           </BlurView>
         ) : (
@@ -83,17 +106,12 @@ export const Card: React.FC<CardProps> = ({
       <BlurView
         intensity={20}
         tint={colorScheme}
-        className={`${getCardClasses()} overflow-hidden`}
-        style={style}
+        style={[getCardStyle(), { overflow: 'hidden' }, style]}
       >
         {children}
       </BlurView>
     );
   }
 
-  return (
-    <View className={getCardClasses()} style={style}>
-      {children}
-    </View>
-  );
+  return <View style={[getCardStyle(), style]}>{children}</View>;
 };

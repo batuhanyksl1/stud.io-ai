@@ -1,6 +1,6 @@
+import { useTheme } from '@/hooks/useTheme';
 import React, { ReactNode } from 'react';
 import { ScrollView, StyleSheet, ViewStyle } from 'react-native';
-import { useTheme } from '@/hooks/useTheme';
 
 interface ScrollContainerProps {
   children: ReactNode;

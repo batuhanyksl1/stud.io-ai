@@ -1,7 +1,7 @@
-import React, { ReactNode } from 'react';
-import { TouchableOpacity, ViewStyle, TextStyle, ActivityIndicator } from 'react-native';
+import { BorderRadius, ComponentTokens, Shadows, Spacing } from '@/constants/DesignTokens';
 import { useTheme } from '@/hooks/useTheme';
-import { Spacing, BorderRadius, ComponentTokens, Shadows } from '@/constants/DesignTokens';
+import React, { ReactNode } from 'react';
+import { ActivityIndicator, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
 import ThemedText from './ThemedText';
 
 interface ThemedButtonProps {
@@ -19,7 +19,7 @@ interface ThemedButtonProps {
 
 /**
  * ThemedButton Component
- * 
+ *
  * A comprehensive button component with multiple variants, sizes,
  * and states that follows the design system tokens.
  */
@@ -75,7 +75,7 @@ export default function ThemedButton({
 
   const getTextColor = () => {
     if (disabled) return colors.textTertiary;
-    
+
     switch (variant) {
       case 'primary':
       case 'secondary':
@@ -127,12 +127,12 @@ export default function ThemedButton({
         <ActivityIndicator size="small" color={textColor} />
       ) : (
         <>
-          {icon && iconPosition === 'left' && (
-            {React.cloneElement(icon as React.ReactElement, {
+          {icon &&
+            iconPosition === 'left' &&
+            React.cloneElement(icon as React.ReactElement, {
               style: { marginRight: Spacing.xs },
             })}
-          )}
-          
+
           <ThemedText
             variant={fontSize === 'sm' ? 'caption' : fontSize === 'lg' ? 'bodyLarge' : 'body'}
             weight={fontWeight}
@@ -140,12 +140,12 @@ export default function ThemedButton({
           >
             {children}
           </ThemedText>
-          
-          {icon && iconPosition === 'right' && (
-            <React.cloneElement(icon as React.ReactElement, {
+
+          {icon &&
+            iconPosition === 'right' &&
+            React.cloneElement(icon as React.ReactElement, {
               style: { marginLeft: Spacing.xs },
-            })
-          )}
+            })}
         </>
       )}
     </TouchableOpacity>

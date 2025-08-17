@@ -7,6 +7,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import { SemanticColors } from '../../constants/DesignTokens';
 import { useTheme } from '../../hooks/useTheme';
 
 interface LoadingSpinnerProps {
@@ -21,6 +22,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   gradient = false,
 }) => {
   const { colorScheme } = useTheme();
+  const colors = SemanticColors[colorScheme];
   const rotation = useSharedValue(0);
 
   const sizeMap = {
@@ -39,7 +41,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
-  const defaultColor = color || (colorScheme === 'dark' ? '#60a5fa' : '#2563eb');
+  const defaultColor = color || colors.primary;
 
   if (gradient) {
     return (
@@ -69,7 +71,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
               right: 3,
               bottom: 3,
               borderRadius: (spinnerSize - 6) / 2,
-              backgroundColor: colorScheme === 'dark' ? '#1f2937' : '#ffffff',
+              backgroundColor: colors.background,
             }}
           />
         </Animated.View>

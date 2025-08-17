@@ -31,7 +31,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View } from 'react-native';
-//import '@/global.css';
+// Global CSS import removed - using DesignTokens instead
 
 SplashScreen.preventAutoHideAsync();
 
@@ -42,7 +42,7 @@ function AppContent() {
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <LoadingSpinner size='lg' gradient />
+        <LoadingSpinner size="lg" gradient />
       </View>
     );
   }
@@ -50,13 +50,13 @@ function AppContent() {
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name='splash' options={{ headerShown: false }} />
-        <Stack.Screen name='index' options={{ headerShown: false }} />
-        <Stack.Screen name='auth' options={{ headerShown: false }} />
-        <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-        <Stack.Screen name='onboarding' options={{ headerShown: false }} />
-        <Stack.Screen name='premium' options={{ headerShown: false }} />
-        <Stack.Screen name='+not-found' />
+        <Stack.Screen name="splash" options={{ headerShown: false }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="auth" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="premium" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </>

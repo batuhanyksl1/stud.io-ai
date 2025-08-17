@@ -1,13 +1,7 @@
-import { Tabs } from 'expo-router';
-import {
-  Camera,
-  Image as ImageIcon,
-  CreditCard as Edit3,
-  User,
-  Settings,
-} from 'lucide-react-native';
-import { StyleSheet, Platform } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
+import { Tabs } from 'expo-router';
+import { CreditCard as Edit3, Hammer, Settings, User } from 'lucide-react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 export default function TabLayout() {
   const { colors } = useTheme();
@@ -28,31 +22,22 @@ export default function TabLayout() {
       <Tabs.Screen
         name='index'
         options={{
-          title: 'Camera',
-          tabBarIcon: ({ size, color }) => <Camera size={size} color={color} strokeWidth={2} />,
+          title: 'Create',
+          tabBarIcon: ({ size, color }) => <Hammer size={size} color={color} strokeWidth={2} />,
         }}
       />
-      {/* <Tabs.Screen
-        name="gallery"
-        options={{
-          title: 'Gallery',
-          tabBarIcon: ({ size, color }) => (
-            <ImageIcon size={size} color={color} strokeWidth={2} />
-          ),
-        }}
-      /> */}
+
       <Tabs.Screen
         name='editor'
         options={{
-          title: 'Editor',
+          title: 'Galeri',
           tabBarIcon: ({ size, color }) => <Edit3 size={size} color={color} strokeWidth={2} />,
         }}
       />
       <Tabs.Screen
-        name='profile'
+        name='service-detail'
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ size, color }) => <User size={size} color={color} strokeWidth={2} />,
+          href: null, // Bu sayfa tab olarak görünmeyecek
         }}
       />
       <Tabs.Screen
@@ -60,6 +45,13 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarIcon: ({ size, color }) => <Settings size={size} color={color} strokeWidth={2} />,
+        }}
+      />
+      <Tabs.Screen
+        name='profile'
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ size, color }) => <User size={size} color={color} strokeWidth={2} />,
         }}
       />
     </Tabs>

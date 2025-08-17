@@ -2,6 +2,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { ActivityIndicator, Text, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import {
+  BorderRadius,
+  ComponentTokens,
+  SemanticColors,
+  Spacing,
+  Typography,
+} from '../../constants/DesignTokens';
 import { useTheme } from '../../hooks/useTheme';
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
@@ -32,6 +39,7 @@ export const Button: React.FC<ButtonProps> = ({
   gradient = false,
 }) => {
   const { colorScheme } = useTheme();
+  const colors = SemanticColors[colorScheme];
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -46,63 +54,81 @@ export const Button: React.FC<ButtonProps> = ({
     scale.value = withSpring(1);
   };
 
-  const getButtonClasses = () => {
-    const baseClasses = 'flex-row items-center justify-center rounded-xl';
-    const sizeClasses = {
-      sm: 'px-4 py-2 min-h-[36px]',
-      md: 'px-6 py-3 min-h-[44px]',
-      lg: 'px-8 py-4 min-h-[52px]',
+  const getButtonStyle = (): ViewStyle => {
+    const baseStyle: ViewStyle = {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: BorderRadius.md,
+      minHeight: ComponentTokens.button.height[size],
+      paddingHorizontal: ComponentTokens.button.padding[size].horizontal,
+      paddingVertical: ComponentTokens.button.padding[size].vertical,
+      opacity: disabled ? 0.5 : 1,
     };
 
-    const variantClasses = {
-      primary: colorScheme === 'dark' ? 'bg-primary-500' : 'bg-primary-600',
-      secondary: colorScheme === 'dark' ? 'bg-secondary-700' : 'bg-secondary-200',
-      outline: `border-2 ${colorScheme === 'dark' ? 'border-primary-500' : 'border-primary-600'}`,
-      ghost: 'bg-transparent',
+    const variantStyles: Record<string, ViewStyle> = {
+      primary: {
+        backgroundColor: colors.primary,
+      },
+      secondary: {
+        backgroundColor: colorScheme === 'dark' ? colors.surfaceElevated : colors.secondarySubtle,
+      },
+      outline: {
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderColor: colors.primary,
+      },
+      ghost: {
+        backgroundColor: 'transparent',
+      },
     };
 
-    return `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${
-      disabled ? 'opacity-50' : ''
-    }`;
+    return {
+      ...baseStyle,
+      ...variantStyles[variant],
+    };
   };
 
-  const getTextClasses = () => {
-    const sizeClasses = {
-      sm: 'text-sm',
-      md: 'text-base',
-      lg: 'text-lg',
+  const getTextStyle = (): TextStyle => {
+    const sizeStyles: Record<string, TextStyle> = {
+      sm: { fontSize: Typography.fontSize.sm },
+      md: { fontSize: Typography.fontSize.md },
+      lg: { fontSize: Typography.fontSize.lg },
     };
 
-    const variantClasses = {
-      primary: 'text-white font-inter-semibold',
-      secondary:
-        colorScheme === 'dark'
-          ? 'text-white font-inter-semibold'
-          : 'text-secondary-800 font-inter-semibold',
-      outline:
-        colorScheme === 'dark'
-          ? 'text-primary-400 font-inter-semibold'
-          : 'text-primary-600 font-inter-semibold',
-      ghost:
-        colorScheme === 'dark'
-          ? 'text-primary-400 font-inter-medium'
-          : 'text-primary-600 font-inter-medium',
+    const variantStyles: Record<string, TextStyle> = {
+      primary: {
+        color: colors.textOnPrimary,
+        fontFamily: Typography.fontFamily.semiBold,
+      },
+      secondary: {
+        color: colorScheme === 'dark' ? colors.textPrimary : colors.textPrimary,
+        fontFamily: Typography.fontFamily.semiBold,
+      },
+      outline: {
+        color: colors.primary,
+        fontFamily: Typography.fontFamily.semiBold,
+      },
+      ghost: {
+        color: colors.primary,
+        fontFamily: Typography.fontFamily.medium,
+      },
     };
 
-    return `${sizeClasses[size]} ${variantClasses[variant]}`;
+    return {
+      ...sizeStyles[size],
+      ...variantStyles[variant],
+    };
   };
 
   const ButtonContent = () => (
     <>
       {loading ? (
-        <ActivityIndicator
-          size='small'
-          color={variant === 'primary' ? 'white' : colorScheme === 'dark' ? '#60a5fa' : '#2563eb'}
-        />
+        <ActivityIndicator size="small" color={variant === 'primary' ? 'white' : colors.primary} />
       ) : (
         <>
           {icon && <>{icon}</>}
-          <Text className={`${getTextClasses()} ${icon ? 'ml-2' : ''}`} style={textStyle}>
+          <Text style={[getTextStyle(), icon && { marginLeft: Spacing.sm }, textStyle]}>
             {title}
           </Text>
         </>
@@ -124,7 +150,7 @@ export const Button: React.FC<ButtonProps> = ({
           colors={colorScheme === 'dark' ? ['#3b82f6', '#8b5cf6'] : ['#2563eb', '#7c3aed']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className={`${getButtonClasses().replace('bg-primary-500', '').replace('bg-primary-600', '')}`}
+          style={getButtonStyle()}
         >
           <ButtonContent />
         </LinearGradient>
@@ -134,8 +160,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <AnimatedTouchableOpacity
-      className={getButtonClasses()}
-      style={[animatedStyle, style]}
+      style={[getButtonStyle(), animatedStyle, style]}
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}

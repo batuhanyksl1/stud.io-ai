@@ -1,6 +1,15 @@
 import { Eye, EyeOff } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Text, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
+import {
+  Text,
+  TextInput,
+  TextInputProps,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
+import { BorderRadius, SemanticColors, Spacing, Typography } from '../../constants/DesignTokens';
 import { useTheme } from '../../hooks/useTheme';
 
 interface InputProps extends TextInputProps {
@@ -23,70 +32,91 @@ export const Input: React.FC<InputProps> = ({
   ...props
 }) => {
   const { colorScheme } = useTheme();
+  const colors = SemanticColors[colorScheme];
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
-  const getInputClasses = () => {
-    const baseClasses = 'rounded-xl font-inter-regular';
-
-    const sizeClasses = {
-      sm: 'h-10 px-3 text-sm',
-      md: 'h-12 px-4 text-base',
-      lg: 'h-14 px-5 text-lg',
+  const getInputStyle = (): ViewStyle => {
+    const baseStyle: ViewStyle = {
+      borderRadius: BorderRadius.md,
+      fontFamily: Typography.fontFamily.primary,
+      height: size === 'sm' ? 40 : size === 'md' ? 48 : 56,
+      paddingHorizontal: size === 'sm' ? Spacing.sm : size === 'md' ? Spacing.md : Spacing.lg,
+      fontSize:
+        size === 'sm'
+          ? Typography.fontSize.sm
+          : size === 'md'
+            ? Typography.fontSize.md
+            : Typography.fontSize.lg,
     };
 
-    const variantClasses = {
-      default:
-        colorScheme === 'dark'
-          ? 'bg-secondary-800 text-white'
-          : 'bg-secondary-50 text-secondary-900',
-      filled:
-        colorScheme === 'dark'
-          ? 'bg-secondary-700 text-white'
-          : 'bg-secondary-100 text-secondary-900',
-      outline:
-        colorScheme === 'dark'
-          ? `bg-secondary-800 border-2 text-white ${
-              error ? 'border-error-500' : isFocused ? 'border-primary-500' : 'border-secondary-700'
-            }`
-          : `bg-white border-2 text-secondary-900 ${
-              error ? 'border-error-500' : isFocused ? 'border-primary-600' : 'border-secondary-200'
-            }`,
+    const variantStyles: Record<string, ViewStyle> = {
+      default: {
+        backgroundColor: colorScheme === 'dark' ? colors.surfaceElevated : colors.secondarySubtle,
+        color: colors.textPrimary,
+      },
+      filled: {
+        backgroundColor: colorScheme === 'dark' ? colors.surface : colors.secondarySubtle,
+        color: colors.textPrimary,
+      },
+      outline: {
+        backgroundColor: colorScheme === 'dark' ? colors.surface : colors.surface,
+        borderWidth: 2,
+        borderColor: error ? colors.error : isFocused ? colors.borderFocus : colors.border,
+        color: colors.textPrimary,
+      },
     };
 
-    return `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]}`;
+    return {
+      ...baseStyle,
+      ...variantStyles[variant],
+    };
   };
 
-  const getLabelClasses = () => {
-    return `text-sm font-inter-medium mb-2 ${
-      colorScheme === 'dark' ? 'text-secondary-300' : 'text-secondary-700'
-    }`;
-  };
+  const getLabelStyle = (): TextStyle => ({
+    fontSize: Typography.fontSize.sm,
+    fontFamily: Typography.fontFamily.medium,
+    marginBottom: Spacing.sm,
+    color: colors.textSecondary,
+  });
 
-  const getErrorClasses = () => {
-    return `text-sm font-inter-regular mt-1 ${
-      colorScheme === 'dark' ? 'text-error-400' : 'text-error-600'
-    }`;
-  };
+  const getErrorStyle = (): TextStyle => ({
+    fontSize: Typography.fontSize.sm,
+    fontFamily: Typography.fontFamily.primary,
+    marginTop: Spacing.xs,
+    color: colors.error,
+  });
 
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
   };
 
   return (
-    <View className='w-full'>
-      {label && <Text className={getLabelClasses()}>{label}</Text>}
+    <View style={{ width: '100%' }}>
+      {label && <Text style={getLabelStyle()}>{label}</Text>}
 
-      <View className='relative'>
+      <View style={{ position: 'relative' }}>
         {leftIcon && (
-          <View className='absolute left-3 top-1/2 -translate-y-1/2 z-10'>{leftIcon}</View>
+          <View
+            style={{
+              position: 'absolute',
+              left: Spacing.sm,
+              top: '50%',
+              transform: [{ translateY: -10 }],
+              zIndex: 10,
+            }}
+          >
+            {leftIcon}
+          </View>
         )}
 
         <TextInput
-          className={`${getInputClasses()} ${leftIcon ? 'pl-12' : ''} ${
-            rightIcon || secureTextEntry ? 'pr-12' : ''
-          }`}
-          placeholderTextColor={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'}
+          style={[
+            getInputStyle(),
+            leftIcon && { paddingLeft: 48 },
+            (rightIcon || secureTextEntry) && { paddingRight: 48 },
+          ]}
+          placeholderTextColor={colors.textTertiary}
           secureTextEntry={secureTextEntry && !isPasswordVisible}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -95,14 +125,19 @@ export const Input: React.FC<InputProps> = ({
 
         {(rightIcon || secureTextEntry) && (
           <TouchableOpacity
-            className='absolute right-3 top-1/2 -translate-y-1/2'
+            style={{
+              position: 'absolute',
+              right: Spacing.sm,
+              top: '50%',
+              transform: [{ translateY: -10 }],
+            }}
             onPress={secureTextEntry ? togglePasswordVisibility : undefined}
           >
             {secureTextEntry ? (
               isPasswordVisible ? (
-                <EyeOff size={20} color={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'} />
+                <EyeOff size={20} color={colors.textTertiary} />
               ) : (
-                <Eye size={20} color={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'} />
+                <Eye size={20} color={colors.textTertiary} />
               )
             ) : (
               rightIcon
@@ -111,7 +146,7 @@ export const Input: React.FC<InputProps> = ({
         )}
       </View>
 
-      {error && <Text className={getErrorClasses()}>{error}</Text>}
+      {error && <Text style={getErrorStyle()}>{error}</Text>}
     </View>
   );
 };
