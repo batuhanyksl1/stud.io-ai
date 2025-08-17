@@ -3,7 +3,7 @@ import ThemedCard from '@/components/ThemedCard';
 import ThemedText from '@/components/ThemedText';
 import ThemedView from '@/components/ThemedView';
 import { useTheme } from '@/hooks/useTheme';
-import Icon from '@expo/vector-icons/Feather';
+import Ionicon from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
@@ -254,9 +254,9 @@ export default function HomeScreen() {
         end={{ x: 1, y: 1 }}
       >
         <View style={styles.carouselContent}>
-          <View style={styles.carouselIcon}>
-            <Icon name={item.icon as any} size={40} color="white" />
-          </View>
+          {/* <View style={styles.carouselIcon}> */}
+            {/* <Ionicon name={item.icon as any} size={40} color="white" /> */}
+          {/* </View> */}
           <ThemedText variant="h4" weight="bold" style={styles.carouselTitle}>
             {item.title}
           </ThemedText>
@@ -267,7 +267,7 @@ export default function HomeScreen() {
             <ThemedText variant="body" weight="semiBold" style={styles.carouselButtonText}>
               Dene
             </ThemedText>
-            <Icon name="arrow-right" size={16} color="white" />
+            <Ionicon name="arrow-forward" size={16} color="white" />
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -291,11 +291,11 @@ export default function HomeScreen() {
           <View style={styles.serviceCardContent}>
             <View style={styles.serviceHeader}>
               <View style={styles.serviceIconWrapper}>
-                <Icon name={service.icon as any} size={28} color="#FFFFFF" />
+                <Ionicon name={service.icon as any} size={28} color="#FFFFFF" />
               </View>
               {service.isPopular && (
                 <View style={[styles.popularBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-                  <Icon name="star" size={10} color="#FFD700" />
+                  <Ionicon name="star" size={10} color="#FFD700" />
                   <ThemedText variant="caption" style={styles.popularText}>
                     {service.badge}
                   </ThemedText>
@@ -317,7 +317,7 @@ export default function HomeScreen() {
 
             <View style={styles.serviceFooter}>
               <View style={styles.serviceStats}>
-                <Icon name="star" size={12} color="#FFD700" />
+                <Ionicon name="star" size={12} color="#FFD700" />
                 <ThemedText variant="caption" style={styles.rating}>
                   {service.rating}
                 </ThemedText>
@@ -325,7 +325,7 @@ export default function HomeScreen() {
                   • {service.usageCount}
                 </ThemedText>
               </View>
-              <Icon name="arrow-right" size={16} color="rgba(255,255,255,0.8)" />
+              <Ionicon name="arrow-forward" size={16} color="rgba(255,255,255,0.8)" />
             </View>
           </View>
         </LinearGradient>
@@ -347,7 +347,7 @@ export default function HomeScreen() {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Icon name={action.icon as any} size={24} color="#FFFFFF" />
+          <Ionicon name={action.icon as any} size={24} color="#FFFFFF" />
           <ThemedText variant="caption" weight="semiBold" style={styles.quickActionText}>
             {action.title}
           </ThemedText>
@@ -380,7 +380,7 @@ export default function HomeScreen() {
       <ThemedCard key={stat.title} style={styles.statCard} padding="md" elevation="sm">
         <View style={styles.statHeader}>
           <View style={[styles.statIcon, { backgroundColor: stat.color + '20' }]}>
-            <Icon name={stat.icon as any} size={16} color={stat.color} />
+            <Ionicon name={stat.icon as any} size={16} color={stat.color} />
           </View>
           <ThemedText variant="caption" color="secondary">
             {stat.title}
@@ -423,7 +423,7 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Hero Section */}
+          {/* Hero Section
           <ThemedView style={styles.heroSection}>
             <LinearGradient
               colors={[colors.primary + '20', colors.primary + '05']}
@@ -433,7 +433,7 @@ export default function HomeScreen() {
             >
               <View style={styles.heroContent}>
                 <View style={styles.heroIcon}>
-                  <Icon name="zap" size={32} color={colors.primary} />
+                  <Ionicon name="zap" size={32} color={colors.primary} />
                 </View>
                 <ThemedText variant="h2" weight="bold" style={styles.heroTitle}>
                   Merhaba! 👋
@@ -443,7 +443,7 @@ export default function HomeScreen() {
                 </ThemedText>
               </View>
             </LinearGradient>
-          </ThemedView>
+          </ThemedView> */}
 
           {/* Dinamik Carousel - EK OLARAK */}
           <ThemedView style={styles.carouselSection}>
