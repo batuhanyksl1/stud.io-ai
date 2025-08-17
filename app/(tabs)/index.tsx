@@ -451,7 +451,7 @@ export default function HomeScreen() {
               Öne Çıkan Özellikler
             </ThemedText>
 
-            <View style={styles.carouselContainer}>
+            <View style={[styles.carouselContainer]}>
               <FlatList
                 ref={flatListRef}
                 data={carouselData}
@@ -473,7 +473,7 @@ export default function HomeScreen() {
               <View
                 style={[
                   styles.pagination,
-                  { position: 'absolute', bottom: 50, left: 0, right: 0, zIndex: 10 },
+                  { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 0 },
                 ]}
               >
                 {carouselData.map((_, index) => (
@@ -632,11 +632,11 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
   },
   carouselContainer: {
-    height: 280,
+    height: 240,
   },
   carouselPage: {
     width: width - 32,
-    paddingHorizontal: 8,
+    paddingHorizontal: 0,
   },
   carouselCard: {
     borderRadius: 16,
@@ -694,7 +694,7 @@ const styles = StyleSheet.create({
   // Quick Actions
   quickActionsSection: {
     paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingTop: 3,
   },
   quickActionsGrid: {
     flexDirection: 'row',
