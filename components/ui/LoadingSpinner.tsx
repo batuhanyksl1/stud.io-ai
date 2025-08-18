@@ -1,3 +1,4 @@
+import { useTheme } from '@/hooks';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect } from 'react';
 import { View } from 'react-native';
@@ -7,8 +8,6 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { SemanticColors } from '../../constants/DesignTokens';
-import { useTheme } from '../../hooks/useTheme';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
@@ -21,8 +20,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   color,
   gradient = false,
 }) => {
-  const { colorScheme } = useTheme();
-  const colors = SemanticColors[colorScheme as keyof typeof SemanticColors];
+  const { colorScheme, colors } = useTheme();
   const rotation = useSharedValue(0);
 
   const sizeMap = {

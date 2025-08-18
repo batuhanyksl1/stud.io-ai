@@ -1,5 +1,6 @@
-import { useTheme } from '@/hooks/useTheme';
-import { authService, SignUpData } from '@/services/authService';
+import { useTheme } from '@/hooks';
+import { authService } from '@/services';
+import { SignUpCredentials } from '@/types';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -45,12 +46,12 @@ export default function SignUpScreen() {
     control,
     handleSubmit,
     formState: { errors, isValid },
-  } = useForm<SignUpData & { confirmPassword: string }>({
+  } = useForm<SignUpCredentials & { confirmPassword: string }>({
     resolver: yupResolver(schema),
     mode: 'onChange',
   });
 
-  const handleSignUp = async (data: SignUpData & { confirmPassword: string }) => {
+  const handleSignUp = async (data: SignUpCredentials & { confirmPassword: string }) => {
     setLoadingState(true);
 
     try {

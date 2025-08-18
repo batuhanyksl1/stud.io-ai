@@ -1,8 +1,5 @@
-import ScrollContainer from '@/components/ScrollContainer';
-import ThemedCard from '@/components/ThemedCard';
-import ThemedText from '@/components/ThemedText';
-import ThemedView from '@/components/ThemedView';
-import { useTheme } from '@/hooks/useTheme';
+import { ScrollContainer, ThemedCard, ThemedText, ThemedView } from '@/components';
+import { useTheme } from '@/hooks';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Camera, Image as ImageIcon, Palette, Sparkles } from 'lucide-react-native';
@@ -28,7 +25,7 @@ const serviceOutputs: ServiceOutput[] = [
     id: '1',
     serviceId: 'profile-picture',
     serviceName: 'Profil Fotoğrafı',
-    serviceIcon: <Camera size={16} color='#0077B5' strokeWidth={2} />,
+    serviceIcon: <Camera size={16} color="#0077B5" strokeWidth={2} />,
     serviceColor: '#0077B5',
     imageUrl:
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
@@ -40,7 +37,7 @@ const serviceOutputs: ServiceOutput[] = [
     id: '2',
     serviceId: 'background-removal',
     serviceName: 'Arka Plan Kaldırma',
-    serviceIcon: <ImageIcon size={16} color='#10B981' strokeWidth={2} />,
+    serviceIcon: <ImageIcon size={16} color="#10B981" strokeWidth={2} />,
     serviceColor: '#10B981',
     imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop',
     title: 'Arka Plan Kaldırıldı',
@@ -51,7 +48,7 @@ const serviceOutputs: ServiceOutput[] = [
     id: '3',
     serviceId: 'photo-enhancement',
     serviceName: 'Fotoğraf İyileştirme',
-    serviceIcon: <Sparkles size={16} color='#F59E0B' strokeWidth={2} />,
+    serviceIcon: <Sparkles size={16} color="#F59E0B" strokeWidth={2} />,
     serviceColor: '#F59E0B',
     imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop',
     title: 'İyileştirilmiş Fotoğraf',
@@ -62,7 +59,7 @@ const serviceOutputs: ServiceOutput[] = [
     id: '4',
     serviceId: 'style-transfer',
     serviceName: 'Stil Transferi',
-    serviceIcon: <Palette size={16} color='#8B5CF6' strokeWidth={2} />,
+    serviceIcon: <Palette size={16} color="#8B5CF6" strokeWidth={2} />,
     serviceColor: '#8B5CF6',
     imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop',
     title: 'Sanatsal Stil Uygulandı',
@@ -73,7 +70,7 @@ const serviceOutputs: ServiceOutput[] = [
     id: '5',
     serviceId: 'profile-picture',
     serviceName: 'Profil Fotoğrafı',
-    serviceIcon: <Camera size={16} color='#0077B5' strokeWidth={2} />,
+    serviceIcon: <Camera size={16} color="#0077B5" strokeWidth={2} />,
     serviceColor: '#0077B5',
     imageUrl:
       'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face',
@@ -85,7 +82,7 @@ const serviceOutputs: ServiceOutput[] = [
     id: '6',
     serviceId: 'background-removal',
     serviceName: 'Arka Plan Kaldırma',
-    serviceIcon: <ImageIcon size={16} color='#10B981' strokeWidth={2} />,
+    serviceIcon: <ImageIcon size={16} color="#10B981" strokeWidth={2} />,
     serviceColor: '#10B981',
     imageUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop',
     title: 'Ürün Fotoğrafı',
@@ -108,8 +105,8 @@ export default function EditorTab() {
     <View style={[styles.serviceBadge, { backgroundColor: `${output.serviceColor}20` }]}>
       {output.serviceIcon}
       <ThemedText
-        variant='caption'
-        weight='medium'
+        variant="caption"
+        weight="medium"
         style={{ color: output.serviceColor, marginLeft: 4 }}
       >
         {output.serviceName}
@@ -126,10 +123,10 @@ export default function EditorTab() {
         ]}
       >
         <View style={styles.headerContent}>
-          <ThemedText variant='h3' weight='bold'>
+          <ThemedText variant="h3" weight="bold">
             Galeri
           </ThemedText>
-          <ThemedText variant='caption' color='secondary'>
+          <ThemedText variant="caption" color="secondary">
             Servis çıktılarınızı görüntüleyin
           </ThemedText>
         </View>
@@ -144,18 +141,18 @@ export default function EditorTab() {
               onPress={() => handleImagePress(output)}
               activeOpacity={0.8}
             >
-              <ThemedCard style={styles.card} padding='sm' elevation='sm'>
+              <ThemedCard style={styles.card} padding="sm" elevation="sm">
                 <Image source={{ uri: output.imageUrl }} style={styles.image} />
                 <View style={styles.imageInfo}>
                   {renderServiceBadge(output)}
                   <View style={styles.textInfo}>
-                    <ThemedText variant='body' weight='semiBold' style={{ fontSize: 14 }}>
+                    <ThemedText variant="body" weight="semiBold" style={{ fontSize: 14 }}>
                       {output.title}
                     </ThemedText>
-                    <ThemedText variant='caption' color='secondary' style={{ fontSize: 12 }}>
+                    <ThemedText variant="caption" color="secondary" style={{ fontSize: 12 }}>
                       {output.description}
                     </ThemedText>
-                    <ThemedText variant='caption' color='tertiary' style={{ fontSize: 10 }}>
+                    <ThemedText variant="caption" color="tertiary" style={{ fontSize: 10 }}>
                       {output.timestamp}
                     </ThemedText>
                   </View>
@@ -169,14 +166,14 @@ export default function EditorTab() {
           <ThemedView style={styles.emptyContainer}>
             <Palette size={80} color={colors.textTertiary} strokeWidth={1.5} />
             <ThemedText
-              variant='h3'
-              weight='bold'
-              align='center'
+              variant="h3"
+              weight="bold"
+              align="center"
               style={{ marginTop: 24, marginBottom: 16 }}
             >
               Henüz Çıktı Yok
             </ThemedText>
-            <ThemedText variant='body' color='secondary' align='center' style={{ lineHeight: 24 }}>
+            <ThemedText variant="body" color="secondary" align="center" style={{ lineHeight: 24 }}>
               Servislerinizi kullanarak ilk çıktınızı oluşturun
             </ThemedText>
           </ThemedView>

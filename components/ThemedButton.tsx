@@ -124,7 +124,7 @@ export default function ThemedButton({
       activeOpacity={0.8}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={textColor} />
+        <ActivityIndicator size='small' color={textColor} />
       ) : (
         <>
           {icon &&

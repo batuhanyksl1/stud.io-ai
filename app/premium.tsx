@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/Button';
-import { useTheme } from '@/hooks/useTheme';
+import { Button } from '@/components';
+import { useTheme } from '@/hooks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { ArrowLeft, Check, Crown, X, Zap } from 'lucide-react-native';

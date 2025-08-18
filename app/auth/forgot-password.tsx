@@ -1,5 +1,5 @@
-import { useTheme } from '@/hooks/useTheme';
-import { authService } from '@/services/authService';
+import { useTheme } from '@/hooks';
+import { authService } from '@/services';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';

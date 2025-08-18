@@ -1,22 +1,19 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, Platform, StatusBar } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  withSequence,
-  withDelay,
-  interpolate,
-  Extrapolate,
-  runOnJS,
-} from 'react-native-reanimated';
+import { ThemedText, ThemedView } from '@/components';
+import { useTheme } from '@/hooks';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Camera, Sparkles } from 'lucide-react-native';
 import { router } from 'expo-router';
-import { useTheme } from '@/hooks/useTheme';
-import ThemedView from '@/components/ThemedView';
-import ThemedText from '@/components/ThemedText';
+import { Camera, Sparkles } from 'lucide-react-native';
+import React, { useEffect } from 'react';
+import { Dimensions, Platform, StatusBar, StyleSheet, View } from 'react-native';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
@@ -87,7 +84,7 @@ export default function SplashScreen() {
     <ThemedView style={styles.container}>
       <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
-        backgroundColor='transparent'
+        backgroundColor="transparent"
         translucent
       />
 
@@ -110,25 +107,25 @@ export default function SplashScreen() {
             <Animated.View style={[styles.logoContainer, logoContainerStyle]}>
               <View style={styles.logoWrapper}>
                 <View style={styles.logoBackground}>
-                  <Camera size={64} color='#FFFFFF' strokeWidth={2} />
+                  <Camera size={64} color="#FFFFFF" strokeWidth={2} />
                 </View>
 
                 <Animated.View style={[styles.sparkleContainer, sparkleStyle]}>
-                  <Sparkles size={28} color='#F59E0B' strokeWidth={2} />
+                  <Sparkles size={28} color="#F59E0B" strokeWidth={2} />
                 </Animated.View>
               </View>
             </Animated.View>
 
             {/* Title Section */}
             <Animated.View style={[styles.titleContainer, titleStyle]}>
-              <ThemedText variant='h2' color='inverse' align='center'>
+              <ThemedText variant="h2" color="inverse" align="center">
                 LinkedIn Profile
               </ThemedText>
-              <ThemedText variant='h2' color='inverse' align='center'>
+              <ThemedText variant="h2" color="inverse" align="center">
                 Creator
               </ThemedText>
               <View style={styles.tagline}>
-                <ThemedText variant='caption' weight='medium' color='inverse' align='center'>
+                <ThemedText variant="caption" weight="medium" color="inverse" align="center">
                   Professional • AI-Powered • Instant
                 </ThemedText>
               </View>
@@ -139,7 +136,7 @@ export default function SplashScreen() {
               <View style={styles.loadingBar}>
                 <Animated.View style={[styles.loadingProgress, { width: '100%' }]} />
               </View>
-              <ThemedText variant='caption' color='inverse' align='center'>
+              <ThemedText variant="caption" color="inverse" align="center">
                 Preparing your studio...
               </ThemedText>
             </View>

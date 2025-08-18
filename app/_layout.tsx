@@ -1,9 +1,7 @@
-import ReduxProvider from '@/components/ReduxProvider';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { useAuth } from '@/hooks/useAuth';
-import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import { useTheme } from '@/hooks/useTheme';
+import { useAuth, useFrameworkReady, useTheme } from '@/hooks';
 import '@/localization/i18n';
+import { AppProvider } from '@/providers';
 import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import {
   Inter_400Regular,
@@ -52,7 +50,6 @@ function AppContent() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="auth" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="premium" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
@@ -102,8 +99,8 @@ export default function RootLayout() {
   }
 
   return (
-    <ReduxProvider>
+    <AppProvider>
       <AppContent />
-    </ReduxProvider>
+    </AppProvider>
   );
 }

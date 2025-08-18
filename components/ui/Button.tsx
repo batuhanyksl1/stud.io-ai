@@ -124,7 +124,7 @@ export const Button: React.FC<ButtonProps> = ({
   const ButtonContent = () => (
     <>
       {loading ? (
-        <ActivityIndicator size="small" color={variant === 'primary' ? 'white' : colors.primary} />
+        <ActivityIndicator size='small' color={variant === 'primary' ? 'white' : colors.primary} />
       ) : (
         <>
           {icon && <>{icon}</>}

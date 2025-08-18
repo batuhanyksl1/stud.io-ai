@@ -1,6 +1,5 @@
-import { useAuth } from '@/hooks/useAuth';
-import { useTheme } from '@/hooks/useTheme';
-import { SignInData } from '@/services/authService';
+import { useAuth, useTheme } from '@/hooks';
+import { SignInCredentials } from '@/types';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -41,12 +40,12 @@ export default function SignInScreen() {
     control,
     handleSubmit,
     formState: { errors, isValid },
-  } = useForm<SignInData>({
+  } = useForm<SignInCredentials>({
     resolver: yupResolver(schema),
     mode: 'onChange',
   });
 
-  const handleSignIn = async (data: SignInData) => {
+  const handleSignIn = async (data: SignInCredentials) => {
     try {
       const result = await login(data);
       if (result.meta.requestStatus === 'fulfilled') {
@@ -98,9 +97,6 @@ export default function SignInScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity style={styles.backButton} onPress={handleGoBack} activeOpacity={0.7}>
-              <ArrowLeft size={24} color="#ffffff" />
-            </TouchableOpacity>
 
             <View style={styles.logoContainer}>
               <Text style={styles.logo}>Stud.io</Text>

@@ -1,4 +1,4 @@
-import { SemanticColors } from '@/constants/DesignTokens';
+import { SemanticColors } from '@/constants';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setColorScheme, setIsDark, toggleTheme } from '@/store/slices/themeSlice';
 import { useEffect } from 'react';
@@ -30,9 +30,9 @@ export function useTheme() {
   }, [colorScheme, dispatch]);
 
   const currentColorScheme: 'light' | 'dark' =
-    colorScheme === 'system' ? (isDark ? 'dark' : 'light') : colorScheme;
+    colorScheme === 'system' ? (isDark ? 'dark' : 'light') : (colorScheme as 'light' | 'dark');
 
-  const colors = SemanticColors[currentColorScheme];
+  const colors = SemanticColors[currentColorScheme] || SemanticColors.light;
 
   const setTheme = (newColorScheme: ColorScheme) => {
     dispatch(setColorScheme(newColorScheme));

@@ -1,8 +1,5 @@
-import ScrollContainer from '@/components/ScrollContainer';
-import ThemedCard from '@/components/ThemedCard';
-import ThemedText from '@/components/ThemedText';
-import ThemedView from '@/components/ThemedView';
-import { useTheme } from '@/hooks/useTheme';
+import { ScrollContainer, ThemedCard, ThemedText, ThemedView } from '@/components';
+import { useTheme } from '@/hooks';
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ArrowLeft, Camera, Image as ImageIcon, Palette, Sparkles } from 'lucide-react-native';
@@ -26,7 +23,7 @@ const services: Service[] = [
     id: 'profile-picture',
     name: 'Profil Fotoğrafı',
     description: 'LinkedIn için profesyonel profil fotoğrafları oluşturun',
-    icon: <Camera size={24} color='#0077B5' strokeWidth={2} />,
+    icon: <Camera size={24} color="#0077B5" strokeWidth={2} />,
     color: '#0077B5',
     features: [
       'Profesyonel filtreler',
@@ -44,7 +41,7 @@ const services: Service[] = [
     id: 'background-removal',
     name: 'Arka Plan Kaldırma',
     description: 'Fotoğraflarınızdan arka planı otomatik olarak kaldırın',
-    icon: <ImageIcon size={24} color='#10B981' strokeWidth={2} />,
+    icon: <ImageIcon size={24} color="#10B981" strokeWidth={2} />,
     color: '#10B981',
     features: [
       'AI destekli arka plan kaldırma',
@@ -62,7 +59,7 @@ const services: Service[] = [
     id: 'photo-enhancement',
     name: 'Fotoğraf İyileştirme',
     description: 'Fotoğraflarınızı AI ile otomatik olarak iyileştirin',
-    icon: <Sparkles size={24} color='#F59E0B' strokeWidth={2} />,
+    icon: <Sparkles size={24} color="#F59E0B" strokeWidth={2} />,
     color: '#F59E0B',
     features: ['Otomatik parlaklık ayarı', 'Gürültü azaltma', 'Keskinlik artırma', 'Renk düzeltme'],
     examples: [
@@ -75,7 +72,7 @@ const services: Service[] = [
     id: 'style-transfer',
     name: 'Stil Transferi',
     description: 'Fotoğraflarınıza sanatsal stiller uygulayın',
-    icon: <Palette size={24} color='#8B5CF6' strokeWidth={2} />,
+    icon: <Palette size={24} color="#8B5CF6" strokeWidth={2} />,
     color: '#8B5CF6',
     features: [
       'Çoklu sanat stili',
@@ -116,7 +113,7 @@ export default function ServiceDetailScreen() {
   if (!service) {
     return (
       <ThemedView style={styles.container}>
-        <ThemedText variant='h3' weight='bold' align='center'>
+        <ThemedText variant="h3" weight="bold" align="center">
           Servis bulunamadı
         </ThemedText>
       </ThemedView>
@@ -138,35 +135,35 @@ export default function ServiceDetailScreen() {
           <ArrowLeft size={24} color={colors.textPrimary} strokeWidth={2} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <ThemedText variant='h3' weight='bold'>
+          <ThemedText variant="h3" weight="bold">
             {service.name}
           </ThemedText>
-          <ThemedText variant='caption' color='secondary'>
+          <ThemedText variant="caption" color="secondary">
             {service.description}
           </ThemedText>
         </View>
       </View>
 
       <ScrollContainer>
-        <ThemedCard style={styles.serviceCard} padding='xl' elevation='md'>
+        <ThemedCard style={styles.serviceCard} padding="xl" elevation="md">
           <View style={[styles.serviceIcon, { backgroundColor: `${service.color}20` }]}>
             {service.icon}
           </View>
-          <ThemedText variant='h4' weight='bold' style={{ marginTop: 16, marginBottom: 8 }}>
+          <ThemedText variant="h4" weight="bold" style={{ marginTop: 16, marginBottom: 8 }}>
             {service.name}
           </ThemedText>
-          <ThemedText variant='body' color='secondary' style={{ marginBottom: 24 }}>
+          <ThemedText variant="body" color="secondary" style={{ marginBottom: 24 }}>
             {service.description}
           </ThemedText>
 
           <View style={styles.featuresSection}>
-            <ThemedText variant='bodyLarge' weight='semiBold' style={{ marginBottom: 16 }}>
+            <ThemedText variant="bodyLarge" weight="semiBold" style={{ marginBottom: 16 }}>
               Özellikler
             </ThemedText>
             {service.features.map((feature, index) => (
               <View key={index} style={styles.featureItem}>
                 <View style={[styles.featureDot, { backgroundColor: service.color }]} />
-                <ThemedText variant='body' style={{ flex: 1, marginLeft: 12 }}>
+                <ThemedText variant="body" style={{ flex: 1, marginLeft: 12 }}>
                   {feature}
                 </ThemedText>
               </View>
@@ -174,8 +171,8 @@ export default function ServiceDetailScreen() {
           </View>
         </ThemedCard>
 
-        <ThemedCard style={styles.examplesCard} padding='lg' elevation='sm'>
-          <ThemedText variant='bodyLarge' weight='semiBold' style={{ marginBottom: 16 }}>
+        <ThemedCard style={styles.examplesCard} padding="lg" elevation="sm">
+          <ThemedText variant="bodyLarge" weight="semiBold" style={{ marginBottom: 16 }}>
             Örnekler
           </ThemedText>
           <View style={styles.examplesGrid}>
@@ -191,7 +188,7 @@ export default function ServiceDetailScreen() {
           style={[styles.startButton, { backgroundColor: service.color }]}
           onPress={startService}
         >
-          <ThemedText variant='bodyLarge' weight='semiBold' color='textOnPrimary'>
+          <ThemedText variant="bodyLarge" weight="semiBold" color="textOnPrimary">
             Servisi Başlat
           </ThemedText>
         </TouchableOpacity>

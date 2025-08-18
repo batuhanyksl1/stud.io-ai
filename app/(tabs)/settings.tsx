@@ -1,11 +1,7 @@
-import ScrollContainer from '@/components/ScrollContainer';
-import ThemedCard from '@/components/ThemedCard';
-import ThemedText from '@/components/ThemedText';
-import ThemedView from '@/components/ThemedView';
-import { BorderRadius, Spacing } from '@/constants/DesignTokens';
-import { useAuth } from '@/hooks/useAuth';
-import { ThemeMode, useTheme } from '@/hooks/useTheme';
-import { authService } from '@/services/authService';
+import { ScrollContainer, ThemedCard, ThemedText, ThemedView } from '@/components';
+import { BorderRadius, Spacing } from '@/constants';
+import { useAuth, useTheme } from '@/hooks';
+import { authService } from '@/services';
 
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -343,8 +339,8 @@ export default function SettingsTab() {
               color: mode === option.mode ? colors.textOnPrimary : colors.textSecondary,
             })}
             <ThemedText
-              variant='caption'
-              weight='medium'
+              variant="caption"
+              weight="medium"
               color={mode === option.mode ? 'onPrimary' : 'secondary'}
               style={{ marginTop: 4 }}
             >
@@ -374,14 +370,14 @@ export default function SettingsTab() {
 
         <View style={styles.settingContent}>
           <ThemedText
-            variant='body'
-            weight='semiBold'
+            variant="body"
+            weight="semiBold"
             color={item.destructive ? 'error' : 'primary'}
           >
             {item.title}
           </ThemedText>
           {item.subtitle && (
-            <ThemedText variant='caption' color='secondary' style={{ marginTop: 2 }}>
+            <ThemedText variant="caption" color="secondary" style={{ marginTop: 2 }}>
               {item.subtitle}
             </ThemedText>
           )}
@@ -425,13 +421,13 @@ export default function SettingsTab() {
       >
         <View style={styles.headerContent}>
           <View style={[styles.headerIcon, { backgroundColor: 'rgba(255, 255, 255, 0.15)' }]}>
-            <SettingsIcon size={28} color='#FFFFFF' strokeWidth={2} />
+            <SettingsIcon size={28} color="#FFFFFF" strokeWidth={2} />
           </View>
           <View style={styles.headerText}>
-            <ThemedText variant='h2' color='inverse'>
+            <ThemedText variant="h2" color="inverse">
               Settings
             </ThemedText>
-            <ThemedText variant='body' color='inverse' style={{ opacity: 0.8 }}>
+            <ThemedText variant="body" color="inverse" style={{ opacity: 0.8 }}>
               Customize your experience
             </ThemedText>
           </View>
@@ -443,15 +439,15 @@ export default function SettingsTab() {
         {settingSections.map((section) => (
           <View key={section.title} style={styles.section}>
             <ThemedText
-              variant='bodyLarge'
-              weight='semiBold'
-              color='secondary'
+              variant="bodyLarge"
+              weight="semiBold"
+              color="secondary"
               style={styles.sectionTitle}
             >
               {section.title}
             </ThemedText>
 
-            <ThemedCard style={styles.sectionContent} padding='none' elevation='sm'>
+            <ThemedCard style={styles.sectionContent} padding="none" elevation="sm">
               {section.items.map((item, itemIndex) => (
                 <View key={item.id}>
                   {renderSettingItem(item)}
@@ -465,15 +461,15 @@ export default function SettingsTab() {
         ))}
 
         {/* App Info */}
-        <ThemedCard style={styles.appInfo} elevation='sm'>
+        <ThemedCard style={styles.appInfo} elevation="sm">
           <View style={styles.appInfoContent}>
-            <ThemedText variant='bodyLarge' weight='semiBold' color='primary' align='center'>
+            <ThemedText variant="bodyLarge" weight="semiBold" color="primary" align="center">
               LinkedIn Profile Creator
             </ThemedText>
-            <ThemedText variant='caption' color='secondary' align='center' style={{ marginTop: 4 }}>
+            <ThemedText variant="caption" color="secondary" align="center" style={{ marginTop: 4 }}>
               Version 1.0.0
             </ThemedText>
-            <ThemedText variant='caption' color='tertiary' align='center' style={{ marginTop: 2 }}>
+            <ThemedText variant="caption" color="tertiary" align="center" style={{ marginTop: 2 }}>
               © 2025 Professional Photos Inc.
             </ThemedText>
           </View>

@@ -1,8 +1,5 @@
-import Logo from '@/components/Logo';
-import ThemedCard from '@/components/ThemedCard';
-import ThemedText from '@/components/ThemedText';
-import ThemedView from '@/components/ThemedView';
-import { useTheme } from '@/hooks/useTheme';
+import { Logo, ThemedCard, ThemedText, ThemedView } from '@/components';
+import { useTheme } from '@/hooks';
 import Ionicon from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -25,7 +22,7 @@ const carouselData = [
     id: 1,
     title: 'Portre Düzenleme',
     subtitle: 'Yüz güzelleştirme ve renk düzeltme',
-    icon: 'user',
+    icon: 'accessibility',
     gradient: ['#FF6B6B', '#FFE66D'],
     image1: require('@/assets/images/carousel/image-a-1.png'),
     image2: require('@/assets/images/carousel/image-a-2.jpg'),
@@ -34,7 +31,7 @@ const carouselData = [
     id: 2,
     title: 'Manzara Fotoğrafları',
     subtitle: 'Doğal renkleri canlandırın',
-    icon: 'mountain',
+    icon: 'accessibility',
     gradient: ['#4ECDC4', '#44A08D'],
     image1: require('@/assets/images/carousel/image-a-1.png'),
     image2: require('@/assets/images/carousel/image-a-2.jpg'),
@@ -43,7 +40,7 @@ const carouselData = [
     id: 3,
     title: 'Ürün Fotoğrafları',
     subtitle: 'Profesyonel görünüm',
-    icon: 'shopping-bag',
+    icon: 'accessibility',
     gradient: ['#A8E6CF', '#7FCDCD'],
     image1: require('@/assets/images/carousel/image-a-1.png'),
     image2: require('@/assets/images/carousel/image-a-2.jpg'),
@@ -52,7 +49,7 @@ const carouselData = [
     id: 4,
     title: 'Sokak Fotoğrafçılığı',
     subtitle: 'Dramatik efektler ekleyin',
-    icon: 'camera',
+    icon: 'accessibility',
     gradient: ['#FF9A9E', '#FECFEF'],
     image1: require('@/assets/images/carousel/image-a-1.png'),
     image2: require('@/assets/images/carousel/image-a-2.jpg'),
@@ -66,7 +63,7 @@ const editingServices = [
     title: 'Profil Fotoğrafı',
     subtitle: 'LinkedIn Ready',
     description: 'LinkedIn için profesyonel profil fotoğrafları oluşturun',
-    icon: 'zap',
+    icon: 'person',
     color: '#0077B5',
     gradient: ['#0077B5', '#005885'],
     features: ['Profesyonel filtreler', 'Otomatik boyutlandırma', 'LinkedIn uyumlu format'],
@@ -94,7 +91,7 @@ const editingServices = [
     title: 'Fotoğraf İyileştirme',
     subtitle: 'Smart Enhancement',
     description: 'Fotoğraflarınızı AI ile otomatik olarak iyileştirin',
-    icon: 'palette',
+    icon: 'color-wand',
     color: '#F59E0B',
     gradient: ['#F59E0B', '#D97706'],
     features: ['Otomatik parlaklık ayarı', 'Gürültü azaltma', 'Keskinlik artırma'],
@@ -108,7 +105,7 @@ const editingServices = [
     title: 'Stil Transferi',
     subtitle: 'Artistic AI',
     description: 'Fotoğraflarınıza sanatsal stiller uygulayın',
-    icon: 'zap',
+    icon: 'cut',
     color: '#8B5CF6',
     gradient: ['#8B5CF6', '#7C3AED'],
     features: ['Çoklu sanat stili', 'Gerçek zamanlı önizleme', 'Stil yoğunluğu ayarı'],
@@ -138,14 +135,14 @@ const quickActions = [
   {
     id: 'recent',
     title: 'Son Düzenlemeler',
-    icon: 'clock',
+    icon: 'pencil',
     color: '#F59E0B',
     gradient: ['#F59E0B', '#D97706'],
   },
   {
     id: 'premium',
     title: 'Premium Özellikler',
-    icon: 'award',
+    icon: 'color-wand',
     color: '#8B5CF6',
     gradient: ['#8B5CF6', '#7C3AED'],
   },
@@ -192,14 +189,14 @@ const todayStats = [
     title: 'Bu Hafta',
     value: '156',
     change: '+8%',
-    icon: 'users',
+    icon: 'accessibility',
     color: '#3B82F6',
   },
   {
     title: 'Toplam Proje',
     value: '1.2K',
     change: '+24%',
-    icon: 'award',
+    icon: 'accessibility',
     color: '#8B5CF6',
   },
 ];

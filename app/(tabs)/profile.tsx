@@ -1,23 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Image,
-  Dimensions,
-  Platform,
-} from 'react-native';
-import { Share, Settings, Trash2, Plus, Download } from 'lucide-react-native';
+import { ScrollContainer, ThemedCard, ThemedText, ThemedView } from '@/components';
+import { useTheme } from '@/hooks';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { useTheme } from '@/hooks/useTheme';
-import ThemedView from '@/components/ThemedView';
-import ThemedText from '@/components/ThemedText';
-import ThemedCard from '@/components/ThemedCard';
-import ScrollContainer from '@/components/ScrollContainer';
-import { Spacing } from '@/constants/DesignTokens';
+import { Download, Plus, Settings, Share, Trash2 } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, Image, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -90,10 +77,10 @@ export default function ProfileTab() {
         ]}
       >
         <View style={styles.headerContent}>
-          <ThemedText variant='h2' weight='bold'>
+          <ThemedText variant="h2" weight="bold">
             Your Profiles
           </ThemedText>
-          <ThemedText variant='body' color='secondary'>
+          <ThemedText variant="body" color="secondary">
             Manage your professional profile pictures
           </ThemedText>
         </View>
@@ -106,27 +93,27 @@ export default function ProfileTab() {
 
       <ScrollContainer>
         <View style={styles.statsContainer}>
-          <ThemedCard style={styles.statCard} padding='lg' elevation='sm'>
-            <ThemedText variant='h3' weight='bold' color='primary' align='center'>
+          <ThemedCard style={styles.statCard} padding="lg" elevation="sm">
+            <ThemedText variant="h3" weight="bold" color="primary" align="center">
               {savedProfiles.length}
             </ThemedText>
-            <ThemedText variant='caption' weight='medium' color='secondary' align='center'>
+            <ThemedText variant="caption" weight="medium" color="secondary" align="center">
               Created
             </ThemedText>
           </ThemedCard>
-          <ThemedCard style={styles.statCard} padding='lg' elevation='sm'>
-            <ThemedText variant='h3' weight='bold' color='primary' align='center'>
+          <ThemedCard style={styles.statCard} padding="lg" elevation="sm">
+            <ThemedText variant="h3" weight="bold" color="primary" align="center">
               2.4K
             </ThemedText>
-            <ThemedText variant='caption' weight='medium' color='secondary' align='center'>
+            <ThemedText variant="caption" weight="medium" color="secondary" align="center">
               Profile Views
             </ThemedText>
           </ThemedCard>
-          <ThemedCard style={styles.statCard} padding='lg' elevation='sm'>
-            <ThemedText variant='h3' weight='bold' color='primary' align='center'>
+          <ThemedCard style={styles.statCard} padding="lg" elevation="sm">
+            <ThemedText variant="h3" weight="bold" color="primary" align="center">
               95%
             </ThemedText>
-            <ThemedText variant='caption' weight='medium' color='secondary' align='center'>
+            <ThemedText variant="caption" weight="medium" color="secondary" align="center">
               Professional Score
             </ThemedText>
           </ThemedCard>
@@ -137,31 +124,31 @@ export default function ProfileTab() {
           onPress={createNewProfile}
         >
           <Plus size={24} color={colors.textOnPrimary} strokeWidth={2} />
-          <ThemedText variant='body' weight='semiBold' color='onPrimary' style={{ marginLeft: 8 }}>
+          <ThemedText variant="body" weight="semiBold" color="onPrimary" style={{ marginLeft: 8 }}>
             Create New Profile Picture
           </ThemedText>
         </TouchableOpacity>
 
         <View style={styles.historyHeader}>
-          <ThemedText variant='h4' weight='semiBold'>
+          <ThemedText variant="h4" weight="semiBold">
             Recent Creations
           </ThemedText>
-          <ThemedText variant='caption' color='secondary'>
+          <ThemedText variant="caption" color="secondary">
             {savedProfiles.length} pictures
           </ThemedText>
         </View>
 
         {savedProfiles.map((profile) => (
-          <ThemedCard key={profile.id} style={styles.profileCard} padding='md' elevation='sm'>
+          <ThemedCard key={profile.id} style={styles.profileCard} padding="md" elevation="sm">
             <View style={styles.profileImageContainer}>
               <Image source={{ uri: profile.uri }} style={styles.profileImage} />
             </View>
 
             <View style={styles.profileInfo}>
-              <ThemedText variant='body' weight='semiBold'>
+              <ThemedText variant="body" weight="semiBold">
                 {profile.filterName} Filter
               </ThemedText>
-              <ThemedText variant='caption' color='secondary' style={{ marginTop: 4 }}>
+              <ThemedText variant="caption" color="secondary" style={{ marginTop: 4 }}>
                 {formatDate(profile.timestamp)}
               </ThemedText>
             </View>
@@ -187,14 +174,14 @@ export default function ProfileTab() {
           <View style={styles.emptyState}>
             <Download size={48} color={colors.textTertiary} strokeWidth={1.5} />
             <ThemedText
-              variant='bodyLarge'
-              weight='semiBold'
-              align='center'
+              variant="bodyLarge"
+              weight="semiBold"
+              align="center"
               style={{ marginTop: 16, marginBottom: 8 }}
             >
               No Profile Pictures Yet
             </ThemedText>
-            <ThemedText variant='body' color='secondary' align='center' style={{ lineHeight: 24 }}>
+            <ThemedText variant="body" color="secondary" align="center" style={{ lineHeight: 24 }}>
               Create your first professional profile picture using the camera or gallery
             </ThemedText>
           </View>
