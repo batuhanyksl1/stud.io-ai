@@ -7,7 +7,15 @@ import Ionicon from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, FlatList, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -19,6 +27,8 @@ const carouselData = [
     subtitle: 'Yüz güzelleştirme ve renk düzeltme',
     icon: 'user',
     gradient: ['#FF6B6B', '#FFE66D'],
+    image1: require('@/assets/images/carousel/image-a-1.png'),
+    image2: require('@/assets/images/carousel/image-a-2.jpg'),
   },
   {
     id: 2,
@@ -26,6 +36,8 @@ const carouselData = [
     subtitle: 'Doğal renkleri canlandırın',
     icon: 'mountain',
     gradient: ['#4ECDC4', '#44A08D'],
+    image1: require('@/assets/images/carousel/image-a-1.png'),
+    image2: require('@/assets/images/carousel/image-a-2.jpg'),
   },
   {
     id: 3,
@@ -33,6 +45,8 @@ const carouselData = [
     subtitle: 'Profesyonel görünüm',
     icon: 'shopping-bag',
     gradient: ['#A8E6CF', '#7FCDCD'],
+    image1: require('@/assets/images/carousel/image-a-1.png'),
+    image2: require('@/assets/images/carousel/image-a-2.jpg'),
   },
   {
     id: 4,
@@ -40,6 +54,8 @@ const carouselData = [
     subtitle: 'Dramatik efektler ekleyin',
     icon: 'camera',
     gradient: ['#FF9A9E', '#FECFEF'],
+    image1: require('@/assets/images/carousel/image-a-1.png'),
+    image2: require('@/assets/images/carousel/image-a-2.jpg'),
   },
 ];
 
@@ -253,10 +269,14 @@ export default function HomeScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
+        {/* Görseller arka planda */}
+        <View style={styles.carouselImagesContainer}>
+          <Image source={item.image1} style={styles.carouselImage} />
+          <Image source={item.image2} style={styles.carouselImage} />
+        </View>
+
+        {/* Yazılar ön planda */}
         <View style={styles.carouselContent}>
-          {/* <View style={styles.carouselIcon}> */}
-          {/* <Ionicon name={item.icon as any} size={40} color="white" /> */}
-          {/* </View> */}
           <ThemedText variant="h4" weight="bold" style={styles.carouselTitle}>
             {item.title}
           </ThemedText>
@@ -643,9 +663,30 @@ const styles = StyleSheet.create({
     padding: 24,
     height: 240,
     justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  carouselImagesContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+  },
+  carouselImage: {
+    width: 160,
+    height: 200,
+    borderRadius: 16,
+    opacity: 0.7,
   },
   carouselContent: {
     alignItems: 'center',
+    zIndex: 1,
+    position: 'relative',
   },
   carouselIcon: {
     width: 80,
