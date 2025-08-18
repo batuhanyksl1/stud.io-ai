@@ -1,58 +1,52 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { Appearance, ColorSchemeName } from 'react-native';
 import { SemanticColors } from '@/constants/DesignTokens';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setColorScheme, setIsDark, toggleTheme } from '@/store/slices/themeSlice';
+import { useEffect } from 'react';
+import { Appearance } from 'react-native';
 
-type ThemeMode = 'light' | 'dark' | 'system';
-type ColorScheme = 'light' | 'dark';
-
-interface ThemeContextType {
-  mode: ThemeMode;
-  colorScheme: ColorScheme;
-  colors: typeof SemanticColors.light;
-  setTheme: (mode: ThemeMode) => void;
-  isDark: boolean;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export type ColorScheme = 'light' | 'dark' | 'system';
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-}
+  const dispatch = useAppDispatch();
+  const { colorScheme, isDark } = useAppSelector((state) => state.theme);
 
-export function useThemeState() {
-  const [mode, setMode] = useState<ThemeMode>('system');
-  const [systemColorScheme, setSystemColorScheme] = useState<ColorScheme>(
-    Appearance.getColorScheme() === 'dark' ? 'dark' : 'light',
-  );
-
+  // System color scheme değişikliklerini dinle
   useEffect(() => {
-    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      setSystemColorScheme(colorScheme === 'dark' ? 'dark' : 'light');
+    const subscription = Appearance.addChangeListener(({ colorScheme: systemColorScheme }) => {
+      if (colorScheme === 'system') {
+        dispatch(setIsDark(systemColorScheme === 'dark'));
+      }
     });
 
     return () => subscription?.remove();
-  }, []);
+  }, [colorScheme, dispatch]);
 
-  const colorScheme: ColorScheme = mode === 'system' ? systemColorScheme : mode;
-  const colors = SemanticColors[colorScheme];
-  const isDark = colorScheme === 'dark';
+  // İlk yüklemede system color scheme'i ayarla
+  useEffect(() => {
+    if (colorScheme === 'system') {
+      const systemColorScheme = Appearance.getColorScheme();
+      dispatch(setIsDark(systemColorScheme === 'dark'));
+    }
+  }, [colorScheme, dispatch]);
 
-  const setTheme = (newMode: ThemeMode) => {
-    setMode(newMode);
+  const currentColorScheme: 'light' | 'dark' =
+    colorScheme === 'system' ? (isDark ? 'dark' : 'light') : colorScheme;
+
+  const colors = SemanticColors[currentColorScheme];
+
+  const setTheme = (newColorScheme: ColorScheme) => {
+    dispatch(setColorScheme(newColorScheme));
+  };
+
+  const toggleDarkMode = () => {
+    dispatch(toggleTheme());
   };
 
   return {
-    mode,
     colorScheme,
     colors,
     setTheme,
     isDark,
+    toggleDarkMode,
   };
 }
-
-export { ThemeContext };
-export type { ThemeMode, ColorScheme, ThemeContextType };

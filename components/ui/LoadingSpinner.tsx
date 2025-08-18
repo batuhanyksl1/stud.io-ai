@@ -22,7 +22,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   gradient = false,
 }) => {
   const { colorScheme } = useTheme();
-  const colors = SemanticColors[colorScheme];
+  const colors = SemanticColors[colorScheme as keyof typeof SemanticColors];
   const rotation = useSharedValue(0);
 
   const sizeMap = {

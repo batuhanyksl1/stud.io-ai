@@ -1,27 +1,27 @@
-import Logo from '@/components/Logo';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
 import { useTheme } from '@/hooks/useTheme';
 import { authService } from '@/services/authService';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { ArrowLeft, Mail, Send } from 'lucide-react-native';
+import { ArrowLeft, Send } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   Alert,
   Dimensions,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
   Text,
+  TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import * as yup from 'yup';
 
-const { height: screenHeight } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 interface ForgotPasswordData {
   email: string;
@@ -35,7 +35,7 @@ const schema = yup.object().shape({
 });
 
 export default function ForgotPasswordScreen() {
-  const { colorScheme } = useTheme();
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
@@ -77,173 +77,287 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={
-        colorScheme === 'dark'
-          ? ['#0f172a', '#1e293b', '#334155']
-          : ['#f8fafc', '#e2e8f0', '#cbd5e1']
-      }
-      style={{ flex: 1 }}
-    >
+    <View style={styles.container}>
+      {/* Arka plan görseli */}
+      <Image
+        source={require('@/assets/images/carousel/image-a-1.png')}
+        style={styles.backgroundImage}
+        blurRadius={2}
+      />
+
+      {/* Gradient overlay */}
+      <LinearGradient
+        colors={['rgba(88, 28, 135, 0.7)', 'rgba(15, 23, 42, 0.8)']}
+        style={styles.gradientOverlay}
+      />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={styles.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            minHeight: screenHeight,
-            paddingVertical: 20,
-          }}
-          keyboardShouldPersistTaps='handled'
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={{ paddingHorizontal: 24, paddingTop: 40 }}>
-            {/* Back Button */}
-            <Button
-              title=''
-              onPress={handleGoBack}
-              variant='ghost'
-              icon={<ArrowLeft size={24} color={colorScheme === 'dark' ? 'white' : '#1f2937'} />}
-              style={{ alignSelf: 'flex-start', marginBottom: 20 }}
-            />
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backButton} onPress={handleGoBack} activeOpacity={0.7}>
+              <ArrowLeft size={24} color="#ffffff" />
+            </TouchableOpacity>
 
-            {/* Header */}
-            <View style={{ alignItems: 'center', marginBottom: 40 }}>
-              <Logo size='lg' variant='default' font='poppins' />
-              <Text
-                style={{
-                  fontSize: 28,
-                  fontWeight: 'bold',
-                  marginTop: 16,
-                  marginBottom: 8,
-                  color: colorScheme === 'dark' ? '#ffffff' : '#1f2937',
-                  textAlign: 'center',
-                }}
-              >
-                Şifremi Unuttum
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: colorScheme === 'dark' ? '#9ca3af' : '#6b7280',
-                  textAlign: 'center',
-                  lineHeight: 24,
-                  paddingHorizontal: 20,
-                }}
-              >
+            <View style={styles.logoContainer}>
+              <Text style={styles.logo}>Stud.io</Text>
+            </View>
+          </View>
+
+          {/* Form Container */}
+          <View style={styles.formContainer}>
+            <View style={styles.formHeader}>
+              <Text style={styles.formTitle}>Reset password</Text>
+              <Text style={styles.formSubtitle}>
                 {emailSent
-                  ? 'Şifre sıfırlama bağlantısı gönderildi'
-                  : 'E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim'}
+                  ? 'Check your email for reset link'
+                  : 'Enter your email to receive a reset link'}
               </Text>
             </View>
 
-            {/* Reset Password Form */}
-            <Card variant='glass' padding='lg' blur>
-              {emailSent ? (
-                <View style={{ alignItems: 'center', gap: 20 }}>
-                  <View
-                    style={{
-                      width: 80,
-                      height: 80,
-                      borderRadius: 40,
-                      backgroundColor: colorScheme === 'dark' ? '#065f46' : '#d1fae5',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Send size={40} color={colorScheme === 'dark' ? '#10b981' : '#059669'} />
-                  </View>
-
-                  <Text
-                    style={{
-                      fontSize: 18,
-                      fontWeight: '600',
-                      color: colorScheme === 'dark' ? '#ffffff' : '#1f2937',
-                      textAlign: 'center',
-                    }}
-                  >
-                    E-posta Gönderildi!
-                  </Text>
-
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      color: colorScheme === 'dark' ? '#9ca3af' : '#6b7280',
-                      textAlign: 'center',
-                      lineHeight: 20,
-                    }}
-                  >
-                    {getValues('email')} adresine şifre sıfırlama bağlantısı gönderildi. E-postanızı
-                    kontrol edin ve bağlantıya tıklayın.
-                  </Text>
-
-                  <Button
-                    title='Giriş Sayfasına Dön'
-                    onPress={handleGoToSignIn}
-                    gradient
-                    size='lg'
-                    style={{ width: '100%', marginTop: 10 }}
-                  />
+            {emailSent ? (
+              <View style={styles.successContainer}>
+                <View style={styles.successIcon}>
+                  <Send size={40} color="#10b981" />
                 </View>
-              ) : (
-                <View style={{ gap: 20 }}>
-                  <Controller
-                    control={control}
-                    name='email'
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <Input
-                        label='E-posta'
-                        placeholder='E-posta adresinizi girin'
+
+                <Text style={styles.successTitle}>Email sent!</Text>
+
+                <Text style={styles.successDescription}>
+                  We've sent a password reset link to {getValues('email')}. Please check your email
+                  and click the link to reset your password.
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.successButton}
+                  onPress={handleGoToSignIn}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.successButtonText}>Back to sign in</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.form}>
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <View style={styles.inputContainer}>
+                      <Text style={styles.inputLabel}>Email</Text>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Enter your email"
+                        placeholderTextColor="rgba(255,255,255,0.6)"
                         value={value}
                         onChangeText={onChange}
                         onBlur={onBlur}
-                        error={errors.email?.message}
-                        leftIcon={
-                          <Mail size={20} color={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'} />
-                        }
-                        keyboardType='email-address'
-                        autoCapitalize='none'
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        autoCorrect={false}
                       />
-                    )}
-                  />
-
-                  <Button
-                    title={loading ? '' : 'Şifre Sıfırlama Bağlantısı Gönder'}
-                    onPress={handleSubmit(handleResetPassword)}
-                    loading={loading}
-                    disabled={!isValid || loading}
-                    gradient
-                    size='lg'
-                    style={{ marginTop: 10 }}
-                  />
-                </View>
-              )}
-            </Card>
-
-            {/* Back to Sign In */}
-            {!emailSent && (
-              <View style={{ alignItems: 'center', marginTop: 24 }}>
-                <Text
-                  style={{
-                    fontSize: 14,
-                    color: colorScheme === 'dark' ? '#9ca3af' : '#6b7280',
-                    textAlign: 'center',
-                  }}
-                >
-                  Şifrenizi hatırladınız mı?
-                </Text>
-                <Button
-                  title='Giriş Yap'
-                  onPress={handleGoToSignIn}
-                  variant='ghost'
-                  style={{ marginTop: 8 }}
+                      {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+                    </View>
+                  )}
                 />
+
+                <TouchableOpacity
+                  style={[styles.resetButton, !isValid && styles.resetButtonDisabled]}
+                  onPress={handleSubmit(handleResetPassword)}
+                  disabled={!isValid || loading}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.resetButtonText}>
+                    {loading ? 'Sending...' : 'Send reset link'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Back to sign in link */}
+            {!emailSent && (
+              <View style={styles.signInContainer}>
+                <Text style={styles.signInText}>Remember your password?</Text>
+                <TouchableOpacity onPress={handleGoToSignIn} activeOpacity={0.7}>
+                  <Text style={styles.signInLink}>Sign in</Text>
+                </TouchableOpacity>
               </View>
             )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    width: width,
+    height: height,
+    resizeMode: 'cover',
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    width: width,
+    height: height,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 40,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 60,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  logo: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    letterSpacing: 1,
+  },
+  formContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  formHeader: {
+    marginBottom: 40,
+  },
+  formTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  formSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.8)',
+    lineHeight: 24,
+  },
+  form: {
+    gap: 24,
+  },
+  inputContainer: {
+    gap: 8,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  input: {
+    height: 56,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: '#ffffff',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#ef4444',
+    marginTop: 4,
+  },
+  resetButton: {
+    height: 56,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  resetButtonDisabled: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  resetButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0f172a',
+  },
+  successContainer: {
+    alignItems: 'center',
+    gap: 24,
+  },
+  successIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    textAlign: 'center',
+  },
+  successDescription: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.8)',
+    textAlign: 'center',
+    lineHeight: 24,
+    paddingHorizontal: 20,
+  },
+  successButton: {
+    height: 56,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 16,
+  },
+  successButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0f172a',
+  },
+  signInContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 32,
+  },
+  signInText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  signInLink: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffffff',
+    textDecorationLine: 'underline',
+  },
+});

@@ -17,6 +17,17 @@ export interface AuthUser {
   lastLoginAt: string;
 }
 
+export interface SignInCredentials {
+  email: string;
+  password: string;
+}
+
+export interface SignUpCredentials {
+  email: string;
+  password: string;
+  displayName: string;
+}
+
 export interface Photo {
   id: string;
   uri: string;

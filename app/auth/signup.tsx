@@ -1,34 +1,31 @@
-import Logo from '@/components/Logo';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { authService, SignUpCredentials, SignUpData } from '@/services/authService';
+import { useTheme } from '@/hooks/useTheme';
+import { authService, SignUpData } from '@/services/authService';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import { ArrowLeft, Lock, Mail, User } from 'lucide-react-native';
+import { ArrowLeft } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   Alert,
   Dimensions,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
   Text,
+  TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import * as yup from 'yup';
 
-const { height: screenHeight } = Dimensions.get('window');
-
-interface SignUpFormData extends SignUpData {
-  confirmPassword: string;
-}
+const { width, height } = Dimensions.get('window');
 
 const schema = yup.object().shape({
-  displayName: yup.string().min(2, 'Ad en az 2 karakter olmalıdır').required('Ad gereklidir'),
+  displayName: yup.string().required('Ad gereklidir'),
   email: yup
     .string()
     .email('Geçerli bir e-posta adresi girin')
@@ -41,35 +38,27 @@ const schema = yup.object().shape({
 });
 
 export default function SignUpScreen() {
-  const { colorScheme } = useTheme();
+  const { colors } = useTheme();
   const [loading, setLoadingState] = useState(false);
 
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
-  } = useForm<SignUpFormData>({
+  } = useForm<SignUpData & { confirmPassword: string }>({
     resolver: yupResolver(schema),
     mode: 'onChange',
   });
 
-  const handleSignUp = async (data: SignUpFormData) => {
+  const handleSignUp = async (data: SignUpData & { confirmPassword: string }) => {
     setLoadingState(true);
 
     try {
-      const signUpData: SignUpCredentials = {
-        email: data.email,
-        password: data.password,
-        displayName: data.displayName,
-      };
-
+      const { confirmPassword, ...signUpData } = data;
       const response = await authService.signUp(signUpData);
-
-      Alert.alert('Başarılı!', 'Hesabınız başarıyla oluşturuldu.', [
-        { text: 'Tamam', onPress: () => router.replace('/(tabs)') },
-      ]);
+      router.replace('/(tabs)');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Hesap oluşturulamadı';
+      const errorMessage = error instanceof Error ? error.message : 'Kayıt oluşturulamadı';
       Alert.alert('Hata', errorMessage);
     } finally {
       setLoadingState(false);
@@ -85,177 +74,288 @@ export default function SignUpScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={
-        colorScheme === 'dark'
-          ? ['#0f172a', '#1e293b', '#334155']
-          : ['#f8fafc', '#e2e8f0', '#cbd5e1']
-      }
-      style={{ flex: 1 }}
-    >
+    <View style={styles.container}>
+      {/* Arka plan görseli */}
+      <Image
+        source={require('@/assets/images/carousel/image-a-2.jpg')}
+        style={styles.backgroundImage}
+        blurRadius={2}
+      />
+
+      {/* Gradient overlay */}
+      <LinearGradient
+        colors={['rgba(88, 28, 135, 0.7)', 'rgba(15, 23, 42, 0.8)']}
+        style={styles.gradientOverlay}
+      />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={styles.keyboardView}
       >
         <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            minHeight: screenHeight,
-            paddingVertical: 20,
-          }}
-          keyboardShouldPersistTaps='handled'
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={{ paddingHorizontal: 24, paddingTop: 40 }}>
-            {/* Back Button */}
-            <Button
-              title=''
-              onPress={handleGoBack}
-              variant='ghost'
-              icon={<ArrowLeft size={24} color={colorScheme === 'dark' ? 'white' : '#1f2937'} />}
-              style={{ alignSelf: 'flex-start', marginBottom: 20 }}
-            />
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backButton} onPress={handleGoBack} activeOpacity={0.7}>
+              <ArrowLeft size={24} color="#ffffff" />
+            </TouchableOpacity>
 
-            {/* Header */}
-            <View style={{ alignItems: 'center', marginBottom: 40 }}>
-              <Logo size='lg' variant='default' font='poppins' />
-              <Text
-                style={{
-                  fontSize: 28,
-                  fontWeight: 'bold',
-                  marginTop: 16,
-                  marginBottom: 8,
-                  color: colorScheme === 'dark' ? '#ffffff' : '#1f2937',
-                  textAlign: 'center',
-                }}
-              >
-                Hesap Oluştur
-              </Text>
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: colorScheme === 'dark' ? '#9ca3af' : '#6b7280',
-                  textAlign: 'center',
-                  lineHeight: 24,
-                }}
-              >
-                Başlamak için hesap oluşturun
-              </Text>
+            <View style={styles.logoContainer}>
+              <Text style={styles.logo}>Stud.io</Text>
+            </View>
+          </View>
+
+          {/* Form Container */}
+          <View style={styles.formContainer}>
+            <View style={styles.formHeader}>
+              <Text style={styles.formTitle}>Create account</Text>
+              <Text style={styles.formSubtitle}>Join us and start creating</Text>
             </View>
 
-            {/* Sign Up Form */}
-            <Card variant='glass' padding='lg' blur>
-              <View style={{ gap: 20 }}>
-                <Controller
-                  control={control}
-                  name='displayName'
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      label='Ad Soyad'
-                      placeholder='Adınızı girin'
+            <View style={styles.form}>
+              <Controller
+                control={control}
+                name="displayName"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>Full Name</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter your full name"
+                      placeholderTextColor="rgba(255,255,255,0.6)"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      error={errors.displayName?.message}
-                      leftIcon={
-                        <User size={20} color={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'} />
-                      }
-                      autoCapitalize='words'
+                      autoCapitalize="words"
+                      autoCorrect={false}
                     />
-                  )}
-                />
-
-                <Controller
-                  control={control}
-                  name='email'
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      label='E-posta'
-                      placeholder='E-posta adresinizi girin'
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.email?.message}
-                      leftIcon={
-                        <Mail size={20} color={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'} />
-                      }
-                      keyboardType='email-address'
-                      autoCapitalize='none'
-                    />
-                  )}
-                />
-
-                <Controller
-                  control={control}
-                  name='password'
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      label='Şifre'
-                      placeholder='Şifrenizi girin'
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.password?.message}
-                      leftIcon={
-                        <Lock size={20} color={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'} />
-                      }
-                      secureTextEntry
-                    />
-                  )}
-                />
-
-                <Controller
-                  control={control}
-                  name='confirmPassword'
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      label='Şifre Tekrar'
-                      placeholder='Şifrenizi tekrar girin'
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      error={errors.confirmPassword?.message}
-                      leftIcon={
-                        <Lock size={20} color={colorScheme === 'dark' ? '#9ca3af' : '#6b7280'} />
-                      }
-                      secureTextEntry
-                    />
-                  )}
-                />
-
-                <Button
-                  title={loading ? '' : 'Hesap Oluştur'}
-                  onPress={handleSubmit(handleSignUp)}
-                  loading={loading}
-                  disabled={!isValid || loading}
-                  gradient
-                  size='lg'
-                  style={{ marginTop: 10 }}
-                />
-              </View>
-            </Card>
-
-            {/* Sign In Link */}
-            <View style={{ alignItems: 'center', marginTop: 24 }}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: colorScheme === 'dark' ? '#9ca3af' : '#6b7280',
-                  textAlign: 'center',
-                }}
-              >
-                Zaten hesabınız var mı?
-              </Text>
-              <Button
-                title='Giriş Yap'
-                onPress={handleGoToSignIn}
-                variant='ghost'
-                style={{ marginTop: 8 }}
+                    {errors.displayName && (
+                      <Text style={styles.errorText}>{errors.displayName.message}</Text>
+                    )}
+                  </View>
+                )}
               />
+
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>Email</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Enter your email"
+                      placeholderTextColor="rgba(255,255,255,0.6)"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                    />
+                    {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+                  </View>
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>Password</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Create a password"
+                      placeholderTextColor="rgba(255,255,255,0.6)"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry
+                      autoCorrect={false}
+                    />
+                    {errors.password && (
+                      <Text style={styles.errorText}>{errors.password.message}</Text>
+                    )}
+                  </View>
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="confirmPassword"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={styles.inputContainer}>
+                    <Text style={styles.inputLabel}>Confirm Password</Text>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Confirm your password"
+                      placeholderTextColor="rgba(255,255,255,0.6)"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      secureTextEntry
+                      autoCorrect={false}
+                    />
+                    {errors.confirmPassword && (
+                      <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
+                    )}
+                  </View>
+                )}
+              />
+
+              <TouchableOpacity
+                style={[styles.signUpButton, !isValid && styles.signUpButtonDisabled]}
+                onPress={handleSubmit(handleSignUp)}
+                disabled={!isValid || loading}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.signUpButtonText}>
+                  {loading ? 'Creating account...' : 'Create account'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Sign in link */}
+            <View style={styles.signInContainer}>
+              <Text style={styles.signInText}>Already have an account?</Text>
+              <TouchableOpacity onPress={handleGoToSignIn} activeOpacity={0.7}>
+                <Text style={styles.signInLink}>Sign in</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </LinearGradient>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0f172a',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    width: width,
+    height: height,
+    resizeMode: 'cover',
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    width: width,
+    height: height,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 40,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 60,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  logo: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    letterSpacing: 1,
+  },
+  formContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  formHeader: {
+    marginBottom: 40,
+  },
+  formTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  formSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.8)',
+    lineHeight: 24,
+  },
+  form: {
+    gap: 24,
+  },
+  inputContainer: {
+    gap: 8,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+  input: {
+    height: 56,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: '#ffffff',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#ef4444',
+    marginTop: 4,
+  },
+  signUpButton: {
+    height: 56,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  signUpButtonDisabled: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  signUpButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0f172a',
+  },
+  signInContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 32,
+  },
+  signInText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+  },
+  signInLink: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffffff',
+    textDecorationLine: 'underline',
+  },
+});

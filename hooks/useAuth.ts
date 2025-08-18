@@ -1,42 +1,41 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/config/firebase';
-
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { clearAuth, clearError, signIn, signOut, signUp } from '@/store/slices/authSlice';
+import { SignInCredentials, SignUpCredentials } from '@/types';
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+  const dispatch = useAppDispatch();
+  const { user, token, isAuthenticated, isLoading, error } = useAppSelector((state) => state.auth);
 
-export function useAuthState() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const login = async (credentials: SignInCredentials) => {
+    return await dispatch(signIn(credentials));
+  };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
+  const register = async (credentials: SignUpCredentials) => {
+    return await dispatch(signUp(credentials));
+  };
 
-    return unsubscribe;
-  }, []);
+  const logout = async () => {
+    return await dispatch(signOut());
+  };
+
+  const clearAuthData = () => {
+    dispatch(clearAuth());
+  };
+
+  const clearAuthError = () => {
+    dispatch(clearError());
+  };
 
   return {
     user,
-    isAuthenticated: !!user,
-    loading,
+    token,
+    isAuthenticated,
+    isLoading,
+    error,
+    login,
+    register,
+    logout,
+    clearAuthData,
+    clearAuthError,
   };
 }
-
-export { AuthContext };
-export type { AuthContextType };

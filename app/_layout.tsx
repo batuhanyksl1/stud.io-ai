@@ -1,5 +1,4 @@
-import AuthProvider from '@/components/AuthProvider';
-import ThemeProvider from '@/components/ThemeProvider';
+import ReduxProvider from '@/components/ReduxProvider';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useAuth } from '@/hooks/useAuth';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
@@ -31,15 +30,14 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View } from 'react-native';
-// Global CSS import removed - using DesignTokens instead
 
 SplashScreen.preventAutoHideAsync();
 
 function AppContent() {
   const { colorScheme } = useTheme();
-  const { loading } = useAuth();
+  const { isLoading } = useAuth();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <LoadingSpinner size="lg" gradient />
@@ -104,10 +102,8 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
+    <ReduxProvider>
+      <AppContent />
+    </ReduxProvider>
   );
 }
