@@ -15,8 +15,8 @@ export const carouselData = [
     subtitle: 'Doğal renkleri canlandırın',
     icon: 'accessibility',
     gradient: ['#4ECDC4', '#44A08D'],
-    image1: require('@/assets/images/carousel/image-a-1.png'),
-    image2: require('@/assets/images/carousel/image-a-2.jpg'),
+    image1: require('@/assets/images/carousel/image-y-1.png'),
+    image2: require('@/assets/images/carousel/image-y-2.jpeg'),
   },
   {
     id: 3,

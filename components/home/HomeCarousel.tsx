@@ -165,8 +165,8 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   carouselImage: {
-    width: 160,
-    height: 200,
+    width: 190,
+    height: 230,
     borderRadius: 16,
     opacity: 0.7,
   },
