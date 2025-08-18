@@ -1,8 +1,8 @@
 // UI Components
-export { default as Button } from './ui/Button';
-export { default as Card } from './ui/Card';
-export { default as Input } from './ui/Input';
-export { default as LoadingSpinner } from './ui/LoadingSpinner';
+export { Button } from './ui/Button';
+export { Card } from './ui/Card';
+export { Input } from './ui/Input';
+export { LoadingSpinner } from './ui/LoadingSpinner';
 
 // Themed Components
 export { default as ThemedButton } from './ThemedButton';
@@ -16,5 +16,8 @@ export { default as ImageEditor } from './ImageEditor';
 export { default as Logo } from './Logo';
 export { default as ScrollContainer } from './ScrollContainer';
 
+// Home Components
+export * from './home';
+
 // Auth Components
-export { default as AuthScreen } from './auth/AuthScreen';
+export { AuthScreen } from './auth/AuthScreen';
