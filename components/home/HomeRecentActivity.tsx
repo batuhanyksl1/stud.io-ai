@@ -11,13 +11,13 @@ export const HomeRecentActivity: React.FC = () => {
     return (
       <TouchableOpacity key={item.id} style={styles.activityItem} activeOpacity={0.7}>
         <View style={styles.activityThumbnail}>
-          <ThemedText variant="h3">{item.thumbnail}</ThemedText>
+          <ThemedText variant='h3'>{item.thumbnail}</ThemedText>
         </View>
         <View style={styles.activityContent}>
-          <ThemedText variant="body" weight="semiBold">
+          <ThemedText variant='body' weight='semiBold'>
             {item.title}
           </ThemedText>
-          <ThemedText variant="caption" color="secondary">
+          <ThemedText variant='caption' color='secondary'>
             {item.service} • {item.timestamp}
           </ThemedText>
         </View>
@@ -29,19 +29,19 @@ export const HomeRecentActivity: React.FC = () => {
   return (
     <ThemedView style={styles.recentSection}>
       <View style={styles.sectionHeader}>
-        <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
+        <ThemedText variant='h3' weight='bold' style={styles.sectionTitle}>
           Son Aktiviteler
         </ThemedText>
         <TouchableOpacity>
-          <ThemedText variant="body" color="primary" weight="semiBold">
+          <ThemedText variant='body' color='primary' weight='semiBold'>
             Tümünü Gör
           </ThemedText>
         </TouchableOpacity>
       </View>
       <ThemedCard
         style={[styles.recentCard, { backgroundColor: colors.surface }] as any}
-        padding="sm"
-        elevation="sm"
+        padding='sm'
+        elevation='sm'
       >
         {recentActivity.map(renderActivityItem)}
       </ThemedCard>

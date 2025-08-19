@@ -95,13 +95,13 @@ export default function SignUpScreen() {
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity style={styles.backButton} onPress={handleGoBack} activeOpacity={0.7}>
-              <ArrowLeft size={24} color="#ffffff" />
+              <ArrowLeft size={24} color='#ffffff' />
             </TouchableOpacity>
 
             <View style={styles.logoContainer}>
@@ -119,18 +119,18 @@ export default function SignUpScreen() {
             <View style={styles.form}>
               <Controller
                 control={control}
-                name="displayName"
+                name='displayName'
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
                     <Text style={styles.inputLabel}>Full Name</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter your full name"
-                      placeholderTextColor="rgba(255,255,255,0.6)"
+                      placeholder='Enter your full name'
+                      placeholderTextColor='rgba(255,255,255,0.6)'
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      autoCapitalize="words"
+                      autoCapitalize='words'
                       autoCorrect={false}
                     />
                     {errors.displayName && (
@@ -142,19 +142,19 @@ export default function SignUpScreen() {
 
               <Controller
                 control={control}
-                name="email"
+                name='email'
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
                     <Text style={styles.inputLabel}>Email</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter your email"
-                      placeholderTextColor="rgba(255,255,255,0.6)"
+                      placeholder='Enter your email'
+                      placeholderTextColor='rgba(255,255,255,0.6)'
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
+                      keyboardType='email-address'
+                      autoCapitalize='none'
                       autoCorrect={false}
                     />
                     {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
@@ -164,14 +164,14 @@ export default function SignUpScreen() {
 
               <Controller
                 control={control}
-                name="password"
+                name='password'
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
                     <Text style={styles.inputLabel}>Password</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Create a password"
-                      placeholderTextColor="rgba(255,255,255,0.6)"
+                      placeholder='Create a password'
+                      placeholderTextColor='rgba(255,255,255,0.6)'
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -187,14 +187,14 @@ export default function SignUpScreen() {
 
               <Controller
                 control={control}
-                name="confirmPassword"
+                name='confirmPassword'
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
                     <Text style={styles.inputLabel}>Confirm Password</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Confirm your password"
-                      placeholderTextColor="rgba(255,255,255,0.6)"
+                      placeholder='Confirm your password'
+                      placeholderTextColor='rgba(255,255,255,0.6)'
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}

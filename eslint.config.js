@@ -20,11 +20,28 @@ module.exports = defineConfig([
     },
     plugins: {
       prettier: require('eslint-plugin-prettier'),
+      '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
     },
     rules: {
       'prettier/prettier': 'error',
       'arrow-body-style': 'off',
       'prefer-arrow-callback': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      'no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 ]);

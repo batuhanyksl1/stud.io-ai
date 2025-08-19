@@ -30,12 +30,12 @@ export const HomeServices: React.FC = () => {
           <View style={styles.serviceCardContent}>
             <View style={styles.serviceHeader}>
               <View style={styles.serviceIconWrapper}>
-                <Ionicon name={service.icon as any} size={28} color="#FFFFFF" />
+                <Ionicon name={service.icon as any} size={28} color='#FFFFFF' />
               </View>
               {service.isPopular && (
                 <View style={[styles.popularBadge, { backgroundColor: 'rgba(255,255,255,0.2)' }]}>
-                  <Ionicon name="star" size={10} color="#FFD700" />
-                  <ThemedText variant="caption" style={styles.popularText}>
+                  <Ionicon name='star' size={10} color='#FFD700' />
+                  <ThemedText variant='caption' style={styles.popularText}>
                     {service.badge}
                   </ThemedText>
                 </View>
@@ -43,28 +43,28 @@ export const HomeServices: React.FC = () => {
             </View>
 
             <View style={styles.serviceContent}>
-              <ThemedText variant="caption" style={styles.serviceSubtitle}>
+              <ThemedText variant='caption' style={styles.serviceSubtitle}>
                 {service.subtitle}
               </ThemedText>
-              <ThemedText variant="h4" weight="bold" style={styles.serviceTitle}>
+              <ThemedText variant='h4' weight='bold' style={styles.serviceTitle}>
                 {service.title}
               </ThemedText>
-              <ThemedText variant="caption" style={styles.serviceDescription}>
+              <ThemedText variant='caption' style={styles.serviceDescription}>
                 {service.description}
               </ThemedText>
             </View>
 
             <View style={styles.serviceFooter}>
               <View style={styles.serviceStats}>
-                <Ionicon name="star" size={12} color="#FFD700" />
-                <ThemedText variant="caption" style={styles.rating}>
+                <Ionicon name='star' size={12} color='#FFD700' />
+                <ThemedText variant='caption' style={styles.rating}>
                   {service.rating}
                 </ThemedText>
-                <ThemedText variant="caption" style={styles.usageCount}>
+                <ThemedText variant='caption' style={styles.usageCount}>
                   • {service.usageCount}
                 </ThemedText>
               </View>
-              <Ionicon name="arrow-forward" size={16} color="rgba(255,255,255,0.8)" />
+              <Ionicon name='arrow-forward' size={16} color='rgba(255,255,255,0.8)' />
             </View>
           </View>
         </LinearGradient>
@@ -75,11 +75,11 @@ export const HomeServices: React.FC = () => {
   return (
     <ThemedView style={styles.servicesSection}>
       <View style={styles.sectionHeader}>
-        <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
+        <ThemedText variant='h3' weight='bold' style={styles.sectionTitle}>
           Tüm Servisler
         </ThemedText>
         <TouchableOpacity>
-          <ThemedText variant="body" color="primary" weight="semiBold">
+          <ThemedText variant='body' color='primary' weight='semiBold'>
             Tümünü Gör
           </ThemedText>
         </TouchableOpacity>

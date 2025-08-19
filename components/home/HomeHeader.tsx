@@ -10,14 +10,14 @@ export const HomeHeader: React.FC = () => {
     <View style={[styles.header, { borderBottomColor: colors.border }]}>
       <View style={styles.headerContent}>
         <View style={styles.headerLeft}>
-          <Logo size="md" font="poppins" />
-          <ThemedText variant="caption" color="secondary" style={styles.headerSubtitle}>
+          <Logo size='md' font='poppins' />
+          <ThemedText variant='caption' color='secondary' style={styles.headerSubtitle}>
             AI destekli görsel düzenleme
           </ThemedText>
         </View>
         <TouchableOpacity style={styles.profileButton}>
           <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
-            <ThemedText variant="body" weight="bold" color="onPrimary">
+            <ThemedText variant='body' weight='bold' color='onPrimary'>
               B
             </ThemedText>
           </View>

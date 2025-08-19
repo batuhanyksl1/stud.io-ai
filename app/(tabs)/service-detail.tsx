@@ -107,7 +107,7 @@ export default function ServiceDetailScreen() {
     }
     // Burada servisi başlatma işlemi yapılacak
     // Şimdilik ana sayfaya yönlendiriyoruz
-    router.push('/(tabs)/');
+    router.push('/(tabs)');
   };
 
   if (!service) {
@@ -188,7 +188,7 @@ export default function ServiceDetailScreen() {
           style={[styles.startButton, { backgroundColor: service.color }]}
           onPress={startService}
         >
-          <ThemedText variant="bodyLarge" weight="semiBold" color="textOnPrimary">
+          <ThemedText variant="bodyLarge" weight="semiBold" color="onPrimary">
             Servisi Başlat
           </ThemedText>
         </TouchableOpacity>

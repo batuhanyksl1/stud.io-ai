@@ -67,17 +67,17 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
         {/* Yazılar ön planda */}
         <View style={styles.carouselContent}>
-          <ThemedText variant="h4" weight="bold" style={styles.carouselTitle}>
+          <ThemedText variant='h4' weight='bold' style={styles.carouselTitle}>
             {item.title}
           </ThemedText>
-          <ThemedText variant="body" style={styles.carouselSubtitle}>
+          <ThemedText variant='body' style={styles.carouselSubtitle}>
             {item.subtitle}
           </ThemedText>
           <TouchableOpacity style={styles.carouselButton} onPress={() => router.push('/editor')}>
-            <ThemedText variant="body" weight="semiBold" style={styles.carouselButtonText}>
+            <ThemedText variant='body' weight='semiBold' style={styles.carouselButtonText}>
               Dene
             </ThemedText>
-            <Ionicon name="arrow-forward" size={16} color="white" />
+            <Ionicon name='arrow-forward' size={16} color='white' />
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -86,7 +86,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
   return (
     <ThemedView style={styles.carouselSection}>
-      <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
+      <ThemedText variant='h3' weight='bold' style={styles.sectionTitle}>
         Öne Çıkan Özellikler
       </ThemedText>
 
@@ -162,11 +162,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 10,
+    gap: 3,
   },
   carouselImage: {
-    width: 190,
-    height: 230,
+    width: 195,
+    height: 235,
     borderRadius: 16,
     opacity: 0.7,
   },

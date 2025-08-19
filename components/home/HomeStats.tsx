@@ -10,19 +10,19 @@ export const HomeStats: React.FC = () => {
 
   const renderStatCard = (stat: (typeof todayStats)[0]) => {
     return (
-      <ThemedCard key={stat.title} style={styles.statCard} padding="md" elevation="sm">
+      <ThemedCard key={stat.title} style={styles.statCard} padding='md' elevation='sm'>
         <View style={styles.statHeader}>
           <View style={[styles.statIcon, { backgroundColor: stat.color + '20' }]}>
             <Ionicon name={stat.icon as any} size={16} color={stat.color} />
           </View>
-          <ThemedText variant="caption" color="secondary">
+          <ThemedText variant='caption' color='secondary'>
             {stat.title}
           </ThemedText>
         </View>
-        <ThemedText variant="h3" weight="bold" style={styles.statValue}>
+        <ThemedText variant='h3' weight='bold' style={styles.statValue}>
           {stat.value}
         </ThemedText>
-        <ThemedText variant="caption" style={[styles.statChange, { color: '#10B981' }]}>
+        <ThemedText variant='caption' style={[styles.statChange, { color: '#10B981' }]}>
           {stat.change}
         </ThemedText>
       </ThemedCard>
@@ -31,7 +31,7 @@ export const HomeStats: React.FC = () => {
 
   return (
     <ThemedView style={styles.todayStatsSection}>
-      <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
+      <ThemedText variant='h3' weight='bold' style={styles.sectionTitle}>
         Bugün
       </ThemedText>
       <View style={styles.statsGrid}>{todayStats.map(renderStatCard)}</View>

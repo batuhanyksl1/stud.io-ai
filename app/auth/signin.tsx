@@ -92,12 +92,11 @@ export default function SignInScreen() {
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}
         >
           {/* Header */}
           <View style={styles.header}>
-
             <View style={styles.logoContainer}>
               <Text style={styles.logo}>Stud.io</Text>
             </View>
@@ -113,19 +112,19 @@ export default function SignInScreen() {
             <View style={styles.form}>
               <Controller
                 control={control}
-                name="email"
+                name='email'
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
                     <Text style={styles.inputLabel}>Email</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter your email"
-                      placeholderTextColor="rgba(255,255,255,0.6)"
+                      placeholder='Enter your email'
+                      placeholderTextColor='rgba(255,255,255,0.6)'
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
+                      keyboardType='email-address'
+                      autoCapitalize='none'
                       autoCorrect={false}
                     />
                     {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
@@ -135,14 +134,14 @@ export default function SignInScreen() {
 
               <Controller
                 control={control}
-                name="password"
+                name='password'
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
                     <Text style={styles.inputLabel}>Password</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter your password"
-                      placeholderTextColor="rgba(255,255,255,0.6)"
+                      placeholder='Enter your password'
+                      placeholderTextColor='rgba(255,255,255,0.6)'
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}

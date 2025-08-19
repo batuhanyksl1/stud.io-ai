@@ -42,8 +42,8 @@ export const HomeQuickActions: React.FC = () => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Ionicon name={action.icon as any} size={24} color="#FFFFFF" />
-          <ThemedText variant="caption" weight="semiBold" style={styles.quickActionText}>
+          <Ionicon name={action.icon as any} size={24} color='#FFFFFF' />
+          <ThemedText variant='caption' weight='semiBold' style={styles.quickActionText}>
             {action.title}
           </ThemedText>
         </LinearGradient>
@@ -53,7 +53,7 @@ export const HomeQuickActions: React.FC = () => {
 
   return (
     <ThemedView style={styles.quickActionsSection}>
-      <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
+      <ThemedText variant='h3' weight='bold' style={styles.sectionTitle}>
         Hızlı Başlat
       </ThemedText>
       <View style={styles.quickActionsGrid}>{quickActions.map(renderQuickAction)}</View>

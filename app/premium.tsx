@@ -95,10 +95,10 @@ export default function PremiumScreen() {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <Button
-              title=""
+              title=''
               onPress={() => router.back()}
-              variant="ghost"
-              icon={<ArrowLeft size={24} color="white" />}
+              variant='ghost'
+              icon={<ArrowLeft size={24} color='white' />}
             />
           </View>
 
@@ -109,7 +109,7 @@ export default function PremiumScreen() {
                 colors={['#fbbf24', '#f59e0b', '#d97706']}
                 style={styles.crownGradient}
               >
-                <Crown size={48} color="white" />
+                <Crown size={48} color='white' />
               </LinearGradient>
 
               {/* Glow rings */}
@@ -179,18 +179,18 @@ export default function PremiumScreen() {
                     <View style={styles.iconContainer}>
                       {feature.free ? (
                         <View style={styles.checkIcon}>
-                          <Check size={18} color="#16a34a" />
+                          <Check size={18} color='#16a34a' />
                         </View>
                       ) : (
                         <View style={styles.xIcon}>
-                          <X size={18} color="#dc2626" />
+                          <X size={18} color='#dc2626' />
                         </View>
                       )}
                     </View>
 
                     <View style={styles.iconContainer}>
                       <View style={styles.premiumCheckIcon}>
-                        <Check size={18} color="white" />
+                        <Check size={18} color='white' />
                       </View>
                     </View>
                   </View>
@@ -309,7 +309,7 @@ export default function PremiumScreen() {
                         title={selectedPlan === plan.id ? '✓ Seçildi' : 'Seç'}
                         onPress={() => setSelectedPlan(plan.id)}
                         variant={selectedPlan === plan.id ? 'outline' : 'primary'}
-                        size="sm"
+                        size='sm'
                       />
                     </View>
                   </View>
@@ -328,9 +328,9 @@ export default function PremiumScreen() {
                 title={loading ? '' : '🚀 7 Gün Ücretsiz Deneyin'}
                 onPress={() => handleSubscribe(selectedPlan)}
                 loading={loading}
-                variant="primary"
-                size="lg"
-                icon={!loading && <Zap size={24} color="white" />}
+                variant='primary'
+                size='lg'
+                icon={!loading && <Zap size={24} color='white' />}
               />
             </LinearGradient>
           </View>
@@ -338,10 +338,10 @@ export default function PremiumScreen() {
           {/* Secondary Actions */}
           <View style={styles.secondaryActions}>
             <Button
-              title="📱 Satın Alımları Geri Yükle"
+              title='📱 Satın Alımları Geri Yükle'
               onPress={handleRestore}
-              variant="ghost"
-              size="md"
+              variant='ghost'
+              size='md'
             />
 
             {/* Trust Indicators */}
