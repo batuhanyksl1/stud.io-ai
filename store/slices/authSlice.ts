@@ -1,4 +1,4 @@
-import { auth } from "@/firebase.config";
+import { auth } from "@/config/firebase.auth.config";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   createUserWithEmailAndPassword,

@@ -1,7 +1,8 @@
-import { Logo, ThemedText } from '@/components';
-import { useTheme } from '@/hooks';
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import Logo from "@/components/Logo";
+import ThemedText from "@/components/ThemedText";
+import { useTheme } from "@/hooks";
+import React from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 export const HomeHeader: React.FC = () => {
   const { colors } = useTheme();
@@ -10,14 +11,20 @@ export const HomeHeader: React.FC = () => {
     <View style={[styles.header, { borderBottomColor: colors.border }]}>
       <View style={styles.headerContent}>
         <View style={styles.headerLeft}>
-          <Logo size='md' font='poppins' />
-          <ThemedText variant='caption' color='secondary' style={styles.headerSubtitle}>
+          <Logo size="md" font="poppins" />
+          <ThemedText
+            variant="caption"
+            color="secondary"
+            style={styles.headerSubtitle}
+          >
             AI destekli görsel düzenleme
           </ThemedText>
         </View>
         <TouchableOpacity style={styles.profileButton}>
-          <View style={[styles.profileAvatar, { backgroundColor: colors.primary }]}>
-            <ThemedText variant='body' weight='bold' color='onPrimary'>
+          <View
+            style={[styles.profileAvatar, { backgroundColor: colors.primary }]}
+          >
+            <ThemedText variant="body" weight="bold" color="onPrimary">
               B
             </ThemedText>
           </View>
@@ -35,13 +42,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   headerLeft: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   headerSubtitle: {
     marginTop: 4,
@@ -53,7 +60,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

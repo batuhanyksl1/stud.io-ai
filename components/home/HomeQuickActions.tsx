@@ -1,29 +1,30 @@
-import { ThemedText, ThemedView } from '@/components';
-import { quickActions } from '@/components/data';
-import Ionicon from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import ThemedText from "@/components/ThemedText";
+import ThemedView from "@/components/ThemedView";
+import { quickActions } from "@/components/data";
+import Ionicon from "@expo/vector-icons/Ionicons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import React from "react";
+import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 export const HomeQuickActions: React.FC = () => {
   const router = useRouter();
 
   const handleQuickAction = (actionId: string) => {
     switch (actionId) {
-      case 'camera':
-        router.push('/(tabs)/editor?mode=camera');
+      case "camera":
+        router.push("/(tabs)/editor?mode=camera");
         break;
-      case 'gallery':
-        router.push('/(tabs)/editor?mode=gallery');
+      case "gallery":
+        router.push("/(tabs)/editor?mode=gallery");
         break;
-      case 'recent':
+      case "recent":
         // Recent işlemleri göster
         break;
-      case 'premium':
-        router.push('/premium');
+      case "premium":
+        router.push("/premium");
         break;
     }
   };
@@ -42,8 +43,12 @@ export const HomeQuickActions: React.FC = () => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Ionicon name={action.icon as any} size={24} color='#FFFFFF' />
-          <ThemedText variant='caption' weight='semiBold' style={styles.quickActionText}>
+          <Ionicon name={action.icon as any} size={24} color="#FFFFFF" />
+          <ThemedText
+            variant="caption"
+            weight="semiBold"
+            style={styles.quickActionText}
+          >
             {action.title}
           </ThemedText>
         </LinearGradient>
@@ -53,10 +58,12 @@ export const HomeQuickActions: React.FC = () => {
 
   return (
     <ThemedView style={styles.quickActionsSection}>
-      <ThemedText variant='h3' weight='bold' style={styles.sectionTitle}>
+      <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
         Hızlı Başlat
       </ThemedText>
-      <View style={styles.quickActionsGrid}>{quickActions.map(renderQuickAction)}</View>
+      <View style={styles.quickActionsGrid}>
+        {quickActions.map(renderQuickAction)}
+      </View>
     </ThemedView>
   );
 };
@@ -67,8 +74,8 @@ const styles = StyleSheet.create({
     paddingTop: 3,
   },
   quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
     marginTop: 0,
   },
@@ -78,14 +85,14 @@ const styles = StyleSheet.create({
   quickActionGradient: {
     borderRadius: 16,
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 12,
     minHeight: 80,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   quickActionText: {
-    color: '#FFFFFF',
-    textAlign: 'center',
+    color: "#FFFFFF",
+    textAlign: "center",
   },
   sectionTitle: {
     marginBottom: 16,

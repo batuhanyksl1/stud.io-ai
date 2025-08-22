@@ -1,13 +1,21 @@
-import { ThemedText, ThemedView } from '@/components';
-import { carouselData } from '@/components/data';
-import { useTheme } from '@/hooks';
-import Ionicon from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, FlatList, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import ThemedText from "@/components/ThemedText";
+import ThemedView from "@/components/ThemedView";
+import { carouselData } from "@/components/data";
+import { useTheme } from "@/hooks";
+import Ionicon from "@expo/vector-icons/Ionicons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 interface HomeCarouselProps {
   onPageChange?: (page: number) => void;
@@ -67,17 +75,24 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
         {/* Yazılar ön planda */}
         <View style={styles.carouselContent}>
-          <ThemedText variant='h4' weight='bold' style={styles.carouselTitle}>
+          <ThemedText variant="h4" weight="bold" style={styles.carouselTitle}>
             {item.title}
           </ThemedText>
-          <ThemedText variant='body' style={styles.carouselSubtitle}>
+          <ThemedText variant="body" style={styles.carouselSubtitle}>
             {item.subtitle}
           </ThemedText>
-          <TouchableOpacity style={styles.carouselButton} onPress={() => router.push('/editor')}>
-            <ThemedText variant='body' weight='semiBold' style={styles.carouselButtonText}>
+          <TouchableOpacity
+            style={styles.carouselButton}
+            onPress={() => router.push("/editor")}
+          >
+            <ThemedText
+              variant="body"
+              weight="semiBold"
+              style={styles.carouselButtonText}
+            >
               Dene
             </ThemedText>
-            <Ionicon name='arrow-forward' size={16} color='white' />
+            <Ionicon name="arrow-forward" size={16} color="white" />
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -86,7 +101,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
   return (
     <ThemedView style={styles.carouselSection}>
-      <ThemedText variant='h3' weight='bold' style={styles.sectionTitle}>
+      <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
         Öne Çıkan Özellikler
       </ThemedText>
 
@@ -112,7 +127,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
         <View
           style={[
             styles.pagination,
-            { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 0 },
+            { position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 0 },
           ]}
         >
           {carouselData.map((_, index) => (
@@ -121,7 +136,8 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
               style={[
                 styles.paginationDot,
                 {
-                  backgroundColor: index === currentPage ? colors.primary : colors.border,
+                  backgroundColor:
+                    index === currentPage ? colors.primary : colors.border,
                   width: index === currentPage ? 24 : 8,
                 },
               ]}
@@ -149,19 +165,19 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 24,
     height: 240,
-    justifyContent: 'center',
-    position: 'relative',
-    overflow: 'hidden',
+    justifyContent: "center",
+    position: "relative",
+    overflow: "hidden",
   },
   carouselImagesContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: 3,
   },
   carouselImage: {
@@ -171,37 +187,37 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   carouselContent: {
-    alignItems: 'center',
+    alignItems: "center",
     zIndex: 1,
-    position: 'relative',
+    position: "relative",
   },
   carouselTitle: {
-    color: 'white',
-    textAlign: 'center',
+    color: "white",
+    textAlign: "center",
     marginBottom: 8,
   },
   carouselSubtitle: {
-    color: 'white',
-    textAlign: 'center',
+    color: "white",
+    textAlign: "center",
     opacity: 0.9,
     marginBottom: 20,
   },
   carouselButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 25,
     gap: 8,
   },
   carouselButtonText: {
-    color: 'white',
+    color: "white",
   },
   pagination: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 16,
     gap: 8,
   },

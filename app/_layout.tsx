@@ -1,5 +1,4 @@
-import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import "@/firebase.config"; // Firebase'i initialize et
+import "@/config/firebase.config"; // Firebase'i initialize et
 import { useAuth, useFrameworkReady, useTheme } from "@/hooks";
 import "@/localization/i18n";
 import { AppProvider } from "@/providers";
@@ -32,7 +31,6 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import { View } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -41,13 +39,13 @@ function AppContent() {
   const { isLoading, isInitializing } = useAuth();
 
   // Auth state'i initialize edilene kadar loading göster
-  if (isInitializing) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <LoadingSpinner size="lg" gradient />
-      </View>
-    );
-  }
+  // if (isInitializing) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+  //       <LoadingSpinner size="lg" gradient />
+  //     </View>
+  //   );
+  // }
 
   return (
     <>
