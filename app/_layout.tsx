@@ -1,4 +1,4 @@
-import "@/config/firebase.config"; // Firebase'i initialize et
+import "@/firebase.config"; // Firebase'i initialize et
 import { useAuth, useFrameworkReady, useTheme } from "@/hooks";
 import "@/localization/i18n";
 import { AppProvider } from "@/providers";
