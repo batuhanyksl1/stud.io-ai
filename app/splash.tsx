@@ -1,10 +1,16 @@
-import { ThemedText, ThemedView } from '@/components';
-import { useTheme } from '@/hooks';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { Camera, Sparkles } from 'lucide-react-native';
-import React, { useEffect } from 'react';
-import { Dimensions, Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { ThemedText, ThemedView } from "@/components";
+import { useTheme } from "@/hooks";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import { Camera, Sparkles } from "lucide-react-native";
+import React, { useEffect } from "react";
+import {
+  Dimensions,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -13,9 +19,9 @@ import Animated, {
   withSequence,
   withSpring,
   withTiming,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 export default function SplashScreen() {
   const { colors, isDark } = useTheme();
@@ -29,7 +35,7 @@ export default function SplashScreen() {
   const pulseScale = useSharedValue(1);
 
   const navigateToLanding = () => {
-    router.replace('/');
+    router.replace("/");
   };
 
   useEffect(() => {
@@ -37,7 +43,10 @@ export default function SplashScreen() {
     backgroundOpacity.value = withTiming(1, { duration: 500 });
 
     // Logo animations
-    logoScale.value = withDelay(300, withSpring(1, { damping: 15, stiffness: 100 }));
+    logoScale.value = withDelay(
+      300,
+      withSpring(1, { damping: 15, stiffness: 100 }),
+    );
     logoOpacity.value = withDelay(300, withTiming(1, { duration: 600 }));
 
     // Sparkle animations
@@ -51,7 +60,10 @@ export default function SplashScreen() {
     // Pulse effect
     pulseScale.value = withDelay(
       1200,
-      withSequence(withTiming(1.05, { duration: 800 }), withTiming(1, { duration: 800 })),
+      withSequence(
+        withTiming(1.05, { duration: 800 }),
+        withTiming(1, { duration: 800 }),
+      ),
     );
 
     // Navigate after animations
@@ -72,7 +84,10 @@ export default function SplashScreen() {
   }));
 
   const sparkleStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${sparkleRotate.value}deg` }, { scale: sparkleScale.value }],
+    transform: [
+      { rotate: `${sparkleRotate.value}deg` },
+      { scale: sparkleScale.value },
+    ],
   }));
 
   const titleStyle = useAnimatedStyle(() => ({
@@ -83,14 +98,18 @@ export default function SplashScreen() {
   return (
     <ThemedView style={styles.container}>
       <StatusBar
-        barStyle={isDark ? 'light-content' : 'dark-content'}
-        backgroundColor='transparent'
+        barStyle={isDark ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
         translucent
       />
 
       <Animated.View style={[styles.backgroundContainer, backgroundStyle]}>
         <LinearGradient
-          colors={isDark ? ['#1F2937', '#111827', '#000000'] : ['#0077B5', '#004182', '#001F3F']}
+          colors={
+            isDark
+              ? ["#1F2937", "#111827", "#000000"]
+              : ["#0077B5", "#004182", "#001F3F"]
+          }
           style={styles.gradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -107,25 +126,30 @@ export default function SplashScreen() {
             <Animated.View style={[styles.logoContainer, logoContainerStyle]}>
               <View style={styles.logoWrapper}>
                 <View style={styles.logoBackground}>
-                  <Camera size={64} color='#FFFFFF' strokeWidth={2} />
+                  <Camera size={64} color="#FFFFFF" strokeWidth={2} />
                 </View>
 
                 <Animated.View style={[styles.sparkleContainer, sparkleStyle]}>
-                  <Sparkles size={28} color='#F59E0B' strokeWidth={2} />
+                  <Sparkles size={28} color="#F59E0B" strokeWidth={2} />
                 </Animated.View>
               </View>
             </Animated.View>
 
             {/* Title Section */}
             <Animated.View style={[styles.titleContainer, titleStyle]}>
-              <ThemedText variant='h2' color='inverse' align='center'>
+              <ThemedText variant="h2" color="inverse" align="center">
                 LinkedIn Profile
               </ThemedText>
-              <ThemedText variant='h2' color='inverse' align='center'>
+              <ThemedText variant="h2" color="inverse" align="center">
                 Creator
               </ThemedText>
               <View style={styles.tagline}>
-                <ThemedText variant='caption' weight='medium' color='inverse' align='center'>
+                <ThemedText
+                  variant="caption"
+                  weight="medium"
+                  color="inverse"
+                  align="center"
+                >
                   Professional • AI-Powered • Instant
                 </ThemedText>
               </View>
@@ -134,9 +158,11 @@ export default function SplashScreen() {
             {/* Loading indicator */}
             <View style={styles.loadingContainer}>
               <View style={styles.loadingBar}>
-                <Animated.View style={[styles.loadingProgress, { width: '100%' }]} />
+                <Animated.View
+                  style={[styles.loadingProgress, { width: "100%" }]}
+                />
               </View>
-              <ThemedText variant='caption' color='inverse' align='center'>
+              <ThemedText variant="caption" color="inverse" align="center">
                 Preparing your studio...
               </ThemedText>
             </View>
@@ -150,7 +176,7 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0077B5',
+    backgroundColor: "#0077B5",
   },
   backgroundContainer: {
     flex: 1,
@@ -162,123 +188,123 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   floatingElement: {
-    position: 'absolute',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    position: "absolute",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
     borderRadius: 50,
   },
   element1: {
     width: 100,
     height: 100,
-    top: '20%',
-    left: '10%',
+    top: "20%",
+    left: "10%",
   },
   element2: {
     width: 60,
     height: 60,
-    top: '60%',
-    right: '15%',
+    top: "60%",
+    right: "15%",
   },
   element3: {
     width: 80,
     height: 80,
-    bottom: '25%',
-    left: '20%',
+    bottom: "25%",
+    left: "20%",
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 32,
   },
   logoContainer: {
     marginBottom: 48,
   },
   logoWrapper: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
   },
   logoBackground: {
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    shadowColor: '#000',
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 8,
   },
   sparkleContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: -10,
     right: -10,
-    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+    backgroundColor: "rgba(245, 158, 11, 0.2)",
     borderRadius: 20,
     padding: 8,
     borderWidth: 2,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
+    borderColor: "rgba(245, 158, 11, 0.3)",
   },
   titleContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 64,
   },
   title: {
     fontSize: 32,
-    fontFamily: 'Inter-Bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
+    fontFamily: "Inter-Bold",
+    color: "#FFFFFF",
+    textAlign: "center",
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 28,
-    fontFamily: 'Inter-Bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
+    fontFamily: "Inter-Bold",
+    color: "#FFFFFF",
+    textAlign: "center",
     marginBottom: 16,
   },
   tagline: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   taglineText: {
     fontSize: 14,
-    fontFamily: 'Inter-Medium',
-    color: 'rgba(255, 255, 255, 0.9)',
-    textAlign: 'center',
+    fontFamily: "Inter-Medium",
+    color: "rgba(255, 255, 255, 0.9)",
+    textAlign: "center",
   },
   loadingContainer: {
-    alignItems: 'center',
-    position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 80 : 60,
+    alignItems: "center",
+    position: "absolute",
+    bottom: Platform.OS === "ios" ? 80 : 60,
     left: 32,
     right: 32,
   },
   loadingBar: {
-    width: '100%',
+    width: "100%",
     height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 2,
-    overflow: 'hidden',
+    overflow: "hidden",
     marginBottom: 16,
   },
   loadingProgress: {
-    height: '100%',
-    backgroundColor: '#FFFFFF',
+    height: "100%",
+    backgroundColor: "#FFFFFF",
     borderRadius: 2,
   },
   loadingText: {
     fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: 'rgba(255, 255, 255, 0.8)',
-    textAlign: 'center',
+    fontFamily: "Inter-Regular",
+    color: "rgba(255, 255, 255, 0.8)",
+    textAlign: "center",
   },
 });

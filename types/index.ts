@@ -1,32 +1,16 @@
-export interface User {
-  id: string;
-  email: string;
-  displayName?: string;
-  photoURL?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// Firebase Auth User type'ını import ediyoruz
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  displayName?: string;
-  photoURL?: string;
-  emailVerified: boolean;
-  createdAt: string;
-  lastLoginAt: string;
-}
+// Auth types - authSlice'tan export ediliyor
+export type {
+  AuthUser,
+  DeleteAccountData,
+  SignInCredentials,
+  SignUpCredentials,
+  UpdateProfileData,
+} from '@/store/slices/authSlice';
 
-export interface SignInCredentials {
-  email: string;
-  password: string;
-}
-
-export interface SignUpCredentials {
-  email: string;
-  password: string;
-  displayName: string;
-}
+export type User = FirebaseAuthTypes.User;
 
 export interface Photo {
   id: string;

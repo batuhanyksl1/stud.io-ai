@@ -31,12 +31,12 @@ export const fetchUserProfile = createAsyncThunk(
       // Burada gerçek API çağrısı yapılacak
       // Şimdilik mock data döndürüyoruz
       const mockUser: User = {
-        id: userId,
+        uid: userId,
         email: 'user@example.com',
         displayName: 'Test User',
-        photoURL: undefined,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        photoURL: null, 
+        emailVerified: false,
+        lastLoginAt: new Date().toISOString(),
       };
       return mockUser;
     } catch (error) {

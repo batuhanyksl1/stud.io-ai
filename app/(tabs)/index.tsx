@@ -30,7 +30,6 @@ export default function HomeScreen() {
           <HomeServices />
           <HomeRecentActivity />
 
-          {/* Bottom Spacing */}
           <View style={{ height: 32 }} />
         </ScrollView>
       </View>
