@@ -8,52 +8,52 @@
 // Primitive Color Tokens (Base Colors)
 export const PrimitiveColors = {
   // Blue Scale (LinkedIn Primary)
-  blue50: '#EFF6FF',
-  blue100: '#DBEAFE',
-  blue200: '#BFDBFE',
-  blue300: '#93C5FD',
-  blue400: '#60A5FA',
-  blue500: '#3B82F6',
-  blue600: '#0077B5', // LinkedIn Primary
-  blue700: '#004182',
-  blue800: '#1E3A8A',
-  blue900: '#1E1B4B',
+  blue50: "#EFF6FF",
+  blue100: "#DBEAFE",
+  blue200: "#BFDBFE",
+  blue300: "#93C5FD",
+  blue400: "#60A5FA",
+  blue500: "#3B82F6",
+  blue600: "#0077B5", // LinkedIn Primary
+  blue700: "#004182",
+  blue800: "#1E3A8A",
+  blue900: "#1E1B4B",
 
   // Gray Scale (Neutral)
-  gray50: '#F9FAFB',
-  gray100: '#F3F4F6',
-  gray200: '#E5E7EB',
-  gray300: '#D1D5DB',
-  gray400: '#9CA3AF',
-  gray500: '#6B7280',
-  gray600: '#4B5563',
-  gray700: '#374151',
-  gray800: '#1F2937',
-  gray900: '#111827',
+  gray50: "#F9FAFB",
+  gray100: "#F3F4F6",
+  gray200: "#E5E7EB",
+  gray300: "#D1D5DB",
+  gray400: "#9CA3AF",
+  gray500: "#6B7280",
+  gray600: "#4B5563",
+  gray700: "#374151",
+  gray800: "#1F2937",
+  gray900: "#111827",
 
   // Accent Colors
-  amber50: '#FFFBEB',
-  amber100: '#FEF3C7',
-  amber500: '#F59E0B',
-  amber600: '#D97706',
-  amber900: '#92400E',
+  amber50: "#FFFBEB",
+  amber100: "#FEF3C7",
+  amber500: "#F59E0B",
+  amber600: "#D97706",
+  amber900: "#92400E",
 
-  green50: '#ECFDF5',
-  green100: '#D1FAE5',
-  green500: '#10B981',
-  green600: '#059669',
-  green900: '#065F46',
+  green50: "#ECFDF5",
+  green100: "#D1FAE5",
+  green500: "#10B981",
+  green600: "#059669",
+  green900: "#065F46",
 
-  red50: '#FEF2F2',
-  red100: '#FEE2E2',
-  red500: '#EF4444',
-  red600: '#DC2626',
-  red900: '#B91C1C',
+  red50: "#FEF2F2",
+  red100: "#FEE2E2",
+  red500: "#EF4444",
+  red600: "#DC2626",
+  red900: "#B91C1C",
 
   // Pure Colors
-  white: '#FFFFFF',
-  black: '#000000',
-  transparent: 'transparent',
+  white: "#FFFFFF",
+  black: "#000000",
+  transparent: "transparent",
 } as const;
 
 // Semantic Color Tokens (Purpose-based)
@@ -74,7 +74,7 @@ export const SemanticColors = {
     background: PrimitiveColors.gray50,
     surface: PrimitiveColors.white,
     surfaceElevated: PrimitiveColors.white,
-    overlay: 'rgba(0, 0, 0, 0.5)',
+    overlay: "rgba(0, 0, 0, 0.5)",
 
     // Text Colors
     textPrimary: PrimitiveColors.gray900,
@@ -118,7 +118,7 @@ export const SemanticColors = {
     background: PrimitiveColors.gray900,
     surface: PrimitiveColors.gray800,
     surfaceElevated: PrimitiveColors.gray700,
-    overlay: 'rgba(0, 0, 0, 0.7)',
+    overlay: "rgba(0, 0, 0, 0.7)",
 
     // Text Colors
     textPrimary: PrimitiveColors.gray100,
@@ -164,27 +164,27 @@ export const Spacing = {
 export const Typography = {
   fontFamily: {
     // Primary fonts
-    primary: 'Inter-Regular',
-    medium: 'Inter-Medium',
-    semiBold: 'Inter-SemiBold',
-    bold: 'Inter-Bold',
+    primary: "Inter-Regular",
+    medium: "Inter-Medium",
+    semiBold: "Inter-SemiBold",
+    bold: "Inter-Bold",
 
     // Alternative fonts
-    poppins: 'Poppins-Regular',
-    poppinsMedium: 'Poppins-Medium',
-    poppinsSemiBold: 'Poppins-SemiBold',
-    poppinsBold: 'Poppins-Bold',
+    poppins: "Poppins-Regular",
+    poppinsMedium: "Poppins-Medium",
+    poppinsSemiBold: "Poppins-SemiBold",
+    poppinsBold: "Poppins-Bold",
 
-    montserrat: 'Montserrat-Regular',
-    montserratMedium: 'Montserrat-Medium',
-    montserratSemiBold: 'Montserrat-SemiBold',
-    montserratBold: 'Montserrat-Bold',
+    montserrat: "Montserrat-Regular",
+    montserratMedium: "Montserrat-Medium",
+    montserratSemiBold: "Montserrat-SemiBold",
+    montserratBold: "Montserrat-Bold",
 
     // Logo fonts
-    bebasNeue: 'BebasNeue-Regular',
-    oswald: 'Oswald-Regular',
-    oswaldMedium: 'Oswald-Medium',
-    oswaldBold: 'Oswald-Bold',
+    bebasNeue: "BebasNeue-Regular",
+    oswald: "Oswald-Regular",
+    oswaldMedium: "Oswald-Medium",
+    oswaldBold: "Oswald-Bold",
   },
   fontSize: {
     xs: 12,
@@ -224,35 +224,35 @@ export const BorderRadius = {
 // Shadow Tokens
 export const Shadows = {
   none: {
-    shadowColor: 'transparent',
+    shadowColor: "transparent",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0,
     shadowRadius: 0,
     elevation: 0,
   },
   sm: {
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
   },
   md: {
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   lg: {
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 6,
   },
   xl: {
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
     shadowRadius: 16,
@@ -269,10 +269,10 @@ export const Animations = {
     slower: 800,
   },
   easing: {
-    linear: 'linear',
-    easeIn: 'ease-in',
-    easeOut: 'ease-out',
-    easeInOut: 'ease-in-out',
+    linear: "linear",
+    easeIn: "ease-in",
+    easeOut: "ease-out",
+    easeInOut: "ease-in-out",
   },
 } as const;
 
@@ -320,4 +320,36 @@ export const ZIndex = {
   popover: 1050,
   tooltip: 1060,
   toast: 1070,
+} as const;
+
+// Font Helper Functions
+export const getFontFamily = {
+  // Inter fonts
+  inter: {
+    regular: Typography.fontFamily.primary,
+    medium: Typography.fontFamily.medium,
+    semiBold: Typography.fontFamily.semiBold,
+    bold: Typography.fontFamily.bold,
+  },
+  // Poppins fonts
+  poppins: {
+    regular: Typography.fontFamily.poppins,
+    medium: Typography.fontFamily.poppinsMedium,
+    semiBold: Typography.fontFamily.poppinsSemiBold,
+    bold: Typography.fontFamily.poppinsBold,
+  },
+  // Montserrat fonts
+  montserrat: {
+    regular: Typography.fontFamily.montserrat,
+    medium: Typography.fontFamily.montserratMedium,
+    semiBold: Typography.fontFamily.montserratSemiBold,
+    bold: Typography.fontFamily.montserratBold,
+  },
+  // Logo fonts
+  logo: {
+    bebasNeue: Typography.fontFamily.bebasNeue,
+    oswald: Typography.fontFamily.oswald,
+    oswaldMedium: Typography.fontFamily.oswaldMedium,
+    oswaldBold: Typography.fontFamily.oswaldBold,
+  },
 } as const;

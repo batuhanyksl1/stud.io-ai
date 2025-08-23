@@ -69,7 +69,7 @@ export default function Logo({ size = 'md', variant = 'default', font = 'default
       colors={['#3B82F6', '#8B5CF6']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
-      style={[styles.gradientBackground, { height: sizeStyles.fontSize + 8 }]}
+      style={[styles.gradientBackground, { height: sizeStyles.fontSize + 8, width: sizeStyles.fontSize + 85 }]}
     >
       <ThemedText
         weight='bold'
@@ -79,7 +79,10 @@ export default function Logo({ size = 'md', variant = 'default', font = 'default
           ...styles.gradientText,
           fontFamily: getFontFamily(),
           textAlign: 'center',
-          lineHeight: sizeStyles.fontSize + 8,
+          justifyContent: 'center',
+          alignItems: 'center',
+          alignContent: 'center',
+          lineHeight: sizeStyles.fontSize + 10,
         }}
       >
         Stud.io

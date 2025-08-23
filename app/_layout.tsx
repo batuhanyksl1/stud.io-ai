@@ -1,5 +1,5 @@
 import "@/firebase.config"; // Firebase'i initialize et
-import { useAuth, useFrameworkReady, useTheme } from "@/hooks";
+import { useFrameworkReady, useTheme } from "@/hooks";
 import "@/localization/i18n";
 import { AppProvider } from "@/providers";
 import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
@@ -36,16 +36,6 @@ SplashScreen.preventAutoHideAsync();
 
 function AppContent() {
   const { colorScheme } = useTheme();
-  const { isLoading, isInitializing } = useAuth();
-
-  // Auth state'i initialize edilene kadar loading göster
-  // if (isInitializing) {
-  //   return (
-  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-  //       <LoadingSpinner size="lg" gradient />
-  //     </View>
-  //   );
-  // }
 
   return (
     <>

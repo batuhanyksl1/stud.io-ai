@@ -1,23 +1,32 @@
-import React, { ReactNode } from 'react';
-import { Text, TextStyle } from 'react-native';
-import { useTheme } from '@/hooks/useTheme';
-import { Typography } from '@/constants/DesignTokens';
+import { Typography } from "@/constants/DesignTokens";
+import { useTheme } from "@/hooks/useTheme";
+import React, { ReactNode } from "react";
+import { Text, TextStyle } from "react-native";
 
 interface ThemedTextProps {
   children: ReactNode;
   style?: TextStyle;
-  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'bodyLarge' | 'caption' | 'overline';
+  variant?:
+    | "h1"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "body"
+    | "bodyLarge"
+    | "caption"
+    | "overline";
   color?:
-    | 'primary'
-    | 'secondary'
-    | 'tertiary'
-    | 'inverse'
-    | 'onPrimary'
-    | 'success'
-    | 'warning'
-    | 'error';
-  weight?: 'regular' | 'medium' | 'semiBold' | 'bold';
-  align?: 'left' | 'center' | 'right';
+    | "primary"
+    | "secondary"
+    | "tertiary"
+    | "inverse"
+    | "onPrimary"
+    | "success"
+    | "warning"
+    | "error";
+  weight?: "regular" | "medium" | "semiBold" | "bold";
+  align?: "left" | "center" | "right";
+  fontFamily?: string;
 }
 
 /**
@@ -29,65 +38,66 @@ interface ThemedTextProps {
 export default function ThemedText({
   children,
   style,
-  variant = 'body',
-  color = 'primary',
-  weight = 'regular',
-  align = 'left',
+  variant = "body",
+  color = "primary",
+  weight = "regular",
+  align = "left",
+  fontFamily,
 }: ThemedTextProps) {
   const { colors } = useTheme();
 
   const getVariantStyle = (): TextStyle => {
     switch (variant) {
-      case 'h1':
+      case "h1":
         return {
           fontSize: Typography.fontSize.xxxxxxl,
           lineHeight: Typography.fontSize.xxxxxxl * Typography.lineHeight.tight,
           fontFamily: Typography.fontFamily.bold,
         };
-      case 'h2':
+      case "h2":
         return {
           fontSize: Typography.fontSize.xxxxxl,
           lineHeight: Typography.fontSize.xxxxxl * Typography.lineHeight.tight,
           fontFamily: Typography.fontFamily.bold,
         };
-      case 'h3':
+      case "h3":
         return {
           fontSize: Typography.fontSize.xxxxl,
           lineHeight: Typography.fontSize.xxxxl * Typography.lineHeight.tight,
           fontFamily: Typography.fontFamily.semiBold,
           marginTop: 16,
         };
-      case 'h4':
+      case "h4":
         return {
           fontSize: Typography.fontSize.xxxl,
           lineHeight: Typography.fontSize.xxxl * Typography.lineHeight.tight,
           fontFamily: Typography.fontFamily.semiBold,
         };
-      case 'bodyLarge':
+      case "bodyLarge":
         return {
           fontSize: Typography.fontSize.lg,
           lineHeight: Typography.fontSize.lg * Typography.lineHeight.normal,
           fontFamily: Typography.fontFamily.primary,
         };
-      case 'body':
+      case "body":
         return {
           fontSize: Typography.fontSize.md,
           lineHeight: Typography.fontSize.md * Typography.lineHeight.normal,
           fontFamily: Typography.fontFamily.primary,
         };
-      case 'caption':
+      case "caption":
         return {
           fontSize: Typography.fontSize.sm,
           lineHeight: Typography.fontSize.sm * Typography.lineHeight.normal,
           fontFamily: Typography.fontFamily.primary,
         };
-      case 'overline':
+      case "overline":
         return {
           fontSize: Typography.fontSize.xs,
           lineHeight: Typography.fontSize.xs * Typography.lineHeight.normal,
           fontFamily: Typography.fontFamily.medium,
           letterSpacing: Typography.letterSpacing.wide,
-          textTransform: 'uppercase',
+          textTransform: "uppercase",
         };
       default:
         return {
@@ -100,21 +110,21 @@ export default function ThemedText({
 
   const getColorValue = () => {
     switch (color) {
-      case 'primary':
+      case "primary":
         return colors.textPrimary;
-      case 'secondary':
+      case "secondary":
         return colors.textSecondary;
-      case 'tertiary':
+      case "tertiary":
         return colors.textTertiary;
-      case 'inverse':
+      case "inverse":
         return colors.textInverse;
-      case 'onPrimary':
+      case "onPrimary":
         return colors.textOnPrimary;
-      case 'success':
+      case "success":
         return colors.success;
-      case 'warning':
+      case "warning":
         return colors.warning;
-      case 'error':
+      case "error":
         return colors.error;
       default:
         return colors.textPrimary;
@@ -123,11 +133,11 @@ export default function ThemedText({
 
   const getWeightStyle = (): TextStyle => {
     switch (weight) {
-      case 'medium':
+      case "medium":
         return { fontFamily: Typography.fontFamily.medium };
-      case 'semiBold':
+      case "semiBold":
         return { fontFamily: Typography.fontFamily.semiBold };
-      case 'bold':
+      case "bold":
         return { fontFamily: Typography.fontFamily.bold };
       default:
         return { fontFamily: Typography.fontFamily.primary };
@@ -140,6 +150,7 @@ export default function ThemedText({
     {
       color: getColorValue(),
       textAlign: align,
+      ...(fontFamily && { fontFamily }),
     },
     ...(style ? [style] : []),
   ];

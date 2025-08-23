@@ -1,21 +1,20 @@
 import {
   HomeCarousel,
   HomeHeader,
-  HomeQuickActions,
-  HomeRecentActivity,
   HomeServices,
   HomeStats,
   ThemedView,
-} from '@/components';
-import { useTheme } from '@/hooks';
-import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-
+} from "@/components";
+import { useTheme } from "@/hooks";
+import { StatusBar } from "expo-status-bar";
+import React from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 export default function HomeScreen() {
-  const { colors } = useTheme();
+  const { colors, colorScheme } = useTheme();
 
   return (
-    <ThemedView backgroundColor="surface" style={styles.container}>
+    <ThemedView backgroundColor="background" style={styles.container}>
+      <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
       <HomeHeader />
 
       <View style={{ flex: 1, backgroundColor: colors.background }}>
@@ -25,11 +24,8 @@ export default function HomeScreen() {
           contentContainerStyle={styles.scrollContent}
         >
           <HomeCarousel />
-          <HomeQuickActions />
-          <HomeStats />
           <HomeServices />
-          <HomeRecentActivity />
-
+          <HomeStats />
           <View style={{ height: 32 }} />
         </ScrollView>
       </View>

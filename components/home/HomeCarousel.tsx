@@ -83,7 +83,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
           </ThemedText>
           <TouchableOpacity
             style={styles.carouselButton}
-            onPress={() => router.push("/editor")}
+            onPress={() => router.push("/createRequest")}
           >
             <ThemedText
               variant="body"
@@ -102,7 +102,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
   return (
     <ThemedView style={styles.carouselSection}>
       <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
-        Öne Çıkan Özellikler
+        Öne Çıkanlar
       </ThemedText>
 
       <View style={[styles.carouselContainer]}>

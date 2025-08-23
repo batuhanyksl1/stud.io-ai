@@ -1,5 +1,5 @@
 // Firebase Auth User type'ını import ediyoruz
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 // Auth types - authSlice'tan export ediliyor
 export type {
@@ -8,7 +8,7 @@ export type {
   SignInCredentials,
   SignUpCredentials,
   UpdateProfileData,
-} from '@/store/slices/authSlice';
+} from "@/store/slices/authSlice";
 
 export type User = FirebaseAuthTypes.User;
 
@@ -45,8 +45,8 @@ export interface ImageFilter {
 }
 
 export interface CameraSettings {
-  facing: 'front' | 'back';
-  flash: 'on' | 'off' | 'auto';
+  facing: "front" | "back";
+  flash: "on" | "off" | "auto";
   quality: number;
 }
 
@@ -66,4 +66,29 @@ export interface EditorState {
     saturation: number;
     sharpness: number;
   };
+}
+
+export type RequestStatus =
+  | "idle"
+  | "uploading"
+  | "processing"
+  | "completed"
+  | "error"
+  | "canceled";
+export type ServiceKey = "serviceA" | "serviceB" | "serviceC";
+export type ServiceStatus = Exclude<RequestStatus, "uploading"> | "uploading";
+export type ServiceState = {
+  status: ServiceStatus;
+  progress: number;
+  resultUrl?: string;
+  error?: string;
+};
+
+export interface RequestData {
+  id: string;
+  imageUri: string;
+  timestamp: number;
+  overall: RequestStatus;
+  services: Record<ServiceKey, ServiceState>;
+  canceled?: boolean;
 }
