@@ -1,23 +1,25 @@
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '@/store/slices/authSlice';
-import themeReducer from '@/store/slices/themeSlice';
-import userReducer from '@/store/slices/userSlice';
+import authReducer from "@/store/slices/authSlice";
+import editReducer from "@/store/slices/editSlice";
+import themeReducer from "@/store/slices/themeSlice";
+import userReducer from "@/store/slices/userSlice";
+import { configureStore } from "@reduxjs/toolkit";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     theme: themeReducer,
     user: userReducer,
+    edit: editReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
         // Ignore these field paths in all actions
-        ignoredActionPaths: ['payload.timestamp'],
+        ignoredActionPaths: ["payload.timestamp"],
         // Ignore these paths in the state
-        ignoredPaths: ['auth.user'],
+        ignoredPaths: ["auth.user"],
       },
     }),
 });

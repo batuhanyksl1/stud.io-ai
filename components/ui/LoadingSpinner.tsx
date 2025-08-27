@@ -1,22 +1,22 @@
-import { useTheme } from '@/hooks';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect } from 'react';
-import { View } from 'react-native';
+import { useTheme } from "@/hooks";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect } from "react";
+import { View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withTiming,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: "tiny" | "sm" | "md" | "lg";
   color?: string;
   gradient?: boolean;
 }
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
-  size = 'md',
+  size = "md",
   color,
   gradient = false,
 }) => {
@@ -24,6 +24,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   const rotation = useSharedValue(0);
 
   const sizeMap = {
+    tiny: 12,
     sm: 20,
     md: 32,
     lg: 48,
@@ -44,26 +45,28 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   if (gradient) {
     return (
       <View style={{ width: spinnerSize, height: spinnerSize }}>
-        <Animated.View style={[animatedStyle, { width: '100%', height: '100%' }]}>
+        <Animated.View
+          style={[animatedStyle, { width: "100%", height: "100%" }]}
+        >
           <LinearGradient
             colors={
-              colorScheme === 'dark'
-                ? ['#3b82f6', '#8b5cf6', '#ec4899']
-                : ['#2563eb', '#7c3aed', '#db2777']
+              colorScheme === "dark"
+                ? ["#3b82f6", "#8b5cf6", "#ec4899"]
+                : ["#2563eb", "#7c3aed", "#db2777"]
             }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{
-              width: '100%',
-              height: '100%',
+              width: "100%",
+              height: "100%",
               borderRadius: spinnerSize / 2,
               borderWidth: 3,
-              borderColor: 'transparent',
+              borderColor: "transparent",
             }}
           />
           <View
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 3,
               left: 3,
               right: 3,
@@ -86,7 +89,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           height: spinnerSize,
           borderRadius: spinnerSize / 2,
           borderWidth: 3,
-          borderColor: 'transparent',
+          borderColor: "transparent",
           borderTopColor: defaultColor,
           borderRightColor: `${defaultColor}80`,
         },

@@ -1,20 +1,31 @@
-import { BorderRadius, ComponentTokens, Shadows, Spacing } from '@/constants/DesignTokens';
-import { useTheme } from '@/hooks/useTheme';
-import React, { ReactNode } from 'react';
-import { ActivityIndicator, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
-import ThemedText from './ThemedText';
+import {
+  BorderRadius,
+  ComponentTokens,
+  Shadows,
+  Spacing,
+} from "@/constants/DesignTokens";
+import { useTheme } from "@/hooks/useTheme";
+import React, { ReactNode } from "react";
+import {
+  ActivityIndicator,
+  TextStyle,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
+import ThemedText from "./ThemedText";
 
 interface ThemedButtonProps {
-  children: ReactNode;
+  children?: ReactNode;
+  title?: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "destructive";
+  size?: "sm" | "md" | "lg";
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
   textStyle?: TextStyle;
-  icon?: ReactNode;
-  iconPosition?: 'left' | 'right';
+  icon?: ReactNode | string;
+  iconPosition?: "left" | "right";
 }
 
 /**
@@ -23,44 +34,50 @@ interface ThemedButtonProps {
  * A comprehensive button component with multiple variants, sizes,
  * and states that follows the design system tokens.
  */
-export default function ThemedButton({
-  children,
-  onPress,
-  variant = 'primary',
-  size = 'md',
-  disabled = false,
-  loading = false,
-  style,
-  textStyle,
-  icon,
-  iconPosition = 'left',
-}: ThemedButtonProps) {
+export default function ThemedButton(props: ThemedButtonProps) {
+  const {
+    children,
+    title,
+    onPress,
+    variant = "primary",
+    size = "md",
+    disabled = false,
+    loading = false,
+    style,
+    textStyle,
+    icon,
+    iconPosition = "left",
+  } = props;
   const { colors } = useTheme();
 
   const getVariantStyle = (): ViewStyle => {
     switch (variant) {
-      case 'primary':
+      case "primary":
         return {
-          backgroundColor: disabled ? colors.interactiveDisabled : colors.primary,
+          backgroundColor: disabled
+            ? colors.interactiveDisabled
+            : colors.primary,
           borderWidth: 0,
         };
-      case 'secondary':
+      case "secondary":
         return {
-          backgroundColor: disabled ? colors.interactiveDisabled : colors.secondary,
+          backgroundColor: disabled
+            ? colors.interactiveDisabled
+            : colors.secondary,
           borderWidth: 0,
         };
-      case 'outline':
+      case "outline":
         return {
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           borderWidth: 1,
           borderColor: disabled ? colors.interactiveDisabled : colors.border,
         };
-      case 'ghost':
+      case "ghost":
         return {
-          backgroundColor: 'transparent',
+          backgroundColor: "transparent",
           borderWidth: 0,
         };
-      case 'destructive':
+      case "destructive":
         return {
           backgroundColor: disabled ? colors.interactiveDisabled : colors.error,
           borderWidth: 0,
@@ -77,12 +94,12 @@ export default function ThemedButton({
     if (disabled) return colors.textTertiary;
 
     switch (variant) {
-      case 'primary':
-      case 'secondary':
-      case 'destructive':
+      case "primary":
+      case "secondary":
+      case "destructive":
         return colors.textOnPrimary;
-      case 'outline':
-      case 'ghost':
+      case "outline":
+      case "ghost":
         return colors.textPrimary;
       default:
         return colors.textOnPrimary;
@@ -100,21 +117,21 @@ export default function ThemedButton({
 
   const buttonStyle: ViewStyle[] = [
     {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
       borderRadius: BorderRadius.md,
       opacity: disabled ? 0.6 : 1,
     },
     getVariantStyle(),
     getSizeStyle(),
-    variant !== 'ghost' && Shadows.sm,
+    variant !== "ghost" && Shadows.sm,
     style,
   ];
 
   const textColor = getTextColor();
-  const fontSize = size === 'sm' ? 'sm' : size === 'lg' ? 'lg' : 'md';
-  const fontWeight = variant === 'ghost' ? 'medium' : 'semiBold';
+  const fontSize = size === "sm" ? "sm" : size === "lg" ? "lg" : "md";
+  const fontWeight = variant === "ghost" ? "medium" : "semiBold";
 
   return (
     <TouchableOpacity
@@ -124,28 +141,46 @@ export default function ThemedButton({
       activeOpacity={0.8}
     >
       {loading ? (
-        <ActivityIndicator size='small' color={textColor} />
+        <ActivityIndicator size="small" color={textColor} />
       ) : (
         <>
           {icon &&
-            iconPosition === 'left' &&
-            React.cloneElement(icon as React.ReactElement, {
-              style: { marginRight: Spacing.xs },
-            })}
+            iconPosition === "left" &&
+            (typeof icon === "string" ? (
+              <ThemedText style={{ marginRight: Spacing.xs, fontSize: 16 }}>
+                {icon}
+              </ThemedText>
+            ) : (
+              React.cloneElement(icon as React.ReactElement, {
+                style: { marginRight: Spacing.xs },
+              })
+            ))}
 
           <ThemedText
-            variant={fontSize === 'sm' ? 'caption' : fontSize === 'lg' ? 'bodyLarge' : 'body'}
+            variant={
+              fontSize === "sm"
+                ? "caption"
+                : fontSize === "lg"
+                  ? "bodyLarge"
+                  : "body"
+            }
             weight={fontWeight}
             style={[{ color: textColor }, textStyle]}
           >
-            {children}
+            {title || children}
           </ThemedText>
 
           {icon &&
-            iconPosition === 'right' &&
-            React.cloneElement(icon as React.ReactElement, {
-              style: { marginLeft: Spacing.xs },
-            })}
+            iconPosition === "right" &&
+            (typeof icon === "string" ? (
+              <ThemedText style={{ marginLeft: Spacing.xs, fontSize: 16 }}>
+                {icon}
+              </ThemedText>
+            ) : (
+              React.cloneElement(icon as React.ReactElement, {
+                style: { marginLeft: Spacing.xs },
+              })
+            ))}
         </>
       )}
     </TouchableOpacity>
