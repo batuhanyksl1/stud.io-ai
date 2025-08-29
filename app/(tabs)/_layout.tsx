@@ -2,28 +2,25 @@ import { useTheme } from "@/hooks";
 import Fontisto from "@expo/vector-icons/Fontisto";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 
 export default function TabLayout() {
   const { colors, colorScheme } = useTheme();
 
   return (
-
     <>
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: [
-          styles.tabBar,
-          { backgroundColor: colors.surface, borderTopColor: colors.border },
-        ],
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarLabelStyle: styles.tabLabel,
-      }}
-    >
-     
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: [
+            styles.tabBar,
+            { backgroundColor: colors.surface, borderTopColor: colors.border },
+          ],
+          tabBarActiveTintColor: colors.primary,
+          tabBarInactiveTintColor: colors.textSecondary,
+          tabBarLabelStyle: styles.tabLabel,
+        }}
+      >
         <Tabs.Screen
           name="index"
           options={{
@@ -60,7 +57,6 @@ export default function TabLayout() {
           options={{
             title: "Sikko", // Bu sayfa tab olarak görünmeyecek
           }}
-   
         />
         <Tabs.Screen
           name="settings"
@@ -87,7 +83,6 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-
     </>
   );
 }

@@ -7,7 +7,7 @@ import {
   setSelectedImage,
   takePhoto,
   uploadImageToStorage,
-} from "@/store/slices/editSlice";
+} from "@/store/slices/generationSlice";
 import React from "react";
 import {
   Alert,

@@ -36,7 +36,11 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "@react-native-firebase/app",
+      "@react-native-firebase/crashlytics",
+      "@react-native-firebase/storage",
+      "@react-native-firebase/auth"
     ],
     "experiments": {
       "typedRoutes": true

@@ -92,3 +92,21 @@ export interface RequestData {
   services: Record<ServiceKey, ServiceState>;
   canceled?: boolean;
 }
+
+export interface RefImage {
+  id: string;
+  uri: string;
+  downloadURL?: string;
+  fileName?: string;
+  status:
+    | "idle"
+    | "uploading"
+    | "uploaded"
+    | "processing"
+    | "completed"
+    | "error";
+  error?: string;
+  processingResult?: any;
+  progress?: number;
+  createdAt: string; // ISO string olarak saklayacağız
+}
