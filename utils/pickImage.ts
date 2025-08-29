@@ -22,14 +22,6 @@ export const pickImage = async (): Promise<string> => {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      //   const asset = result.assets[0];
-
-      //   const imageData: RefImage = {
-      //     id: Date.now().toString(),
-      //     uri: asset.uri,
-      //     status: "idle",
-      //     createdAt: new Date().toISOString(),
-      //   };
       console.log("Image data:", result.assets[0].uri);
       console.log(" Görsel seçildi");
       return result.assets[0].uri;

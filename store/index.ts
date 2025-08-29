@@ -1,5 +1,5 @@
 import authReducer from "@/store/slices/authSlice";
-import generationReducer from "@/store/slices/generationSlice";
+import contentCreationReducer from "@/store/slices/contentCreationSlice";
 import themeReducer from "@/store/slices/themeSlice";
 import userReducer from "@/store/slices/userSlice";
 import { configureStore } from "@reduxjs/toolkit";
@@ -9,7 +9,7 @@ export const store = configureStore({
     auth: authReducer,
     theme: themeReducer,
     user: userReducer,
-    generation: generationReducer,
+    contentCreation: contentCreationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

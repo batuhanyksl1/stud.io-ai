@@ -1,6 +1,6 @@
 // State Management Hooks
 export { useAuth } from "./useAuth";
-export { useGeneration } from "./useGeneration";
+export { useContentCreation } from "./useContentCreation";
 export { useTheme } from "./useTheme";
 
 // Utility Hooks
