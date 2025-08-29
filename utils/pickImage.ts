@@ -31,7 +31,7 @@ export const pickImage = async (): Promise<string> => {
       //     createdAt: new Date().toISOString(),
       //   };
       console.log("Image data:", result.assets[0].uri);
-      console.log("generationSlice.ts: Görsel seçildi");
+      console.log(" Görsel seçildi");
       return result.assets[0].uri;
     } else {
       throw new Error("Görsel seçilmedi");

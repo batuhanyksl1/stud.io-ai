@@ -9,7 +9,7 @@ const Sikko = () => {
   const handlePickImage = async () => {
     const newImage = await pickImage();
     setImage(newImage);
-    const downloadURL = await sendStorage(newImage);
+    const downloadURL = await sendStorage(newImage, "uploads");
     console.log("downloadURL", downloadURL);
   };
 
