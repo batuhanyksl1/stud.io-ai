@@ -1,5 +1,6 @@
 import { storage } from "@/firebase.config";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import { auth } from "../firebase.auth.config";
 
 /**
  * Upload a local file (file:// or content:// URI) to Firebase Storage and return its download URL.
@@ -23,7 +24,10 @@ export async function sendStorage(
     const fileName = `${Date.now()}.${ext}`;
 
     // Create a storage reference (e.g., uploads/1699999999999.jpg)
-    const reference = ref(storage, `${pathPrefix}/${fileName}`);
+    const reference = ref(
+      storage,
+      `${pathPrefix}/${auth.currentUser?.uid}/${fileName}`,
+    );
 
     // Upload with resumable upload
     const task = uploadBytesResumable(reference, blob);
