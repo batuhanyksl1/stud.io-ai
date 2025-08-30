@@ -2,6 +2,8 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   clearAllImages as clearAllImagesAction,
   clearError as clearErrorAction,
+  setActivityIndicatorColor as setActivityIndicatorColorAction,
+  uploadImageToAITool as uploadImageToAIToolAction,
   uploadImageToStorage as uploadImageToStorageAction,
 } from "@/store/slices/contentCreationSlice";
 
@@ -10,17 +12,26 @@ export function useContentCreation() {
 
   // Redux store'dan state'leri al
   const {
-    refImageUrl,
+    status,
     createdImageUrl,
-    storageUploadStatus,
-    progress,
-    error,
+    imageStorageUrl,
+    storageUploadProcessingStatus,
     aiToolProcessingStatus,
+    error,
+    activityIndicatorColor,
   } = useAppSelector((state) => state.contentCreation);
 
   // Actions
-  const uploadImageToStorage = (fileUri: string) => {
-    dispatch(uploadImageToStorageAction({ fileUri }));
+  const uploadImageToStorage = async (fileUri: string) => {
+    const result = await dispatch(uploadImageToStorageAction({ fileUri }));
+    return result.payload;
+  };
+
+  const uploadImageToAITool = async (imageUrl: string, prompt: string) => {
+    const result = await dispatch(
+      uploadImageToAIToolAction({ imageUrl, prompt }),
+    );
+    return result.payload;
   };
 
   const clearError = () => {
@@ -31,16 +42,23 @@ export function useContentCreation() {
     dispatch(clearAllImagesAction());
   };
 
+  const setActivityIndicatorColor = (color: string) => {
+    dispatch(setActivityIndicatorColorAction(color));
+  };
+
   return {
     // State
-    refImageUrl,
+    imageStorageUrl,
     createdImageUrl,
-    storageUploadStatus,
-    progress,
-    error,
+    storageUploadProcessingStatus,
     aiToolProcessingStatus,
+    error,
+    status,
+    activityIndicatorColor,
+    setActivityIndicatorColor,
     // Actions
     uploadImageToStorage,
+    uploadImageToAITool,
     clearError,
     clearAllImages,
   };
