@@ -1,5 +1,9 @@
 import { useContentCreation } from "@/hooks";
-import { getAiToolStatus } from "@/store/slices/contentCreationSlice";
+import { useAppDispatch } from "@/store/hooks";
+import {
+  getAiToolResult,
+  getAiToolStatus,
+} from "@/store/slices/contentCreationSlice";
 import { pickImage } from "@/utils/pickImage";
 import React, { useState } from "react";
 import {
@@ -12,6 +16,7 @@ import {
 } from "react-native";
 
 const Sikko = () => {
+  const dispatch = useAppDispatch();
   const {
     uploadImageToStorage,
     imageStorageUrl,
@@ -59,10 +64,27 @@ const Sikko = () => {
             setActivityIndicatorColor("rgb(43, 230, 252)");
 
             if (aiToolRequestId) {
-              const aiToolResult = await getAiToolStatus({
-                requestId: aiToolRequestId,
-              });
-              console.log("🎯 AI Tool sonucu:", aiToolResult);
+              const aiToolStatusResult = await dispatch(
+                getAiToolStatus({
+                  requestId: aiToolRequestId,
+                }),
+              );
+
+              const statusPayload = aiToolStatusResult.payload;
+              if (
+                statusPayload &&
+                typeof statusPayload === "object" &&
+                "status" in statusPayload &&
+                statusPayload.status === "COMPLETED"
+              ) {
+                const aiToolResult = await dispatch(
+                  getAiToolResult({
+                    requestId: aiToolRequestId,
+                  }),
+                );
+                console.log("🎯 AI Tool sonucu:", aiToolResult.payload);
+              }
+              console.log("🎯 AI Tool durumu:", statusPayload);
             }
           }
         }
