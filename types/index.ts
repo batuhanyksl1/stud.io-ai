@@ -110,3 +110,15 @@ export interface RefImage {
   progress?: number;
   createdAt: string; // ISO string olarak saklayacağız
 }
+
+export interface AiToolStatus {
+  status: string;
+  request_id: string;
+  response_url: string;
+  status_url: string;
+  cancel_url: string;
+  logs: null | any;
+  metrics: {
+    inference_time: number;
+  } | null;
+}

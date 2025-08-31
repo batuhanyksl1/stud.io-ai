@@ -1,4 +1,5 @@
 import { useContentCreation } from "@/hooks";
+import { getAiToolStatus } from "@/store/slices/contentCreationSlice";
 import { pickImage } from "@/utils/pickImage";
 import React, { useState } from "react";
 import {
@@ -41,22 +42,39 @@ const Sikko = () => {
         console.log("📤 Storage URL:", imageUrl);
         setActivityIndicatorColor("rgb(92, 43, 252)");
 
-        if (imageUrl && imageUrl.length > 0) {
+        if (imageUrl) {
           console.log("🤖 AI Tool'a gönderiliyor...");
-          const aiToolResult = await uploadImageToAITool(
+          const aiToolRequest = await uploadImageToAITool(
             imageUrl,
             "bir elma koy bu fotoğrafa",
           );
-          console.log("🎯 AI Tool sonucu:", aiToolResult);
-          setActivityIndicatorColor("rgb(43, 230, 252)");
+
+          if (
+            aiToolRequest &&
+            typeof aiToolRequest === "object" &&
+            "request_id" in aiToolRequest
+          ) {
+            const aiToolRequestId = aiToolRequest.request_id?.toString();
+            console.log("🎯 AI Tool Request ID:", aiToolRequestId);
+            setActivityIndicatorColor("rgb(43, 230, 252)");
+
+            if (aiToolRequestId) {
+              const aiToolResult = await getAiToolStatus({
+                requestId: aiToolRequestId,
+              });
+              console.log("🎯 AI Tool sonucu:", aiToolResult);
+            }
+          }
         }
       } else {
         console.log("❌ Resim seçilmedi.");
         setActivityIndicatorColor("rgb(43, 252, 217)");
+        return null;
       }
     } catch (error) {
       console.error("💥 Hata oluştu:", error);
       setActivityIndicatorColor("rgb(255, 0, 0)");
+      return null;
     }
   };
 

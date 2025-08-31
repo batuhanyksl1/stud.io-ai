@@ -117,12 +117,12 @@ export const uploadImageToAITool = createAsyncThunk<
   },
 );
 
-export const pollAiToolJob = createAsyncThunk<
+export const getAiToolStatus = createAsyncThunk<
   { status?: string; [k: string]: any },
   { requestId: string },
   { rejectValue: string }
 >(
-  "contentCreation/pollAiToolJob",
+  "contentCreation/getAiToolStatus",
   async ({ requestId }, { rejectWithValue }) => {
     try {
       const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
