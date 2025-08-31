@@ -7,9 +7,6 @@ import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 fal.config({
   credentials: "YOUR_FAL_KEY",
 });
-// --- Types for AI tool payloads ---
-type FalImageItem = { url?: string };
-type FalResultData = { images?: FalImageItem[] } & Record<string, unknown>;
 
 // Types
 export interface ContentCreationState {
@@ -21,6 +18,7 @@ export interface ContentCreationState {
   pathPrefix: string;
   status: "idle" | "pending" | "fulfilled" | "failed";
   activityIndicatorColor: string;
+  requestId: string | null;
 }
 
 const initialState: ContentCreationState = {
@@ -32,6 +30,7 @@ const initialState: ContentCreationState = {
   pathPrefix: "uploads",
   status: "idle",
   activityIndicatorColor: "#000000",
+  requestId: null,
 };
 
 // Async thunks for image operations
@@ -78,67 +77,108 @@ export const uploadImageToStorage = createAsyncThunk<
   },
 );
 
+// New thunk: startAIToolJob (enqueue job without waiting)
 export const uploadImageToAITool = createAsyncThunk<
-  FalResultData,
+  { request_id?: string; status?: string; [k: string]: any },
   { imageUrl: string; prompt: string },
   { rejectValue: string }
 >(
-  "contentCreation/uploadImageToAITool",
-  async (
-    { imageUrl, prompt }: { imageUrl: string; prompt: string },
-    { rejectWithValue },
-  ) => {
+  "contentCreation/startAIToolJob",
+  async ({ imageUrl, prompt }, { rejectWithValue }) => {
     try {
-      console.log("🚀 AI Tool işlemi başlatılıyor...");
-      console.log("📝 Prompt:", prompt);
-      console.log("🖼️ Image URL:", imageUrl);
-
-      const result = await fal.subscribe("fal-ai/flux-pro/kontext", {
-        input: {
-          prompt: prompt,
+      const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
+      const res = await fetch("https://queue.fal.run/fal-ai/flux-pro/kontext", {
+        method: "POST",
+        headers: {
+          Authorization: `Key ${FAL_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt,
           image_url: imageUrl,
           guidance_scale: 3.5,
           num_images: 1,
           output_format: "jpeg",
           safety_tolerance: "2",
-        },
-        logs: true,
-        onQueueUpdate: (update) => {
-          console.log("📊 Queue durumu:", update.status);
-          if (update.status === "IN_PROGRESS") {
-            console.log("⚙️ İşlem devam ediyor...");
-            update.logs
-              .map((log) => {
-                console.log("📋 AI Log:", log.message);
-                return log.message;
-              })
-              .forEach(console.log);
-          } else if (update.status === "COMPLETED") {
-            console.log("✅ İşlem tamamlandı!");
-          }
-        },
+        }),
       });
-
-      console.log("🎉 AI Tool işlemi başarıyla tamamlandı!");
-      console.log("📊 Sonuç verisi:", result.data);
-      console.log("🆔 Request ID:", result.requestId);
-
-      if (result.data?.images?.[0]?.url) {
-        console.log("🖼️ Oluşturulan resim URL:", result.data.images[0].url);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Fal queue start failed: ${res.status} ${text}`);
       }
-
-      return result.data as FalResultData;
-    } catch (error) {
-      console.error("💥 AI Tool işlemi hatası:", error);
-      console.error("🔍 Hata detayları:", {
-        message: error instanceof Error ? error.message : "Bilinmeyen hata",
-        stack: error instanceof Error ? error.stack : undefined,
-        error: error,
-      });
-      return rejectWithValue(error as string);
+      const data = (await res.json()) as any;
+      // Some responses might already include images if synchronous; pass through.
+      return data;
+    } catch (err) {
+      return rejectWithValue(
+        err instanceof Error ? err.message : "Unknown AI enqueue error",
+      );
     }
   },
 );
+
+export const pollAiToolJob = createAsyncThunk<
+  { status?: string; [k: string]: any },
+  { requestId: string },
+  { rejectValue: string }
+>(
+  "contentCreation/pollAiToolJob",
+  async ({ requestId }, { rejectWithValue }) => {
+    try {
+      const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
+      const res = await fetch(
+        `https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}/status`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Key ${FAL_KEY}`,
+          },
+        },
+      );
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Fal status failed: ${res.status} ${text}`);
+      }
+      const data = (await res.json()) as any;
+      return data;
+    } catch (err) {
+      return rejectWithValue(
+        err instanceof Error ? err.message : "Unknown AI poll error",
+      );
+    }
+  },
+);
+
+// New thunk: checkAIToolStatus (poll job status)
+export const checkAIToolStatus = createAsyncThunk<
+  { status?: string; [k: string]: any },
+  { requestId: string },
+  { rejectValue: string }
+>(
+  "contentCreation/checkAIToolStatus",
+  async ({ requestId }, { rejectWithValue }) => {
+    try {
+      const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
+      const res = await fetch(`https://queue.fal.run/requests/${requestId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Key ${FAL_KEY}`,
+        },
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Fal status failed: ${res.status} ${text}`);
+      }
+      const data = (await res.json()) as any;
+      return data as { status?: string; [k: string]: any };
+    } catch (err) {
+      return rejectWithValue(
+        err instanceof Error ? err.message : "Unknown AI status error",
+      );
+    }
+  },
+);
+
 // Slice
 const contentCreationSlice = createSlice({
   name: "contentCreation",
@@ -208,10 +248,8 @@ const contentCreationSlice = createSlice({
         state.error = null;
         state.createdImageUrl = action.payload.images?.[0]?.url || null;
         state.status = "fulfilled";
-        console.log(
-          "🖼️ Oluşturulan resim URL:",
-          action.payload.images?.[0]?.url,
-        );
+        state.requestId = action.payload.request_id || null;
+        console.log("🆔 Request ID:", state.requestId);
       })
       .addCase(uploadImageToAITool.rejected, (state, action) => {
         state.error = action.payload as string;
