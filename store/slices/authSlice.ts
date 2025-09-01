@@ -240,59 +240,59 @@ export const deleteAccount = createAsyncThunk(
 export const initializeAuth = createAsyncThunk(
   "auth/initializeAuth",
   async (_, { dispatch }) => {
-    console.log("authSlice.ts: Initializing auth...");
+    // console.log("authSlice.ts: Initializing auth...");
     return new Promise<void>((resolve) => {
       try {
-        console.log("authSlice.ts: Using Firebase auth instance...");
-        console.log("authSlice.ts: Firebase auth instance:", auth);
-        console.log("authSlice.ts: Auth current user:", auth.currentUser);
-        console.log("authSlice.ts: Auth app:", auth.app);
+        // console.log("authSlice.ts: Using Firebase auth instance...");
+        // console.log("authSlice.ts: Firebase auth instance:", auth);
+        // console.log("authSlice.ts: Auth current user:", auth.currentUser);
+        // console.log("authSlice.ts: Auth app:", auth.app);
 
         // Önceki listener varsa temizle
         if ((global as any).authUnsubscribe) {
-          console.log("authSlice.ts: Cleaning up previous auth listener...");
+          // console.log("authSlice.ts: Cleaning up previous auth listener...");
           (global as any).authUnsubscribe();
         }
 
-        console.log("authSlice.ts: Setting up new auth listener...");
+        // console.log("authSlice.ts: Setting up new auth listener...");
 
         // Handle auth state change inline
         const handleAuthStateChange = (firebaseUser: FirebaseUser | null) => {
-          console.log(
-            "authSlice.ts: Auth state changed:",
-            firebaseUser ? "User logged in" : "User logged out",
-          );
-          console.log("authSlice.ts: Firebase user:", firebaseUser);
+          // console.log(
+          //    "authSlice.ts: Auth state changed:",
+          //   firebaseUser ? "User logged in" : "User logged out",
+          // );
+          // console.log("authSlice.ts: Firebase user:", firebaseUser);
 
           if (firebaseUser) {
-            console.log("authSlice.ts: Setting user in store:", firebaseUser);
+            // console.log("authSlice.ts: Setting user in store:", firebaseUser);
             dispatch(setUser(firebaseUser));
           } else {
-            console.log("authSlice.ts: Clearing auth from store");
+            // console.log("authSlice.ts: Clearing auth from store");
             dispatch(clearAuth());
           }
 
-          console.log("authSlice.ts: Setting isInitializing to false");
+          // console.log("authSlice.ts: Setting isInitializing to false");
           dispatch(setInitializing(false));
 
           // Promise'i resolve et - sadece ilk auth state değişikliğinde
           if (!(global as any).authInitialized) {
             (global as any).authInitialized = true;
-            console.log("authSlice.ts: Resolving promise...");
+            // console.log("authSlice.ts: Resolving promise...");
             resolve();
           }
         };
 
-        console.log("authSlice.ts: Calling onAuthStateChanged...");
+        // console.log("authSlice.ts: Calling onAuthStateChanged...");
         const unsubscribe = onAuthStateChanged(auth, handleAuthStateChange);
-        console.log(
-          "authSlice.ts: onAuthStateChanged returned unsubscribe function:",
-          unsubscribe,
-        );
+        // console.log(
+        //   "authSlice.ts: onAuthStateChanged returned unsubscribe function:",
+        //   unsubscribe,
+        // );
 
         // Store the unsubscribe function globally so it can be called later
         (global as any).authUnsubscribe = unsubscribe;
-        console.log("authSlice.ts: Auth listener setup completed");
+        // console.log("authSlice.ts: Auth listener setup completed");
       } catch (error) {
         console.error("authSlice.ts: Error setting up auth listener:", error);
         dispatch(setInitializing(false));
@@ -307,24 +307,24 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<AuthUser>) => {
-      console.log("authSlice.ts: setUser reducer called with:", action.payload);
+      // console.log("authSlice.ts: setUser reducer called with:", action.payload);
       state.user = action.payload;
       state.isAuthenticated = true;
       state.error = null;
-      console.log("authSlice.ts: New auth state:", {
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      });
+      // console.log("authSlice.ts: New auth state:", {
+      // user: state.user,
+      // isAuthenticated: state.isAuthenticated,
+      // });
     },
     clearAuth: (state) => {
-      console.log("authSlice.ts: clearAuth reducer called");
+      // console.log("authSlice.ts: clearAuth reducer called");
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
-      console.log("authSlice.ts: New auth state:", {
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      });
+      // console.log("authSlice.ts: New auth state:", {
+      // user: state.user,
+      // isAuthenticated: state.isAuthenticated,
+      // });
     },
     clearError: (state) => {
       state.error = null;
@@ -336,7 +336,7 @@ const authSlice = createSlice({
       state.isLoading = action.payload;
     },
     cleanupAuth: (state) => {
-      console.log("authSlice.ts: cleanupAuth reducer called");
+      // console.log("authSlice.ts: cleanupAuth reducer called");
       // Cleanup auth listener
       if ((global as any).authUnsubscribe) {
         (global as any).authUnsubscribe();
