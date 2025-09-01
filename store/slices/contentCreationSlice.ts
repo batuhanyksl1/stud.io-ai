@@ -1,5 +1,6 @@
 import { auth } from "@/firebase.auth.config";
 import { storage } from "@/firebase.config";
+import { AiToolResult } from "@/types";
 import { fal } from "@fal-ai/client";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
@@ -14,6 +15,7 @@ export interface ContentCreationState {
   imageStorageUrl: string | null;
   storageUploadProcessingStatus: "idle" | "pending" | "fulfilled" | "failed";
   aiToolProcessingStatus: "idle" | "pending" | "fulfilled" | "failed";
+  pollAiToolStatus: "idle" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
   error: string | null;
   pathPrefix: string;
   status: "idle" | "pending" | "fulfilled" | "failed";
@@ -26,6 +28,7 @@ const initialState: ContentCreationState = {
   imageStorageUrl: null,
   storageUploadProcessingStatus: "idle",
   aiToolProcessingStatus: "idle",
+  pollAiToolStatus: "idle",
   error: null,
   pathPrefix: "uploads",
   status: "idle",
@@ -117,63 +120,81 @@ export const uploadImageToAITool = createAsyncThunk<
   },
 );
 
-export const getAiToolStatus = createAsyncThunk<
-  { status?: string; [k: string]: any },
-  { requestId: string },
-  { rejectValue: string }
+// New thunk: poll AI tool status until completed
+export const pollAiToolStatus = createAsyncThunk<
+  AiToolResult,
+  { requestId: string; maxAttempts?: number; intervalMs?: number }
 >(
-  "contentCreation/getAiToolStatus",
-  async ({ requestId }, { rejectWithValue }) => {
+  "contentCreation/pollAiToolStatus",
+  async (
+    { requestId, maxAttempts = 60, intervalMs = 60000 },
+    { rejectWithValue },
+  ) => {
     try {
       const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
-      const res = await fetch(
-        `https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}/status`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Key ${FAL_KEY}`,
-          },
-        },
-      );
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Fal status failed: ${res.status} ${text}`);
-      }
-      const data = (await res.json()) as any;
-      return data;
-    } catch (err) {
-      return rejectWithValue(
-        err instanceof Error ? err.message : "Unknown AI poll error",
-      );
-    }
-  },
-);
 
-// New thunk: checkAIToolStatus (poll job status)
-export const getAiToolResult = createAsyncThunk<
-  { status?: string; [k: string]: any },
-  { requestId: string },
-  { rejectValue: string }
->(
-  "contentCreation/getAiToolResult",
-  async ({ requestId }, { rejectWithValue }) => {
-    try {
-      const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
-      const res = await fetch(`https://queue.fal.run/requests/${requestId}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Key ${FAL_KEY}`,
-        },
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Fal status failed: ${res.status} ${text}`);
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        // Check status
+        const statusRes = await fetch(
+          `https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}/status`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Key ${FAL_KEY}`,
+            },
+          },
+        );
+
+        if (!statusRes.ok) {
+          const text = await statusRes.text();
+          throw new Error(`Fal status failed: ${statusRes.status} ${text}`);
+        }
+
+        const statusData = (await statusRes.json()) as any;
+        console.log(
+          `🔄 Polling attempt ${attempt + 1}/${maxAttempts}, status:`,
+          statusData.status,
+        );
+
+        // If completed, get the result
+        if (statusData.status === "COMPLETED") {
+          const resultRes = await fetch(
+            `https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Key ${FAL_KEY}`,
+              },
+            },
+          );
+
+          if (!resultRes.ok) {
+            const text = await resultRes.text();
+            throw new Error(`Fal result failed: ${resultRes.status} ${text}`);
+          }
+
+          const resultData = (await resultRes.json()) as AiToolResult;
+          console.log("✅ AI Tool completed, result:", resultData);
+          return resultData;
+        }
+
+        // If failed, throw error
+        if (statusData.status === "FAILED") {
+          throw new Error(
+            `AI Tool failed: ${statusData.error || "Unknown error"}`,
+          );
+        }
+
+        // Wait before next attempt (except for last attempt)
+        if (attempt < maxAttempts - 1) {
+          await new Promise((resolve) => setTimeout(resolve, intervalMs));
+        }
       }
-      const data = (await res.json()) as any;
-      return data as { status?: string; [k: string]: any };
+
+      throw new Error(`AI Tool polling timeout after ${maxAttempts} attempts`);
     } catch (err) {
       return rejectWithValue(
-        err instanceof Error ? err.message : "Unknown AI status error",
+        err instanceof Error ? err.message : "Unknown AI polling error",
       );
     }
   },
@@ -247,7 +268,6 @@ const contentCreationSlice = createSlice({
         state.aiToolProcessingStatus = "fulfilled";
         state.error = null;
         state.createdImageUrl = action.payload.images?.[0]?.url || null;
-        state.status = "fulfilled";
         state.requestId = action.payload.request_id || null;
         console.log("🆔 Request ID:", state.requestId);
       })
@@ -257,6 +277,16 @@ const contentCreationSlice = createSlice({
         state.status = "failed";
         state.createdImageUrl = null;
         state.imageStorageUrl = null;
+      })
+      // Poll AI Tool Status
+      .addCase(pollAiToolStatus.pending, (state) => {
+        state.pollAiToolStatus = "IN_PROGRESS";
+      })
+      .addCase(pollAiToolStatus.fulfilled, (state, action) => {
+        state.pollAiToolStatus = "COMPLETED";
+      })
+      .addCase(pollAiToolStatus.rejected, (state, action) => {
+        state.pollAiToolStatus = "FAILED";
       });
   },
 });

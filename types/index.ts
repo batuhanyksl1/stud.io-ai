@@ -122,3 +122,15 @@ export interface AiToolStatus {
     inference_time: number;
   } | null;
 }
+
+export interface AiToolResult {
+  has_nsfw_concepts: boolean[];
+  images: {
+    content_type: string;
+    file_name: string | null;
+    file_size: number | null;
+    height: number;
+    url: string;
+    width: number;
+  }[];
+}

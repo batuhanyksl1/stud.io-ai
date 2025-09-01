@@ -1,9 +1,5 @@
 import { useContentCreation } from "@/hooks";
 import { useAppDispatch } from "@/store/hooks";
-import {
-  getAiToolResult,
-  getAiToolStatus,
-} from "@/store/slices/contentCreationSlice";
 import { pickImage } from "@/utils/pickImage";
 import React, { useState } from "react";
 import {
@@ -14,6 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { pollAiToolStatus } from "../../store/slices/contentCreationSlice";
 
 const Sikko = () => {
   const dispatch = useAppDispatch();
@@ -35,17 +32,12 @@ const Sikko = () => {
   const handlePickImage = async () => {
     try {
       const pickedImageUri = await pickImage();
-      setActivityIndicatorColor("rgb(255, 0, 0)");
       setImageUri(pickedImageUri);
-      setActivityIndicatorColor("rgb(175, 77, 255)");
 
       if (pickedImageUri) {
-        setActivityIndicatorColor("rgb(43, 252, 78)");
         console.log("🔄 Storage'a yükleniyor...");
         const imageUrl = await uploadImageToStorage(pickedImageUri);
-        setActivityIndicatorColor("rgb(214, 252, 43)");
         console.log("📤 Storage URL:", imageUrl);
-        setActivityIndicatorColor("rgb(92, 43, 252)");
 
         if (imageUrl) {
           console.log("🤖 AI Tool'a gönderiliyor...");
@@ -61,11 +53,10 @@ const Sikko = () => {
           ) {
             const aiToolRequestId = aiToolRequest.request_id?.toString();
             console.log("🎯 AI Tool Request ID:", aiToolRequestId);
-            setActivityIndicatorColor("rgb(43, 230, 252)");
 
             if (aiToolRequestId) {
               const aiToolStatusResult = await dispatch(
-                getAiToolStatus({
+                pollAiToolStatus({
                   requestId: aiToolRequestId,
                 }),
               );
@@ -78,13 +69,13 @@ const Sikko = () => {
                 statusPayload.status === "COMPLETED"
               ) {
                 const aiToolResult = await dispatch(
-                  getAiToolResult({
+                  pollAiToolStatus({
                     requestId: aiToolRequestId,
                   }),
-                );
-                console.log("🎯 AI Tool sonucu:", aiToolResult.payload);
+                ).unwrap();
+                console.log("🎯 AI Tool sonucu:", aiToolResult.images[0]?.url);
               }
-              console.log("🎯 AI Tool durumu:", statusPayload);
+              console.log("🎯 AI Tool durumu:", statusPayload.images[0]?.url);
             }
           }
         }
@@ -190,6 +181,23 @@ const Sikko = () => {
             }}
           >
             {imageStorageUrl || " Yok"}
+          </Text>
+        </Text>
+        <Text style={{ marginBottom: 5 }}>
+          📤 Image Storage URL:{" "}
+          <Text
+            style={{
+              color:
+                aiToolProcessingStatus === "pending"
+                  ? "orange"
+                  : aiToolProcessingStatus === "fulfilled"
+                    ? "green"
+                    : aiToolProcessingStatus === "failed"
+                      ? "red"
+                      : "gray",
+            }}
+          >
+            {createdImageUrl}
           </Text>
         </Text>
 

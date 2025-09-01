@@ -2,6 +2,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   clearAllImages as clearAllImagesAction,
   clearError as clearErrorAction,
+  pollAiToolStatus as pollAiToolStatusAction,
   setActivityIndicatorColor as setActivityIndicatorColorAction,
   uploadImageToAITool as uploadImageToAIToolAction,
   uploadImageToStorage as uploadImageToStorageAction,
@@ -34,6 +35,11 @@ export function useContentCreation() {
     return result.payload;
   };
 
+  const pollAiToolStatus = async (requestId: string) => {
+    const result = await dispatch(pollAiToolStatusAction({ requestId }));
+    return result.payload;
+  };
+
   const clearError = () => {
     dispatch(clearErrorAction());
   };
@@ -61,5 +67,6 @@ export function useContentCreation() {
     uploadImageToAITool,
     clearError,
     clearAllImages,
+    pollAiToolStatus,
   };
 }
