@@ -284,9 +284,15 @@ const contentCreationSlice = createSlice({
       })
       .addCase(pollAiToolStatus.fulfilled, (state, action) => {
         state.pollAiToolStatus = "COMPLETED";
+        state.status = "fulfilled";
+        state.createdImageUrl = action.payload.images?.[0]?.url || null;
       })
       .addCase(pollAiToolStatus.rejected, (state, action) => {
         state.pollAiToolStatus = "FAILED";
+        state.status = "failed";
+        state.createdImageUrl = null;
+        state.imageStorageUrl = null;
+        state.error = action.payload as string;
       });
   },
 });

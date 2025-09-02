@@ -22,29 +22,22 @@ const Sikko = () => {
     storageUploadProcessingStatus,
     aiToolProcessingStatus,
     status,
-    setActivityIndicatorColor,
     activityIndicatorColor,
     error,
   } = useContentCreation();
 
   const [imageUri, setImageUri] = useState<string | null>();
-
-  const handlePickImage = async () => {
+  const [url, setUrl] = useState<string | null>(null);
+  const handlePickImage = async (prompt: string) => {
     try {
       const pickedImageUri = await pickImage();
       setImageUri(pickedImageUri);
 
       if (pickedImageUri) {
-        console.log("🔄 Storage'a yükleniyor...");
         const imageUrl = await uploadImageToStorage(pickedImageUri);
-        console.log("📤 Storage URL:", imageUrl);
 
         if (imageUrl) {
-          console.log("🤖 AI Tool'a gönderiliyor...");
-          const aiToolRequest = await uploadImageToAITool(
-            imageUrl,
-            "bir elma koy bu fotoğrafa",
-          );
+          const aiToolRequest = await uploadImageToAITool(imageUrl, prompt);
 
           if (
             aiToolRequest &&
@@ -52,7 +45,6 @@ const Sikko = () => {
             "request_id" in aiToolRequest
           ) {
             const aiToolRequestId = aiToolRequest.request_id?.toString();
-            console.log("🎯 AI Tool Request ID:", aiToolRequestId);
 
             if (aiToolRequestId) {
               const aiToolStatusResult = await dispatch(
@@ -62,31 +54,17 @@ const Sikko = () => {
               );
 
               const statusPayload = aiToolStatusResult.payload;
-              if (
-                statusPayload &&
-                typeof statusPayload === "object" &&
-                "status" in statusPayload &&
-                statusPayload.status === "COMPLETED"
-              ) {
-                const aiToolResult = await dispatch(
-                  pollAiToolStatus({
-                    requestId: aiToolRequestId,
-                  }),
-                ).unwrap();
-                console.log("🎯 AI Tool sonucu:", aiToolResult.images[0]?.url);
-              }
-              console.log("🎯 AI Tool durumu:", statusPayload.images[0]?.url);
+
+              const url =
+                (statusPayload as any)?.images?.[0]?.url ?? statusPayload;
+              setUrl(url);
             }
           }
         }
       } else {
-        console.log("❌ Resim seçilmedi.");
-        setActivityIndicatorColor("rgb(43, 252, 217)");
         return null;
       }
     } catch (error) {
-      console.error("💥 Hata oluştu:", error);
-      setActivityIndicatorColor("rgb(255, 0, 0)");
       return null;
     }
   };
@@ -98,7 +76,10 @@ const Sikko = () => {
       </Text>
 
       {/* Buttons */}
-      <Button title="📸 Resim Seç" onPress={handlePickImage} />
+      <Button
+        title="📸 Resim Seç"
+        onPress={() => handlePickImage("put an apple on this picture")}
+      />
 
       {/* Status Indicators */}
       <View
@@ -241,6 +222,17 @@ const Sikko = () => {
       )}
 
       {/* Created Image */}
+      {(url || createdImageUrl) && (
+        <View>
+          <Image
+            source={{
+              uri: url || undefined,
+            }}
+            style={{ width: 200, height: 200, borderRadius: 10 }}
+            resizeMode="contain"
+          />
+        </View>
+      )}
       {createdImageUrl && (
         <View style={{ marginTop: 20, alignItems: "center" }}>
           <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>
@@ -266,6 +258,12 @@ const Sikko = () => {
           borderRadius: 10,
         }}
       >
+        <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>
+          🔍 URL: {url}
+        </Text>
+        <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>
+          🔍 Created Image URL: {createdImageUrl}
+        </Text>
         <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>
           🔍 Debug Bilgileri:
         </Text>
