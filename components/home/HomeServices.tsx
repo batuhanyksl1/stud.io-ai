@@ -11,7 +11,7 @@ export const HomeServices: React.FC = () => {
   const router = useRouter();
 
   const handleServicePress = (serviceId: string) => {
-    router.push(`/service-detail?serviceId=${serviceId}`);
+    router.push(`/(tabs)/[prompt]`);
   };
 
   const renderServiceCard = (service: (typeof editingServices)[0]) => {
