@@ -1,4 +1,13 @@
+import {
+  Animations,
+  BorderRadius,
+  ComponentTokens,
+  Shadows,
+  Spacing,
+  Typography,
+} from "@/constants/DesignTokens";
 import { useContentCreation } from "@/hooks";
+import { useTheme } from "@/hooks/useTheme";
 import { useAppDispatch } from "@/store/hooks";
 import { pickImage } from "@/utils/pickImage";
 import * as MediaLibrary from "expo-media-library";
@@ -6,6 +15,7 @@ import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Animated,
   Dimensions,
   Image,
   KeyboardAvoidingView,
@@ -24,6 +34,7 @@ import { pollAiToolStatus } from "../../store/slices/contentCreationSlice";
 // Profesyonel ve kullanıcı dostu bir arayüz
 const ImageGeneratorScreen = () => {
   const dispatch = useAppDispatch();
+  const { colors } = useTheme();
   const {
     uploadImageToStorage,
     uploadImageToAITool,
@@ -33,14 +44,18 @@ const ImageGeneratorScreen = () => {
   } = useContentCreation();
 
   // Component'e özel state'ler
-  const [localImageUri, setLocalImageUri] = useState<string | null>(null); // Galeriden seçilen görselin yerel adresi
+  const [localImageUri, setLocalImageUri] = useState<string | null>(null);
   const [originalImageForResult, setOriginalImageForResult] = useState<
     string | null
-  >(null); // Sonuç ekranındaki "önce" görseli için
+  >(null);
   const [isImageViewerVisible, setImageViewerVisible] =
-    useState<boolean>(false); // Tam ekran resim görüntüleyici
-  const [prompt, setPrompt] = useState<string>(""); // Kullanıcının girdiği metin
+    useState<boolean>(false);
+  const [prompt, setPrompt] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Animation states
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [scaleAnim] = useState(new Animated.Value(0.8));
 
   // Başlangıç durumuna sıfırlama fonksiyonu
   const resetState = useCallback(() => {
@@ -49,15 +64,31 @@ const ImageGeneratorScreen = () => {
     setPrompt("");
     setErrorMessage(null);
     setImageViewerVisible(false);
-    // Gerekirse Redux state'ini de temizlemek için bir action dispatch edilebilir.
   }, []);
+
+  // Animation effects
+  React.useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: Animations.duration.normal,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [localImageUri, createdImageUrl]);
 
   // Adım 1: Sadece galeriden görsel seçme
   const handleSelectImage = async () => {
     try {
       const pickedImageUri = await pickImage();
       if (pickedImageUri) {
-        resetState(); // Yeni görsel seçildiğinde eski sonuçları temizle
+        resetState();
         setLocalImageUri(pickedImageUri);
       }
     } catch (e) {
@@ -77,15 +108,22 @@ const ImageGeneratorScreen = () => {
     }
 
     setErrorMessage(null);
-    setOriginalImageForResult(localImageUri); // "Önce" görselini sonuç ekranı için sakla
+    setOriginalImageForResult(localImageUri);
 
     try {
-      // Zincirleme işlemleri daha okunabilir hale getirelim
       const imageUrl = await uploadImageToStorage(localImageUri);
       if (!imageUrl) throw new Error("Görsel sunucuya yüklenemedi.");
 
       const aiToolRequest = await uploadImageToAITool(imageUrl, prompt);
-      const requestId = aiToolRequest?.request_id?.toString();
+
+      // Type guard for request_id
+      let requestId: string | undefined;
+      if (typeof aiToolRequest === "string") {
+        throw new Error("Beklenmeyen yanıt formatı alındı.");
+      } else {
+        requestId = aiToolRequest?.request_id?.toString();
+      }
+
       if (!requestId) throw new Error("Yapay zeka aracı başlatılamadı.");
 
       const aiToolStatusResult = await dispatch(
@@ -101,14 +139,11 @@ const ImageGeneratorScreen = () => {
       if (!finalUrl) {
         throw new Error("Yapay zekadan geçerli bir sonuç alınamadı.");
       }
-
-      // `createdImageUrl` hook tarafından güncellendiği için ek bir state'e gerek yok.
-      // Başarılı olunca `localImageUri`'yi `null` yapabiliriz ki sonuç ekranı görünsün.
     } catch (err: any) {
       const message = err.message || "Bilinmeyen bir hata oluştu.";
       Alert.alert("İşlem Başarısız", message);
       setErrorMessage(message);
-      setOriginalImageForResult(null); // Hata durumunda "önce" görselini temizle
+      setOriginalImageForResult(null);
     }
   };
 
@@ -128,7 +163,7 @@ const ImageGeneratorScreen = () => {
 
       await MediaLibrary.saveToLibraryAsync(createdImageUrl);
       Alert.alert("Başarılı!", "Görsel galerinize kaydedildi.");
-      setImageViewerVisible(false); // İndirdikten sonra görüntüleyiciyi kapat
+      setImageViewerVisible(false);
     } catch (error) {
       console.error(error);
       Alert.alert("Hata", "Görsel kaydedilirken bir sorun oluştu.");
@@ -137,81 +172,254 @@ const ImageGeneratorScreen = () => {
 
   // Arayüzü duruma göre render eden fonksiyonlar
   const renderInitialView = () => (
-    <View style={styles.centeredContainer}>
-      <Text style={styles.title}>Yapay Zeka Stüdyosu</Text>
-      <Text style={styles.subtitle}>
-        Bir görsel seçin ve nasıl dönüştüreceğinizi hayal edin.
-      </Text>
-      <Pressable style={styles.ctaButton} onPress={handleSelectImage}>
-        <Text style={styles.ctaButtonText}>🖼️ Galeriden Görsel Seç</Text>
+    <Animated.View
+      style={[
+        styles.centeredContainer,
+        { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+      ]}
+    >
+      <View style={[styles.heroContainer, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.heroIcon, { color: colors.primary }]}>🎨</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>
+          Yapay Zeka Stüdyosuuuu
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          Bir görsel seçin ve nasıl dönüştüreceğinizi hayal edin
+        </Text>
+      </View>
+
+      <Pressable
+        style={[styles.ctaButton, { backgroundColor: colors.primary }]}
+        onPress={handleSelectImage}
+      >
+        <Text style={[styles.ctaButtonText, { color: colors.textOnPrimary }]}>
+          🖼️ Galeriden Görsel Seç
+        </Text>
       </Pressable>
-    </View>
+
+      <View style={[styles.featureGrid, { backgroundColor: colors.surface }]}>
+        <View style={styles.featureItem}>
+          <Text style={[styles.featureIcon, { color: colors.primary }]}>
+            ✨
+          </Text>
+          <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+            Hızlı Dönüştürme
+          </Text>
+        </View>
+        <View style={styles.featureItem}>
+          <Text style={[styles.featureIcon, { color: colors.primary }]}>
+            🎯
+          </Text>
+          <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+            Yüksek Kalite
+          </Text>
+        </View>
+        <View style={styles.featureItem}>
+          <Text style={[styles.featureIcon, { color: colors.primary }]}>
+            💾
+          </Text>
+          <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+            Kolay İndirme
+          </Text>
+        </View>
+      </View>
+    </Animated.View>
   );
 
   const renderEditingView = () =>
     localImageUri && (
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+        style={[styles.container, { backgroundColor: colors.background }]}
       >
-        <View style={styles.contentContainer}>
-          <Text style={styles.title}>Görseliniz Hazır!</Text>
-          <Image source={{ uri: localImageUri }} style={styles.previewImage} />
-          <Text style={styles.promptLabel}>
-            Bu görsele ne yapmak istersiniz?
-          </Text>
-          <TextInput
-            style={styles.promptInput}
-            placeholder="Örn: Suluboya bir tabloya çevir"
-            value={prompt}
-            onChangeText={setPrompt}
-          />
-          <Pressable
-            style={styles.ctaButton}
-            onPress={handleGenerateImage}
-            disabled={status === "pending"}
+        <ScrollView
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View
+            style={[
+              styles.editingContent,
+              { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+            ]}
           >
-            <Text style={styles.ctaButtonText}>✨ Dönüştür</Text>
-          </Pressable>
-          <Pressable
-            style={[styles.ctaButton, styles.secondaryButton]}
-            onPress={handleSelectImage}
-          >
-            <Text style={[styles.ctaButtonText, styles.secondaryButtonText]}>
-              Görseli Değiştir
-            </Text>
-          </Pressable>
-        </View>
+            <View
+              style={[styles.headerCard, { backgroundColor: colors.surface }]}
+            >
+              <Text style={[styles.title, { color: colors.textPrimary }]}>
+                Görseliniz Hazır! 🎉
+              </Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                Şimdi ne yapmak istediğinizi söyleyin
+              </Text>
+            </View>
+
+            <View
+              style={[styles.imageCard, { backgroundColor: colors.surface }]}
+            >
+              <Image
+                source={{ uri: localImageUri }}
+                style={styles.previewImage}
+              />
+            </View>
+
+            <View
+              style={[styles.inputCard, { backgroundColor: colors.surface }]}
+            >
+              <Text style={[styles.promptLabel, { color: colors.textPrimary }]}>
+                Bu görsele ne yapmak istersiniz?
+              </Text>
+              <TextInput
+                style={[
+                  styles.promptInput,
+                  {
+                    backgroundColor: colors.background,
+                    borderColor: colors.border,
+                    color: colors.textPrimary,
+                  },
+                ]}
+                placeholder="Örn: Suluboya bir tabloya çevir, anime tarzında yap..."
+                placeholderTextColor={colors.textTertiary}
+                value={prompt}
+                onChangeText={setPrompt}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+            </View>
+
+            <View style={styles.buttonGroup}>
+              <Pressable
+                style={[
+                  styles.ctaButton,
+                  { backgroundColor: colors.primary },
+                  status === "pending" && {
+                    backgroundColor: colors.interactiveDisabled,
+                  },
+                ]}
+                onPress={handleGenerateImage}
+                disabled={status === "pending"}
+              >
+                <Text
+                  style={[
+                    styles.ctaButtonText,
+                    { color: colors.textOnPrimary },
+                  ]}
+                >
+                  ✨ Dönüştür
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.secondaryButton,
+                  {
+                    borderColor: colors.border,
+                    backgroundColor: colors.surface,
+                  },
+                ]}
+                onPress={handleSelectImage}
+              >
+                <Text
+                  style={[
+                    styles.secondaryButtonText,
+                    { color: colors.textSecondary },
+                  ]}
+                >
+                  🔄 Görseli Değiştir
+                </Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        </ScrollView>
       </KeyboardAvoidingView>
     );
 
   const renderResultView = () =>
     createdImageUrl && (
-      <View style={styles.centeredContainer}>
-        <Text style={styles.title}>İşte Sonuç!</Text>
-        <View style={styles.resultContainer}>
+      <Animated.View
+        style={[
+          styles.centeredContainer,
+          { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+        ]}
+      >
+        <View
+          style={[styles.resultHeader, { backgroundColor: colors.surface }]}
+        >
+          <Text style={[styles.title, { color: colors.textPrimary }]}>
+            İşte Sonuç! 🎊
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            Yapay zeka sihrini tamamladı
+          </Text>
+        </View>
+
+        <View
+          style={[styles.resultContainer, { backgroundColor: colors.surface }]}
+        >
           <View style={styles.imageContainer}>
-            <Text style={styles.imageLabel}>ÖNCE</Text>
+            <Text style={[styles.imageLabel, { color: colors.textSecondary }]}>
+              ÖNCE
+            </Text>
             <Image
               source={{ uri: originalImageForResult || "" }}
               style={styles.resultImage}
             />
           </View>
+
+          <View style={styles.arrowContainer}>
+            <Text style={[styles.arrowText, { color: colors.primary }]}>→</Text>
+          </View>
+
           <Pressable
             style={styles.imageContainer}
             onPress={() => setImageViewerVisible(true)}
           >
-            <Text style={styles.imageLabel}>SONRA (Büyütmek için tıkla)</Text>
+            <Text style={[styles.imageLabel, { color: colors.textSecondary }]}>
+              SONRA
+            </Text>
+            <Text style={[styles.tapToZoom, { color: colors.primary }]}>
+              (Büyütmek için tıkla)
+            </Text>
             <Image
               source={{ uri: createdImageUrl }}
               style={styles.resultImage}
             />
           </Pressable>
         </View>
-        <Pressable style={styles.ctaButton} onPress={resetState}>
-          <Text style={styles.ctaButtonText}>Yeni Bir Tane Yap</Text>
-        </Pressable>
-      </View>
+
+        <View style={styles.resultActions}>
+          <Pressable
+            style={[styles.ctaButton, { backgroundColor: colors.primary }]}
+            onPress={resetState}
+          >
+            <Text
+              style={[styles.ctaButtonText, { color: colors.textOnPrimary }]}
+            >
+              🆕 Yeni Bir Tane Yap
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={[
+              styles.secondaryButton,
+              {
+                borderColor: colors.border,
+                backgroundColor: colors.surface,
+              },
+            ]}
+            onPress={() => setImageViewerVisible(true)}
+          >
+            <Text
+              style={[
+                styles.secondaryButtonText,
+                { color: colors.textSecondary },
+              ]}
+            >
+              🔍 Detaylı Görüntüle
+            </Text>
+          </Pressable>
+        </View>
+      </Animated.View>
     );
 
   const renderImageViewer = () => (
@@ -221,7 +429,9 @@ const ImageGeneratorScreen = () => {
       animationType="slide"
       onRequestClose={() => setImageViewerVisible(false)}
     >
-      <SafeAreaView style={styles.viewerContainer}>
+      <SafeAreaView
+        style={[styles.viewerContainer, { backgroundColor: colors.background }]}
+      >
         <ScrollView
           contentContainerStyle={styles.viewerScrollViewContent}
           centerContent={true}
@@ -234,18 +444,30 @@ const ImageGeneratorScreen = () => {
             resizeMode="contain"
           />
         </ScrollView>
-        <View style={styles.viewerHeader}>
+
+        <View
+          style={[styles.viewerHeader, { backgroundColor: colors.overlay }]}
+        >
           <Pressable
-            style={[styles.viewerButton, styles.downloadButton]}
+            style={[styles.viewerButton, { backgroundColor: colors.success }]}
             onPress={handleDownloadImage}
           >
-            <Text style={styles.viewerButtonText}>İndir</Text>
+            <Text
+              style={[styles.viewerButtonText, { color: colors.textOnPrimary }]}
+            >
+              💾 İndir
+            </Text>
           </Pressable>
+
           <Pressable
-            style={styles.viewerButton}
+            style={[styles.viewerButton, { backgroundColor: colors.error }]}
             onPress={() => setImageViewerVisible(false)}
           >
-            <Text style={styles.viewerButtonText}>Kapat</Text>
+            <Text
+              style={[styles.viewerButtonText, { color: colors.textOnPrimary }]}
+            >
+              ✕ Kapat
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -253,20 +475,57 @@ const ImageGeneratorScreen = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       {/* Yükleme Modalı */}
       <Modal
         transparent={true}
         animationType="fade"
         visible={status === "pending"}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <ActivityIndicator size="large" color="#5A67D8" />
-            <Text style={styles.modalText}>Yapay zeka sihrini yapıyor...</Text>
-            <Text style={styles.modalSubText}>
-              Bu işlem biraz zaman alabilir.
+        <View
+          style={[styles.modalContainer, { backgroundColor: colors.overlay }]}
+        >
+          <View
+            style={[styles.modalContent, { backgroundColor: colors.surface }]}
+          >
+            <View
+              style={[styles.loadingIcon, { backgroundColor: colors.primary }]}
+            >
+              <ActivityIndicator size="large" color={colors.textOnPrimary} />
+            </View>
+            <Text style={[styles.modalText, { color: colors.textPrimary }]}>
+              Yapay zeka sihrini yapıyor... ✨
             </Text>
+            <Text
+              style={[styles.modalSubText, { color: colors.textSecondary }]}
+            >
+              Bu işlem biraz zaman alabilir
+            </Text>
+
+            <View style={styles.loadingSteps}>
+              <View style={styles.loadingStep}>
+                <View
+                  style={[styles.stepDot, { backgroundColor: colors.primary }]}
+                />
+                <Text
+                  style={[styles.stepText, { color: colors.textSecondary }]}
+                >
+                  Görsel yükleniyor
+                </Text>
+              </View>
+              <View style={styles.loadingStep}>
+                <View
+                  style={[styles.stepDot, { backgroundColor: colors.primary }]}
+                />
+                <Text
+                  style={[styles.stepText, { color: colors.textSecondary }]}
+                >
+                  AI işleniyor
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
       </Modal>
@@ -280,7 +539,18 @@ const ImageGeneratorScreen = () => {
       {createdImageUrl && renderResultView()}
 
       {/* Hata Mesajı */}
-      {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
+      {errorMessage && (
+        <View
+          style={[
+            styles.errorContainer,
+            { backgroundColor: colors.errorSubtle },
+          ]}
+        >
+          <Text style={[styles.errorText, { color: colors.error }]}>
+            ⚠️ {errorMessage}
+          </Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -288,143 +558,280 @@ const ImageGeneratorScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F7FAFC",
   },
   centeredContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: Spacing.xl,
   },
   contentContainer: {
-    flex: 1,
-    padding: 20,
+    flexGrow: 1,
+    padding: Spacing.xl,
+  },
+  editingContent: {
     alignItems: "center",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#2D3748",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#718096",
-    textAlign: "center",
-    marginBottom: 40,
-  },
-  ctaButton: {
-    backgroundColor: "#5A67D8",
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    marginTop: 20,
-    width: "100%",
+
+  // Hero Section
+  heroContainer: {
+    padding: Spacing.xxl,
+    borderRadius: BorderRadius.xl,
     alignItems: "center",
+    marginBottom: Spacing.xl,
+    ...Shadows.lg,
   },
-  ctaButtonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "600",
+  heroIcon: {
+    fontSize: Typography.fontSize.xxxxxl,
+    marginBottom: Spacing.md,
   },
-  secondaryButton: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#A0AEC0",
-    elevation: 0,
-    marginTop: 10,
-  },
-  secondaryButtonText: {
-    color: "#4A5568",
-  },
-  previewImage: {
-    width: 280,
-    height: 280,
-    borderRadius: 20,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  promptLabel: {
-    fontSize: 16,
-    color: "#4A5568",
-    alignSelf: "flex-start",
-    marginBottom: 10,
-    fontWeight: "500",
-  },
-  promptInput: {
-    width: "100%",
-    height: 50,
-    backgroundColor: "white",
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#CBD5E0",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    padding: 30,
-    borderRadius: 15,
-    alignItems: "center",
-    width: "80%",
-  },
-  modalText: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 20,
-    color: "#2D3748",
-  },
-  modalSubText: {
-    fontSize: 14,
-    color: "#718096",
-    marginTop: 5,
-  },
-  resultContainer: {
+
+  // Feature Grid
+  featureGrid: {
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",
-    marginVertical: 20,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginTop: Spacing.xl,
+    ...Shadows.sm,
   },
-  imageContainer: {
+  featureItem: {
     alignItems: "center",
+    flex: 1,
   },
-  imageLabel: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#A0AEC0",
-    marginBottom: 5,
+  featureIcon: {
+    fontSize: Typography.fontSize.xxl,
+    marginBottom: Spacing.xs,
+  },
+  featureText: {
+    fontSize: Typography.fontSize.sm,
     textAlign: "center",
+    fontFamily: Typography.fontFamily.medium,
+  },
+
+  // Cards
+  headerCard: {
+    padding: Spacing.xl,
+    borderRadius: BorderRadius.lg,
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+    width: "100%",
+    ...Shadows.md,
+  },
+  imageCard: {
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.lg,
+    ...Shadows.sm,
+  },
+  inputCard: {
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.lg,
+    width: "100%",
+    ...Shadows.sm,
+  },
+
+  // Typography
+  title: {
+    fontSize: Typography.fontSize.xxxl,
+    fontFamily: Typography.fontFamily.bold,
+    marginBottom: Spacing.sm,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: Typography.fontSize.md,
+    textAlign: "center",
+    marginBottom: Spacing.lg,
+    fontFamily: Typography.fontFamily.medium,
+  },
+
+  // Buttons
+  ctaButton: {
+    paddingVertical: ComponentTokens.button.padding.lg.vertical,
+    paddingHorizontal: ComponentTokens.button.padding.lg.horizontal,
+    borderRadius: BorderRadius.lg,
+    ...Shadows.md,
+    marginTop: Spacing.md,
+    width: "100%",
+    alignItems: "center",
+    height: ComponentTokens.button.height.lg,
+    justifyContent: "center",
+  },
+  ctaButtonText: {
+    fontSize: Typography.fontSize.lg,
+    fontFamily: Typography.fontFamily.semiBold,
+  },
+  secondaryButton: {
+    borderWidth: 1,
+    paddingVertical: ComponentTokens.button.padding.md.vertical,
+    paddingHorizontal: ComponentTokens.button.padding.md.horizontal,
+    borderRadius: BorderRadius.lg,
+    marginTop: Spacing.sm,
+    width: "100%",
+    alignItems: "center",
+    height: ComponentTokens.button.height.md,
+    justifyContent: "center",
+  },
+  secondaryButtonText: {
+    fontSize: Typography.fontSize.md,
+    fontFamily: Typography.fontFamily.medium,
+  },
+  buttonGroup: {
+    width: "100%",
+    marginTop: Spacing.md,
+  },
+
+  // Images
+  previewImage: {
+    width: 280,
+    height: 280,
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
   },
   resultImage: {
     width: 150,
     height: 150,
-    borderRadius: 12,
+    borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+  },
+
+  // Input
+  promptLabel: {
+    fontSize: Typography.fontSize.md,
+    alignSelf: "flex-start",
+    marginBottom: Spacing.sm,
+    fontFamily: Typography.fontFamily.semiBold,
+  },
+  promptInput: {
+    width: "100%",
+    minHeight: 80,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+    fontSize: Typography.fontSize.md,
+    borderWidth: 1,
+    fontFamily: Typography.fontFamily.primary,
+  },
+
+  // Result View
+  resultHeader: {
+    padding: Spacing.xl,
+    borderRadius: BorderRadius.lg,
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+    width: "100%",
+    ...Shadows.md,
+  },
+  resultContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    width: "100%",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    marginVertical: Spacing.lg,
+    ...Shadows.sm,
+  },
+  imageContainer: {
+    alignItems: "center",
+    flex: 1,
+  },
+  arrowContainer: {
+    alignItems: "center",
+    paddingHorizontal: Spacing.md,
+  },
+  arrowText: {
+    fontSize: Typography.fontSize.xxl,
+    fontFamily: Typography.fontFamily.bold,
+  },
+  imageLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontFamily: Typography.fontFamily.semiBold,
+    marginBottom: Spacing.xs,
+    textAlign: "center",
+  },
+  tapToZoom: {
+    fontSize: Typography.fontSize.xs,
+    fontFamily: Typography.fontFamily.primary,
+    marginBottom: Spacing.xs,
+    textAlign: "center",
+  },
+  resultActions: {
+    width: "100%",
+    marginTop: Spacing.lg,
+  },
+
+  // Modal
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    padding: Spacing.xxl,
+    borderRadius: BorderRadius.xl,
+    alignItems: "center",
+    width: "80%",
+    ...Shadows.xl,
+  },
+  loadingIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: BorderRadius.full,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+  },
+  modalText: {
+    fontSize: Typography.fontSize.lg,
+    fontFamily: Typography.fontFamily.semiBold,
+    marginBottom: Spacing.xs,
+    textAlign: "center",
+  },
+  modalSubText: {
+    fontSize: Typography.fontSize.md,
+    textAlign: "center",
+    marginBottom: Spacing.lg,
+    fontFamily: Typography.fontFamily.primary,
+  },
+  loadingSteps: {
+    width: "100%",
+    marginTop: Spacing.md,
+  },
+  loadingStep: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: Spacing.sm,
+  },
+  stepDot: {
+    width: 8,
+    height: 8,
+    borderRadius: BorderRadius.full,
+    marginRight: Spacing.sm,
+  },
+  stepText: {
+    fontSize: Typography.fontSize.sm,
+    fontFamily: Typography.fontFamily.primary,
+  },
+
+  // Error
+  errorContainer: {
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    margin: Spacing.md,
+    alignItems: "center",
   },
   errorText: {
-    color: "#E53E3E",
+    fontSize: Typography.fontSize.md,
+    fontFamily: Typography.fontFamily.medium,
     textAlign: "center",
-    padding: 10,
-    fontWeight: "bold",
   },
-  // Viewer Styles
+
+  // Viewer
   viewerContainer: {
     flex: 1,
-    backgroundColor: "#000",
   },
   viewerScrollViewContent: {
     flexGrow: 1,
@@ -442,21 +849,21 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginHorizontal: Spacing.lg,
   },
   viewerButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  downloadButton: {
-    backgroundColor: "#4299E1",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    minWidth: 80,
+    alignItems: "center",
   },
   viewerButtonText: {
-    color: "#FFF",
-    fontWeight: "bold",
-    fontSize: 16,
+    fontFamily: Typography.fontFamily.semiBold,
+    fontSize: Typography.fontSize.md,
   },
 });
 
