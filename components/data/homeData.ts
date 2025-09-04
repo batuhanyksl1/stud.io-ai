@@ -59,6 +59,10 @@ export const editingServices = [
     usageCount: "2.5K+",
     isPopular: true,
     badge: "En Popüler",
+    aiToolRequest: "https://queue.fal.run/fal-ai/flux-pro/kontext",
+    aiToolStatus:
+      "https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}/status",
+    aiToolResult: "https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}",
   },
   {
     id: "background-removal",

@@ -1,11 +1,34 @@
 import { useTheme } from "@/hooks";
-import Fontisto from "@expo/vector-icons/Fontisto";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
-import { StyleSheet } from "react-native";
+import React from "react";
+import { Platform, StyleSheet } from "react-native";
 
 export default function TabLayout() {
-  const { colors, colorScheme } = useTheme();
+  // Varsayılan değerler
+  const defaultColors = {
+    surface: "#ffffff",
+    border: "#e0e0e0",
+    primary: "#007AFF",
+    textSecondary: "#8E8E93",
+  };
+
+  let colors = defaultColors;
+  let colorScheme = "system";
+
+  try {
+    const theme = useTheme();
+    colors = theme.colors || defaultColors;
+    colorScheme = theme.colorScheme || "system";
+  } catch (error) {
+    console.warn("TabLayout: useTheme error, using defaults:", error);
+  }
+
+  // colorScheme undefined ise varsayılan değer kullan
+  const safeColorScheme = colorScheme || "system";
+
+  // colors undefined ise varsayılan değerler kullan
+  const safeColors = colors || defaultColors;
 
   return (
     <>
@@ -14,10 +37,13 @@ export default function TabLayout() {
           headerShown: false,
           tabBarStyle: [
             styles.tabBar,
-            { backgroundColor: colors.surface, borderTopColor: colors.border },
+            {
+              backgroundColor: safeColors.surface,
+              borderTopColor: safeColors.border,
+            },
           ],
-          tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.textSecondary,
+          tabBarActiveTintColor: safeColors.primary,
+          tabBarInactiveTintColor: safeColors.textSecondary,
           tabBarLabelStyle: styles.tabLabel,
         }}
       >
@@ -35,32 +61,16 @@ export default function TabLayout() {
         />
 
         <Tabs.Screen
-          name="editor"
-          options={{
-            title: "Galeri",
-            tabBarIcon: ({ size, color, focused }) =>
-              focused ? (
-                <Fontisto name="world" size={size} color={color} />
-              ) : (
-                <Fontisto name="world-o" size={size} color={color} />
-              ),
-          }}
-        />
-        <Tabs.Screen
-          name="service-detail"
-          options={{
-            href: null, // Bu sayfa tab olarak görünmeyecek
-          }}
-        />
-        <Tabs.Screen
           name="sikko"
           options={{
             title: "Sikko", // Bu sayfa tab olarak görünmeyecek
+            href: null,
           }}
         />
         <Tabs.Screen
           name="settings"
           options={{
+            href: null,
             title: "Settings",
             tabBarIcon: ({ size, color, focused }) =>
               focused ? (
@@ -89,21 +99,21 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    // borderTopWidth: 1,
-    // height: Platform.OS === 'ios' ? 90 : 70,
-    // paddingBottom: Platform.OS === 'ios' ? 25 : 10,
-    // paddingTop: 10,
-    // shadowColor: '#000',
-    // shadowOffset: {
-    //   width: 0,
-    //   height: -2,
-    // },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 8,
-    // elevation: 5,
+    borderTopWidth: 1,
+    //height: Platform.OS === "ios" ? 90 : 70,
+    paddingBottom: Platform.OS === "ios" ? 25 : 10,
+    paddingTop: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   tabLabel: {
-    // fontFamily: 'Inter-Medium',
-    // fontSize: 12,
+    fontFamily: "Inter-Medium",
+    fontSize: 12,
   },
 });

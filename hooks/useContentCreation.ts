@@ -28,15 +28,26 @@ export function useContentCreation() {
     return result.payload;
   };
 
-  const uploadImageToAITool = async (imageUrl: string, prompt: string) => {
+  const uploadImageToAITool = async (
+    imageUrl: string,
+    prompt: string,
+    aiToolRequest: string,
+    requestId: string,
+  ) => {
     const result = await dispatch(
-      uploadImageToAIToolAction({ imageUrl, prompt }),
+      uploadImageToAIToolAction({ imageUrl, prompt, aiToolRequest, requestId }),
     );
     return result.payload;
   };
 
-  const pollAiToolStatus = async (requestId: string) => {
-    const result = await dispatch(pollAiToolStatusAction({ requestId }));
+  const pollAiToolStatus = async (
+    requestId: string,
+    aiToolStatus: string,
+    aiToolResult: string,
+  ) => {
+    const result = await dispatch(
+      pollAiToolStatusAction({ requestId, aiToolStatus, aiToolResult }),
+    );
     return result.payload;
   };
 

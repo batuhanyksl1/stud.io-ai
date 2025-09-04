@@ -82,29 +82,46 @@ export const uploadImageToStorage = createAsyncThunk<
 
 // New thunk: startAIToolJob (enqueue job without waiting)
 export const uploadImageToAITool = createAsyncThunk<
-  { request_id?: string; status?: string; [k: string]: any },
-  { imageUrl: string; prompt: string },
+  {
+    request_id?: string;
+    status?: string;
+    [k: string]: any;
+    aiToolRequest: string;
+    requestId: string;
+  },
+  {
+    imageUrl: string;
+    prompt: string;
+    aiToolRequest: string;
+    requestId: string;
+  },
   { rejectValue: string }
 >(
   "contentCreation/startAIToolJob",
-  async ({ imageUrl, prompt }, { rejectWithValue }) => {
+  async (
+    { imageUrl, prompt, aiToolRequest, requestId },
+    { rejectWithValue },
+  ) => {
     try {
       const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
-      const res = await fetch("https://queue.fal.run/fal-ai/flux-pro/kontext", {
-        method: "POST",
-        headers: {
-          Authorization: `Key ${FAL_KEY}`,
-          "Content-Type": "application/json",
+      const res = await fetch(
+        aiToolRequest.replace("${requestId}", requestId),
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Key ${FAL_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prompt,
+            image_url: imageUrl,
+            guidance_scale: 3.5,
+            num_images: 1,
+            output_format: "jpeg",
+            safety_tolerance: "2",
+          }),
         },
-        body: JSON.stringify({
-          prompt,
-          image_url: imageUrl,
-          guidance_scale: 3.5,
-          num_images: 1,
-          output_format: "jpeg",
-          safety_tolerance: "2",
-        }),
-      });
+      );
       if (!res.ok) {
         const text = await res.text();
         throw new Error(`Fal queue start failed: ${res.status} ${text}`);
@@ -123,11 +140,23 @@ export const uploadImageToAITool = createAsyncThunk<
 // New thunk: poll AI tool status until completed
 export const pollAiToolStatus = createAsyncThunk<
   AiToolResult,
-  { requestId: string; maxAttempts?: number; intervalMs?: number }
+  {
+    requestId: string;
+    maxAttempts?: number;
+    intervalMs?: number;
+    aiToolStatus: string;
+    aiToolResult: string;
+  }
 >(
   "contentCreation/pollAiToolStatus",
   async (
-    { requestId, maxAttempts = 60, intervalMs = 60000 },
+    {
+      requestId,
+      maxAttempts = 60,
+      intervalMs = 60000,
+      aiToolStatus,
+      aiToolResult,
+    },
     { rejectWithValue },
   ) => {
     try {
@@ -135,8 +164,9 @@ export const pollAiToolStatus = createAsyncThunk<
 
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         // Check status
+
         const statusRes = await fetch(
-          `https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}/status`,
+          aiToolStatus.replace("${requestId}", requestId),
           {
             method: "GET",
             headers: {
@@ -159,7 +189,7 @@ export const pollAiToolStatus = createAsyncThunk<
         // If completed, get the result
         if (statusData.status === "COMPLETED") {
           const resultRes = await fetch(
-            `https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}`,
+            aiToolResult.replace("${requestId}", requestId),
             {
               method: "GET",
               headers: {

@@ -33,7 +33,13 @@ import { pollAiToolStatus } from "../../store/slices/contentCreationSlice";
 
 // Profesyonel ve kullanıcı dostu bir arayüz
 const ImageGeneratorScreen = () => {
-  const { servicePrompt } = useLocalSearchParams<{ servicePrompt: string }>();
+  const { servicePrompt, aiToolRequest, aiToolStatus, aiToolResult } =
+    useLocalSearchParams<{
+      servicePrompt: string;
+      aiToolRequest: string;
+      aiToolStatus: string;
+      aiToolResult: string;
+    }>();
   console.log(servicePrompt);
   const dispatch = useAppDispatch();
   const { colors } = useTheme();
@@ -114,20 +120,31 @@ const ImageGeneratorScreen = () => {
       const imageUrl = await uploadImageToStorage(localImageUri);
       if (!imageUrl) throw new Error("Görsel sunucuya yüklenemedi.");
 
-      const aiToolRequest = await uploadImageToAITool(imageUrl, servicePrompt);
+      // AI Tool'a görsel yükle
+      const aiToolResponse = await uploadImageToAITool(
+        imageUrl,
+        servicePrompt || "",
+        aiToolRequest || "",
+        "", // requestId henüz yok, boş string olarak gönder
+      );
 
       // Type guard for request_id
-      let requestId: string | undefined;
-      if (typeof aiToolRequest === "string") {
+      let generatedRequestId: string | undefined;
+      if (typeof aiToolResponse === "string") {
         throw new Error("Beklenmeyen yanıt formatı alındı.");
       } else {
-        requestId = aiToolRequest?.request_id?.toString();
+        generatedRequestId = aiToolResponse?.request_id?.toString();
       }
 
-      if (!requestId) throw new Error("Yapay zeka aracı başlatılamadı.");
+      if (!generatedRequestId)
+        throw new Error("Yapay zeka aracı başlatılamadı.");
 
       const aiToolStatusResult = await dispatch(
-        pollAiToolStatus({ requestId }),
+        pollAiToolStatus({
+          requestId: generatedRequestId,
+          aiToolStatus: aiToolStatus || "",
+          aiToolResult: aiToolResult || "",
+        }),
       );
       if (aiToolStatusResult.meta.requestStatus === "rejected") {
         throw new Error("Yapay zeka görseli işleyemedi.");
@@ -189,6 +206,15 @@ const ImageGeneratorScreen = () => {
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           {servicePrompt}
         </Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          {aiToolRequest}
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          {aiToolStatus}
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          {aiToolResult}
+        </Text>
       </View>
 
       <Pressable
@@ -211,7 +237,7 @@ const ImageGeneratorScreen = () => {
         </View>
         <View style={styles.featureItem}>
           <Text style={[styles.featureIcon, { color: colors.primary }]}>
-            🎯
+            ��
           </Text>
           <Text style={[styles.featureText, { color: colors.textSecondary }]}>
             Yüksek Kalite
