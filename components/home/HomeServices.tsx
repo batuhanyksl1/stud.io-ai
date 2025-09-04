@@ -9,16 +9,18 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 export const HomeServices: React.FC = () => {
   const router = useRouter();
-
-  const handleServicePress = (serviceId: string) => {
-    router.push(`/(tabs)/[prompt]`);
+  const handleServicePress = (servicePrompt: string) => {
+    router.push({
+      pathname: "/(tabs)/sikko",
+      params: { servicePrompt: servicePrompt },
+    });
   };
 
   const renderServiceCard = (service: (typeof editingServices)[0]) => {
     return (
       <TouchableOpacity
         key={service.id}
-        onPress={() => handleServicePress(service.id)}
+        onPress={() => handleServicePress(service.prompt)}
         activeOpacity={0.8}
         style={styles.serviceCardContainer}
       >

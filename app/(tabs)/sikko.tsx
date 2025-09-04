@@ -11,6 +11,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useAppDispatch } from "@/store/hooks";
 import { pickImage } from "@/utils/pickImage";
 import * as MediaLibrary from "expo-media-library";
+import { useLocalSearchParams } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
@@ -26,13 +27,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { pollAiToolStatus } from "../../store/slices/contentCreationSlice";
 
 // Profesyonel ve kullanıcı dostu bir arayüz
 const ImageGeneratorScreen = () => {
+  const { servicePrompt } = useLocalSearchParams<{ servicePrompt: string }>();
+  console.log(servicePrompt);
   const dispatch = useAppDispatch();
   const { colors } = useTheme();
   const {
@@ -50,7 +52,6 @@ const ImageGeneratorScreen = () => {
   >(null);
   const [isImageViewerVisible, setImageViewerVisible] =
     useState<boolean>(false);
-  const [prompt, setPrompt] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Animation states
@@ -61,7 +62,6 @@ const ImageGeneratorScreen = () => {
   const resetState = useCallback(() => {
     setLocalImageUri(null);
     setOriginalImageForResult(null);
-    setPrompt("");
     setErrorMessage(null);
     setImageViewerVisible(false);
   }, []);
@@ -81,7 +81,7 @@ const ImageGeneratorScreen = () => {
         useNativeDriver: true,
       }),
     ]).start();
-  }, [localImageUri, createdImageUrl]);
+  }, [localImageUri, createdImageUrl, fadeAnim, scaleAnim]);
 
   // Adım 1: Sadece galeriden görsel seçme
   const handleSelectImage = async () => {
@@ -102,8 +102,8 @@ const ImageGeneratorScreen = () => {
       setErrorMessage("Lütfen önce bir görsel seçin.");
       return;
     }
-    if (!prompt.trim()) {
-      setErrorMessage("Lütfen görsele ne yapmak istediğinizi yazın.");
+    if (!servicePrompt) {
+      setErrorMessage("Lütfen bir prompt yazın.");
       return;
     }
 
@@ -114,7 +114,7 @@ const ImageGeneratorScreen = () => {
       const imageUrl = await uploadImageToStorage(localImageUri);
       if (!imageUrl) throw new Error("Görsel sunucuya yüklenemedi.");
 
-      const aiToolRequest = await uploadImageToAITool(imageUrl, prompt);
+      const aiToolRequest = await uploadImageToAITool(imageUrl, servicePrompt);
 
       // Type guard for request_id
       let requestId: string | undefined;
@@ -185,6 +185,9 @@ const ImageGeneratorScreen = () => {
         </Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
           Bir görsel seçin ve nasıl dönüştüreceğinizi hayal edin
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          {servicePrompt}
         </Text>
       </View>
 
@@ -262,7 +265,7 @@ const ImageGeneratorScreen = () => {
               />
             </View>
 
-            <View
+            {/* <View
               style={[styles.inputCard, { backgroundColor: colors.surface }]}
             >
               <Text style={[styles.promptLabel, { color: colors.textPrimary }]}>
@@ -279,13 +282,13 @@ const ImageGeneratorScreen = () => {
                 ]}
                 placeholder="Örn: Suluboya bir tabloya çevir, anime tarzında yap..."
                 placeholderTextColor={colors.textTertiary}
-                value={prompt}
-                onChangeText={setPrompt}
+                value={servicePrompt as string}
+                onChangeText={() => {}}
                 multiline
                 numberOfLines={3}
                 textAlignVertical="top"
               />
-            </View>
+            </View> */}
 
             <View style={styles.buttonGroup}>
               <Pressable
