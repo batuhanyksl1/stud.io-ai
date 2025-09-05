@@ -61,9 +61,9 @@ export default function TabLayout() {
         />
 
         <Tabs.Screen
-          name="sikko"
+          name="creationPage"
           options={{
-            title: "Sikko", // Bu sayfa tab olarak görünmeyecek
+            title: "creationPage", // Bu sayfa tab olarak görünmeyecek
             href: null,
           }}
         />

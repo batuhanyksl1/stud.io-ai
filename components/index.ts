@@ -1,4 +1,5 @@
 // UI Components
+export { Badge, ComingSoonBadge } from "./ui/Badge";
 export { Button } from "./ui/Button";
 export { Card } from "./ui/Card";
 export { Input } from "./ui/Input";

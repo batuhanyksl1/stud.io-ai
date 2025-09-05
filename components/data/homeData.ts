@@ -1,47 +1,8 @@
-// Carousel için örnek veriler
-export const carouselData = [
-  {
-    id: 1,
-    title: "Portre Düzenleme",
-    subtitle: "Yüz güzelleştirme ve renk düzeltme",
-    icon: "accessibility",
-    gradient: ["#FF6B6B", "#FFE66D"],
-    image1: require("@/assets/images/carousel/image-a-1.png"),
-    image2: require("@/assets/images/carousel/image-a-2.jpg"),
-  },
-  {
-    id: 2,
-    title: "Manzara Fotoğrafları",
-    subtitle: "Doğal renkleri canlandırın",
-    icon: "accessibility",
-    gradient: ["#4ECDC4", "#44A08D"],
-    image1: require("@/assets/images/carousel/image-y-1.png"),
-    image2: require("@/assets/images/carousel/image-y-2.jpeg"),
-  },
-  {
-    id: 3,
-    title: "Ürün Fotoğrafları",
-    subtitle: "Profesyonel görünüm",
-    icon: "accessibility",
-    gradient: ["#A8E6CF", "#7FCDCD"],
-    image1: require("@/assets/images/carousel/image-a-1.png"),
-    image2: require("@/assets/images/carousel/image-a-2.jpg"),
-  },
-  {
-    id: 4,
-    title: "Sokak Fotoğrafçılığı",
-    subtitle: "Dramatik efektler ekleyin",
-    icon: "accessibility",
-    gradient: ["#FF9A9E", "#FECFEF"],
-    image1: require("@/assets/images/carousel/image-a-1.png"),
-    image2: require("@/assets/images/carousel/image-a-2.jpg"),
-  },
-];
-
 // Ana servislerimiz
 export const editingServices = [
   {
     id: "profile-picture",
+    disabled: false,
     title: "Profil Fotoğrafı",
     subtitle: "LinkedIn Ready",
     description: "LinkedIn için profesyonel profil fotoğrafları oluşturun",
@@ -63,9 +24,12 @@ export const editingServices = [
     aiToolStatus:
       "https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}/status",
     aiToolResult: "https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}",
+    image1: require("@/assets/images/carousel/image-a-1.png"),
+    image2: require("@/assets/images/carousel/image-a-2.jpg"),
   },
   {
     id: "background-removal",
+    disabled: false,
     title: "Arka Plan Kaldırma",
     subtitle: "AI Powered",
     prompt: "Remove the background of the image and make it transparent",
@@ -82,9 +46,16 @@ export const editingServices = [
     usageCount: "1.8K+",
     isPopular: false,
     badge: "Hızlı",
+    aiToolRequest: "https://queue.fal.run/fal-ai/flux-pro/kontext",
+    aiToolStatus:
+      "https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}/status",
+    aiToolResult: "https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}",
+    image1: require("@/assets/images/carousel/image-a-1.png"),
+    image2: require("@/assets/images/carousel/image-a-2.jpg"),
   },
   {
     id: "photo-enhancement",
+    disabled: false,
     title: "Fotoğraf İyileştirme",
     subtitle: "Smart Enhancement",
     prompt: "Enhance the image to make it look more natural and realistic",
@@ -101,9 +72,16 @@ export const editingServices = [
     usageCount: "1.2K+",
     isPopular: false,
     badge: "Kaliteli",
+    aiToolRequest: "https://queue.fal.run/fal-ai/flux-pro/kontext",
+    aiToolStatus:
+      "https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}/status",
+    aiToolResult: "https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}",
+    image1: require("@/assets/images/carousel/image-a-1.png"),
+    image2: require("@/assets/images/carousel/image-a-2.jpg"),
   },
   {
     id: "style-transfer",
+    disabled: false,
     title: "Stil Transferi",
     subtitle: "Artistic AI",
     prompt:
@@ -121,6 +99,12 @@ export const editingServices = [
     usageCount: "3.1K+",
     isPopular: true,
     badge: "Yaratıcı",
+    aiToolRequest: "https://queue.fal.run/fal-ai/flux-pro/kontext",
+    aiToolStatus:
+      "https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}/status",
+    aiToolResult: "https://queue.fal.run/fal-ai/flux-pro/requests/${requestId}",
+    image1: require("@/assets/images/carousel/image-a-1.png"),
+    image2: require("@/assets/images/carousel/image-a-2.jpg"),
   },
 ];
 

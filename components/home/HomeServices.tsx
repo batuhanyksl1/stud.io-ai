@@ -9,6 +9,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 
 export const HomeServices: React.FC = () => {
   const router = useRouter();
+
   const handleServicePress = (
     servicePrompt: string,
     aiToolRequest: string,
@@ -16,7 +17,7 @@ export const HomeServices: React.FC = () => {
     aiToolResult: string,
   ) => {
     router.push({
-      pathname: "/(tabs)/sikko",
+      pathname: "/(tabs)/creationPage",
       params: {
         servicePrompt: servicePrompt,
         aiToolRequest: aiToolRequest,
