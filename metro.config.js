@@ -2,11 +2,16 @@ const { getDefaultConfig } = require("expo/metro-config");
 
 const config = getDefaultConfig(__dirname);
 
-// Firebase için resolver ayarları
+// Platformlar
 config.resolver.platforms = ["ios", "android", "native", "web"];
 
-// Firebase ES module sorununu çözmek için
-config.resolver.resolverMainFields = ["react-native", "browser", "main"];
-config.resolver.sourceExts = ["js", "json", "ts", "tsx", "jsx"];
+// Modern paketlerin ESM/CJS dosyalarını da çözebilmesi için uzantıları genişlet
+const defaultSourceExts = config.resolver.sourceExts ?? [];
+config.resolver.sourceExts = Array.from(
+  new Set([...defaultSourceExts, "cjs", "mjs"]),
+);
+
+// Not: resolverMainFields override etmiyoruz; Expo/Metro varsayılanları
+// package.json "exports" alanını destekliyor ve Redux/RTK ile daha uyumlu.
 
 module.exports = config;
