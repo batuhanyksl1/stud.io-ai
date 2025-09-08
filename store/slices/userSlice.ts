@@ -1,5 +1,5 @@
-import { User } from '@/types';
-import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { User } from "@/types";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface UserState {
   profile: User | null;
@@ -19,53 +19,60 @@ const initialState: UserState = {
   preferences: {
     notifications: true,
     emailUpdates: true,
-    language: 'tr',
+    language: "tr",
   },
 };
 
 // Async thunks
 export const fetchUserProfile = createAsyncThunk(
-  'user/fetchProfile',
+  "user/fetchProfile",
   async (userId: string, { rejectWithValue }) => {
     try {
       // Burada gerçek API çağrısı yapılacak
       // Şimdilik mock data döndürüyoruz
       const mockUser: User = {
         uid: userId,
-        email: 'user@example.com',
-        displayName: 'Test User',
-        photoURL: null, 
+        email: "user@example.com",
+        displayName: "Test User",
+        photoURL: null,
         emailVerified: false,
-        lastLoginAt: new Date().toISOString(),
+        // lastLoginAt: new Date().toISOString(),
       };
       return mockUser;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Profil yüklenemedi');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Profil yüklenemedi",
+      );
     }
   },
 );
 
 export const updateUserProfile = createAsyncThunk(
-  'user/updateProfile',
+  "user/updateProfile",
   async (userData: Partial<User>, { rejectWithValue }) => {
     try {
       // Burada gerçek API çağrısı yapılacak
       // Şimdilik mock response döndürüyoruz
       return userData;
     } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Profil güncellenemedi');
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Profil güncellenemedi",
+      );
     }
   },
 );
 
 const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState,
   reducers: {
     setProfile: (state, action: PayloadAction<User>) => {
       state.profile = action.payload;
     },
-    updatePreferences: (state, action: PayloadAction<Partial<UserState['preferences']>>) => {
+    updatePreferences: (
+      state,
+      action: PayloadAction<Partial<UserState["preferences"]>>,
+    ) => {
       state.preferences = { ...state.preferences, ...action.payload };
     },
     clearUser: (state) => {
@@ -113,5 +120,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { setProfile, updatePreferences, clearUser, clearError } = userSlice.actions;
+export const { setProfile, updatePreferences, clearUser, clearError } =
+  userSlice.actions;
 export default userSlice.reducer;

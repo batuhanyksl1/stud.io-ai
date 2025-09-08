@@ -1,9 +1,9 @@
 import { auth } from "@/firebase.auth.config";
-import { storage } from "@/firebase.config";
 import { AiToolResult } from "@/types";
 import { fal } from "@fal-ai/client";
+import { storage } from "@/firebase.config";
+
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 fal.config({
   credentials: "YOUR_FAL_KEY",
@@ -46,30 +46,28 @@ export const uploadImageToStorage = createAsyncThunk<
   "contentCreation/uploadImageToStorage",
   async ({ fileUri }: { fileUri: string }, { rejectWithValue }) => {
     try {
-      const response = await fetch(fileUri);
-      const blob = await response.blob();
-
       const rawName = fileUri.split("/").pop() || `file-${Date.now()}`;
       const ext = rawName.includes(".") ? rawName.split(".").pop() : "jpg";
       const fileName = `${Date.now()}.${ext}`;
 
-      const reference = ref(
-        storage,
+      const reference = storage().ref(
         `${initialState.pathPrefix}/${auth.currentUser?.uid}/${fileName}`,
       );
 
-      const task = uploadBytesResumable(reference, blob);
+      // Ensure we pass a valid local path to RNFirebase Storage
+      // RNFirebase expects a file system path (without the file:// scheme)
+      const pathToFile = fileUri.startsWith("file://")
+        ? fileUri.replace("file://", "")
+        : fileUri;
 
-      await new Promise<void>((resolve, reject) => {
-        task.on(
-          "state_changed",
-          undefined,
-          (err) => reject(err),
-          () => resolve(),
-        );
-      });
+      // Upload the file from local storage
+      const task = reference.putFile(pathToFile);
 
-      const downloadURL = await getDownloadURL(reference);
+      // Optionally, track progress with task.on('state_changed', ...)
+      await task;
+
+      // Retrieve the public download URL
+      const downloadURL = await reference.getDownloadURL();
       return downloadURL;
     } catch (error) {
       console.error("Storage upload error:", error);
