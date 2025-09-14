@@ -1,5 +1,5 @@
 // Firebase Auth User type'ını import ediyoruz
-import { User as FirebaseAuthUser } from "firebase/auth";
+import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 
 // Auth types - authSlice'tan export ediliyor
 export type {
@@ -10,7 +10,7 @@ export type {
   UpdateProfileData,
 } from "@/store/slices/authSlice";
 
-export type User = FirebaseAuthUser;
+export type User = FirebaseAuthTypes.User;
 
 export interface Photo {
   id: string;

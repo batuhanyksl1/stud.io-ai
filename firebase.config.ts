@@ -1,13 +1,8 @@
-import { initializeApp } from "firebase/app";
+// React Native Firebase otomatik olarak yapılandırılır
+// google-services.json (Android) ve GoogleService-Info.plist (iOS) dosyaları kullanılır
+// Bu dosya sadece import'lar için kullanılır
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAvUMnqfBOQ_1WrK6WGM_r3AGMf15RAVQI",
-  authDomain: "studioai-980a7.firebaseapp.com",
-  projectId: "studioai-980a7",
-  storageBucket: "studioai-980a7.firebasestorage.app",
-  messagingSenderId: "216158155286",
-  appId: "1:216158155286:web:9767f4000f7b43c7877b37",
-  measurementId: "G-SGLQ2TMFGN",
-};
+import auth from "@react-native-firebase/auth";
+import storage from "@react-native-firebase/storage";
 
-export const app = initializeApp(firebaseConfig);
+export { auth, storage };

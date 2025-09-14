@@ -1,7 +1,6 @@
-import { auth } from "@/firebase.auth.config";
+import { auth, storage } from "@/firebase.config";
 import { AiToolResult } from "@/types";
 import { fal } from "@fal-ai/client";
-import { storage } from "@/firebase.config";
 
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
