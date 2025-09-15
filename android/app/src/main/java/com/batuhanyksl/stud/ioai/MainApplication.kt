@@ -1,4 +1,4 @@
-package com.studioai
+package com.batuhanyksl.stud.ioai
 
 import android.app.Application
 import android.content.res.Configuration
