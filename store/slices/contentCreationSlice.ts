@@ -50,7 +50,7 @@ export const uploadImageToStorage = createAsyncThunk<
       const fileName = `${Date.now()}.${ext}`;
 
       const reference = storage().ref(
-        `${initialState.pathPrefix}/${auth.currentUser?.uid}/${fileName}`,
+        `${initialState.pathPrefix}/${auth().currentUser?.uid}/${fileName}`,
       );
 
       // Ensure we pass a valid local path to RNFirebase Storage

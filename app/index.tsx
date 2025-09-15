@@ -20,18 +20,23 @@ export default function OnboardingScreen() {
   // const { colors } = useTheme();
   // const { isAuthenticated, isInitializing } = useAuth();
 
-  // Auth state'ini kontrol et
+  // Auth state'ini kontrol et (tek seferlik subscribe)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
-      setIsInitializing(false);
       setIsAuthenticated(!!user);
+      setIsInitializing(false);
     });
-    // isInitializing false olduğunda ve kullanıcı authenticate olmuşsa ana sayfaya yönlendir
+    return () => {
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
+  }, []);
+
+  // Kullanıcı hazır olduğunda yönlendir
+  useEffect(() => {
     if (!isInitializing && isAuthenticated) {
       router.replace("/(tabs)");
     }
-    return unsubscribe;
-  }, [isAuthenticated, isInitializing]);
+  }, [isInitializing, isAuthenticated]);
   // Auth state hala initialize ediliyorsa loading göster
   if (isInitializing) {
     return (
