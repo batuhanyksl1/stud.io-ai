@@ -1,6 +1,6 @@
 import ThemedText from "@/components/ThemedText";
 import ThemedView from "@/components/ThemedView";
-import { carouselData } from "@/components/data";
+import { editingServices } from "@/components/data";
 import { useTheme } from "@/hooks";
 import Ionicon from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Badge } from "../ui/Badge";
 
 const { width } = Dimensions.get("window");
 
@@ -31,7 +32,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
   // Otomatik kaydırma
   useEffect(() => {
     autoScrollInterval.current = setInterval(() => {
-      const nextPage = (currentPage + 1) % carouselData.length;
+      const nextPage = (currentPage + 1) % editingServices.length;
       setCurrentPage(nextPage);
       flatListRef.current?.scrollToIndex({
         index: nextPage,
@@ -55,11 +56,33 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
     }
   };
 
+  const handleServicePress = (
+    servicePrompt: string,
+    aiToolRequest: string,
+    aiToolStatus: string,
+    aiToolResult: string,
+  ) => {
+    router.push({
+      pathname: "/(tabs)/creationPage",
+      params: {
+        servicePrompt: servicePrompt,
+        aiToolRequest: aiToolRequest,
+        aiToolStatus: aiToolStatus,
+        aiToolResult: aiToolResult,
+      },
+    });
+    console.log(aiToolRequest, aiToolStatus, aiToolResult);
+  };
+
   const viewabilityConfig = {
     itemVisiblePercentThreshold: 50,
   };
 
-  const renderCarouselItem = ({ item }: { item: (typeof carouselData)[0] }) => (
+  const renderCarouselItem = ({
+    item,
+  }: {
+    item: (typeof editingServices)[0];
+  }) => (
     <View style={styles.carouselPage}>
       <LinearGradient
         colors={item.gradient as any}
@@ -72,6 +95,9 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
           <Image source={item.image1} style={styles.carouselImage} />
           <Image source={item.image2} style={styles.carouselImage} />
         </View>
+        <Badge style={styles.carouselBadge} variant="coming-soon">
+          Yakında ✨
+        </Badge>
 
         {/* Yazılar ön planda */}
         <View style={styles.carouselContent}>
@@ -83,7 +109,14 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
           </ThemedText>
           <TouchableOpacity
             style={styles.carouselButton}
-            onPress={() => router.push("/createRequest")}
+            onPress={() =>
+              handleServicePress(
+                item.prompt,
+                item.aiToolRequest as string,
+                item.aiToolStatus as string,
+                item.aiToolResult as string,
+              )
+            }
           >
             <ThemedText
               variant="body"
@@ -108,7 +141,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
       <View style={[styles.carouselContainer]}>
         <FlatList
           ref={flatListRef}
-          data={carouselData}
+          data={editingServices}
           renderItem={renderCarouselItem}
           keyExtractor={(item) => item.id.toString()}
           horizontal
@@ -130,7 +163,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
             { position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 0 },
           ]}
         >
-          {carouselData.map((_, index) => (
+          {editingServices.map((_, index) => (
             <View
               key={index}
               style={[
@@ -169,6 +202,11 @@ const styles = StyleSheet.create({
     position: "relative",
     overflow: "hidden",
   },
+  carouselBadge: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+  },
   carouselImagesContainer: {
     position: "absolute",
     top: 0,
@@ -195,6 +233,10 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     marginBottom: 8,
+    shadowColor: "black",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 10,
   },
   carouselSubtitle: {
     color: "white",

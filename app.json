@@ -8,11 +8,21 @@
     "scheme": "studioai",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/adaptive-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.batuhanyksl.stud.ioai"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.batuhanyksl.stud.ioai",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -27,6 +37,7 @@
     },
     "plugins": [
       "expo-router",
+      "@react-native-firebase/app",
       [
         "expo-splash-screen",
         {
@@ -37,6 +48,8 @@
         }
       ],
       "expo-localization",
+      ["expo-build-properties", { "ios": { "useFrameworks": "static" } }]
+
     ],
     "experiments": {
       "typedRoutes": true

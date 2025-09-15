@@ -1,4 +1,3 @@
-import "@/firebase.config"; // Firebase'i initialize et
 import { useFrameworkReady, useTheme } from "@/hooks";
 import "@/localization/i18n";
 import { AppProvider } from "@/providers";
@@ -30,8 +29,7 @@ import {
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
-
+import React, { useEffect } from "react";
 SplashScreen.preventAutoHideAsync();
 
 function AppContent() {

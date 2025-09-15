@@ -10,15 +10,36 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 export const HomeServices: React.FC = () => {
   const router = useRouter();
 
-  const handleServicePress = (serviceId: string) => {
-    router.push(`/service-detail?serviceId=${serviceId}`);
+  const handleServicePress = (
+    servicePrompt: string,
+    aiToolRequest: string,
+    aiToolStatus: string,
+    aiToolResult: string,
+  ) => {
+    router.push({
+      pathname: "/(tabs)/creationPage",
+      params: {
+        servicePrompt: servicePrompt,
+        aiToolRequest: aiToolRequest,
+        aiToolStatus: aiToolStatus,
+        aiToolResult: aiToolResult,
+      },
+    });
+    console.log(aiToolRequest, aiToolStatus, aiToolResult);
   };
 
   const renderServiceCard = (service: (typeof editingServices)[0]) => {
     return (
       <TouchableOpacity
         key={service.id}
-        onPress={() => handleServicePress(service.id)}
+        onPress={() =>
+          handleServicePress(
+            service.prompt,
+            service.aiToolRequest as string,
+            service.aiToolStatus as string,
+            service.aiToolResult as string,
+          )
+        }
         activeOpacity={0.8}
         style={styles.serviceCardContainer}
       >

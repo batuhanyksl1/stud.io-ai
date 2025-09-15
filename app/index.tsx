@@ -1,7 +1,8 @@
-import { useAuth, useTheme } from "@/hooks";
+// import { useAuth, useTheme } from "@/hooks";
+import { getAuth, onAuthStateChanged } from "@react-native-firebase/auth";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -14,22 +15,38 @@ import {
 const { width, height } = Dimensions.get("window");
 
 export default function OnboardingScreen() {
-  const { colors } = useTheme();
-  const { isAuthenticated, isInitializing } = useAuth();
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const { colors } = useTheme();
+  // const { isAuthenticated, isInitializing } = useAuth();
 
-  // Auth state'ini kontrol et
+  // Auth state'ini kontrol et (tek seferlik subscribe)
   useEffect(() => {
-    // isInitializing false olduğunda ve kullanıcı authenticate olmuşsa ana sayfaya yönlendir
+    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+      setIsAuthenticated(!!user);
+      setIsInitializing(false);
+    });
+    return () => {
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
+  }, []);
+
+  // Kullanıcı hazır olduğunda yönlendir
+  useEffect(() => {
     if (!isInitializing && isAuthenticated) {
       router.replace("/(tabs)");
     }
-  }, [isAuthenticated, isInitializing]);
-
+  }, [isInitializing, isAuthenticated]);
   // Auth state hala initialize ediliyorsa loading göster
   if (isInitializing) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: '#ffffff', fontSize: 16 }}>Yükleniyor...</Text>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <Text style={{ color: "#ffffff", fontSize: 16 }}>Yükleniyor...</Text>
       </View>
     );
   }

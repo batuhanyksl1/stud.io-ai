@@ -1,20 +1,14 @@
-import { auth } from "@/firebase.auth.config";
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import {
+import auth, {
   createUserWithEmailAndPassword,
-  EmailAuthProvider,
-  deleteUser as firebaseDeleteUser,
-  signOut as firebaseSignOut,
-  updateProfile as firebaseUpdateProfile,
-  User as FirebaseUser,
-  onAuthStateChanged,
-  reauthenticateWithCredential,
+  FirebaseAuthTypes,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
-} from "firebase/auth";
+  signOut as signOutFirebase,
+} from "@react-native-firebase/auth";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // Types
-export type AuthUser = FirebaseUser;
+export type AuthUser = FirebaseAuthTypes.User;
 
 export interface SignInCredentials {
   email: string;
@@ -48,7 +42,7 @@ const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
   isLoading: false,
-  isInitializing: true,
+  isInitializing: false,
   error: null,
 };
 
@@ -58,7 +52,7 @@ export const signIn = createAsyncThunk(
   async (credentials: SignInCredentials, { rejectWithValue }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(
-        auth,
+        auth(),
         credentials.email,
         credentials.password,
       );
@@ -97,14 +91,14 @@ export const signUp = createAsyncThunk(
   async (credentials: SignUpCredentials, { rejectWithValue }) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(
-        auth,
+        auth(),
         credentials.email,
         credentials.password,
       );
 
       // Update display name
       if (userCredential.user) {
-        await firebaseUpdateProfile(userCredential.user, {
+        await userCredential.user.updateProfile({
           displayName: credentials.displayName,
         });
       }
@@ -139,7 +133,7 @@ export const signOut = createAsyncThunk(
   "auth/signOut",
   async (_, { rejectWithValue }) => {
     try {
-      await firebaseSignOut(auth);
+      await signOutFirebase(auth());
       return null;
     } catch (error: any) {
       return rejectWithValue(error.message || "Çıkış yapılamadı");
@@ -151,7 +145,7 @@ export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (email: string, { rejectWithValue }) => {
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(auth(), email);
       return null;
     } catch (error: any) {
       let errorMessage = "Şifre sıfırlama e-postası gönderilemedi";
@@ -174,157 +168,117 @@ export const forgotPassword = createAsyncThunk(
   },
 );
 
-export const updateProfile = createAsyncThunk(
-  "auth/updateProfile",
-  async (profileData: UpdateProfileData, { rejectWithValue, getState }) => {
-    try {
-      const state = getState() as any;
-      const currentUser = auth.currentUser;
+// export const updateProfile = createAsyncThunk(
+//   "auth/updateProfile",
+//   async (profileData: UpdateProfileData, { rejectWithValue }) => {
+//     try {
+//       const currentUser = currentUser(auth());
 
-      if (!currentUser) {
-        throw new Error("Kullanıcı oturumu bulunamadı");
-      }
+//       if (!currentUser) {
+//         throw new Error("Kullanıcı oturumu bulunamadı");
+//       }
 
-      await firebaseUpdateProfile(currentUser, profileData);
+//       await currentUser.updateProfile(profileData);
 
-      // Return updated user data
-      return currentUser;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.message || "Profil güncellenirken bir hata oluştu",
-      );
-    }
-  },
-);
+//       // Return updated user data
+//       return currentUser(auth()) as AuthUser;
+//     } catch (error: any) {
+//       return rejectWithValue(
+//         error.message || "Profil güncellenirken bir hata oluştu",
+//       );
+//     }
+//   },
+// );
 
-export const deleteAccount = createAsyncThunk(
-  "auth/deleteAccount",
-  async (data: DeleteAccountData, { rejectWithValue }) => {
-    try {
-      const currentUser = auth.currentUser;
+// export const deleteAccount = createAsyncThunk(
+//   "auth/deleteAccount",
+//   async (data: DeleteAccountData, { rejectWithValue }) => {
+//     try {
+//       const currentUser = currentUser(auth());
 
-      if (!currentUser || !currentUser.email) {
-        throw new Error("Kullanıcı oturumu bulunamadı");
-      }
+//       if (!currentUser || !currentUser.email) {
+//         throw new Error("Kullanıcı oturumu bulunamadı");
+//       }
 
-      // Re-authenticate user before deletion
-      const credential = EmailAuthProvider.credential(
-        currentUser.email,
-        data.password,
-      );
+//       // Re-authenticate user before deletion
+//       const credential = EmailAuthProvider.credential(
+//         currentUser.email,
+//         data.password,
+//         // NOTE: If you use phone or other providers, adapt flow accordingly
+//       );
 
-      await reauthenticateWithCredential(currentUser, credential);
-      await firebaseDeleteUser(currentUser);
+//       await currentUser.reauthenticateWithCredential(credential);
+//       await currentUser.delete();
 
-      return null;
-    } catch (error: any) {
-      let errorMessage = "Hesap silinemedi";
+//       return null;
+//     } catch (error: any) {
+//       let errorMessage = "Hesap silinemedi";
 
-      switch (error.code) {
-        case "auth/wrong-password":
-          errorMessage = "Hatalı şifre";
-          break;
-        case "auth/requires-recent-login":
-          errorMessage = "Hesap silmek için yeniden giriş yapmanız gerekiyor";
-          break;
-        default:
-          errorMessage = error.message || "Hesap silinirken bir hata oluştu";
-      }
+//       switch (error.code) {
+//         case "auth/wrong-password":
+//           errorMessage = "Hatalı şifre";
+//           break;
+//         case "auth/requires-recent-login":
+//           errorMessage = "Hesap silmek için yeniden giriş yapmanız gerekiyor";
+//           break;
+//         default:
+//           errorMessage = error.message || "Hesap silinirken bir hata oluştu";
+//       }
 
-      return rejectWithValue(errorMessage);
-    }
-  },
-);
+//       return rejectWithValue(errorMessage);
+//     }
+//   },
+// );
 
 // Auth state listener
-export const initializeAuth = createAsyncThunk(
-  "auth/initializeAuth",
-  async (_, { dispatch }) => {
-    console.log("authSlice.ts: Initializing auth...");
-    return new Promise<void>((resolve) => {
-      try {
-        console.log("authSlice.ts: Using Firebase auth instance...");
-        console.log("authSlice.ts: Firebase auth instance:", auth);
-        console.log("authSlice.ts: Auth current user:", auth.currentUser);
-        console.log("authSlice.ts: Auth app:", auth.app);
+// export const initializeAuth = createAsyncThunk(
+//   "auth/initializeAuth",
+//   async (_, { dispatch }) => {
+//     return new Promise<void>((resolve) => {
+//       try {
+//         if ((global as any).authUnsubscribe) {
+//           (global as any).authUnsubscribe();
+//         }
 
-        // Önceki listener varsa temizle
-        if ((global as any).authUnsubscribe) {
-          console.log("authSlice.ts: Cleaning up previous auth listener...");
-          (global as any).authUnsubscribe();
-        }
+//         const handleAuthStateChange = (firebaseUser: AuthUser | null) => {
+//           if (firebaseUser) {
+//             dispatch(setUser(firebaseUser));
+//           } else {
+//             dispatch(clearAuth());
+//           }
 
-        console.log("authSlice.ts: Setting up new auth listener...");
+//           dispatch(setInitializing(false));
 
-        // Handle auth state change inline
-        const handleAuthStateChange = (firebaseUser: FirebaseUser | null) => {
-          console.log(
-            "authSlice.ts: Auth state changed:",
-            firebaseUser ? "User logged in" : "User logged out",
-          );
-          console.log("authSlice.ts: Firebase user:", firebaseUser);
+//           if (!(global as any).authInitialized) {
+//             (global as any).authInitialized = true;
+//             resolve();
+//           }
+//         };
 
-          if (firebaseUser) {
-            console.log("authSlice.ts: Setting user in store:", firebaseUser);
-            dispatch(setUser(firebaseUser));
-          } else {
-            console.log("authSlice.ts: Clearing auth from store");
-            dispatch(clearAuth());
-          }
-
-          console.log("authSlice.ts: Setting isInitializing to false");
-          dispatch(setInitializing(false));
-
-          // Promise'i resolve et - sadece ilk auth state değişikliğinde
-          if (!(global as any).authInitialized) {
-            (global as any).authInitialized = true;
-            console.log("authSlice.ts: Resolving promise...");
-            resolve();
-          }
-        };
-
-        console.log("authSlice.ts: Calling onAuthStateChanged...");
-        const unsubscribe = onAuthStateChanged(auth, handleAuthStateChange);
-        console.log(
-          "authSlice.ts: onAuthStateChanged returned unsubscribe function:",
-          unsubscribe,
-        );
-
-        // Store the unsubscribe function globally so it can be called later
-        (global as any).authUnsubscribe = unsubscribe;
-        console.log("authSlice.ts: Auth listener setup completed");
-      } catch (error) {
-        console.error("authSlice.ts: Error setting up auth listener:", error);
-        dispatch(setInitializing(false));
-        resolve();
-      }
-    });
-  },
-);
+//         const unsubscribe = onAuthStateChanged(auth(), handleAuthStateChange);
+//         (global as any).authUnsubscribe = unsubscribe;
+//       } catch (error) {
+//         console.error("authSlice.ts: Error setting up auth listener:", error);
+//         dispatch(setInitializing(false));
+//         resolve();
+//       }
+//     });
+//   },
+// );
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<AuthUser>) => {
-      console.log("authSlice.ts: setUser reducer called with:", action.payload);
       state.user = action.payload;
       state.isAuthenticated = true;
       state.error = null;
-      console.log("authSlice.ts: New auth state:", {
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      });
     },
     clearAuth: (state) => {
-      console.log("authSlice.ts: clearAuth reducer called");
       state.user = null;
       state.isAuthenticated = false;
       state.error = null;
-      console.log("authSlice.ts: New auth state:", {
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      });
     },
     clearError: (state) => {
       state.error = null;
@@ -335,26 +289,23 @@ const authSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    cleanupAuth: (state) => {
-      console.log("authSlice.ts: cleanupAuth reducer called");
-      // Cleanup auth listener
-      if ((global as any).authUnsubscribe) {
-        (global as any).authUnsubscribe();
-        (global as any).authUnsubscribe = null;
-      }
-      // Reset auth initialized flag
-      (global as any).authInitialized = false;
-    },
+    // cleanupAuth: (state) => {
+    //   if ((global as any).authUnsubscribe) {
+    //     (global as any).authUnsubscribe();
+    //     (global as any).authUnsubscribe = null;
+    //   }
+    //   (global as any).authInitialized = false;
+    // },
   },
   extraReducers: (builder) => {
     // Initialize Auth
-    builder
-      .addCase(initializeAuth.pending, (state) => {
-        state.isInitializing = true;
-      })
-      .addCase(initializeAuth.fulfilled, (state) => {
-        state.isInitializing = false;
-      });
+    // builder
+    //   .addCase(initializeAuth.pending, (state) => {
+    //     state.isInitializing = true;
+    //   })
+    //   .addCase(initializeAuth.fulfilled, (state) => {
+    //     state.isInitializing = false;
+    //   });
 
     // Sign In
     builder
@@ -364,7 +315,7 @@ const authSlice = createSlice({
       })
       .addCase(signIn.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload;
+        state.user = action.payload as AuthUser;
         state.isAuthenticated = true;
         state.error = null;
       })
@@ -381,7 +332,7 @@ const authSlice = createSlice({
       })
       .addCase(signUp.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload;
+        state.user = action.payload as AuthUser;
         state.isAuthenticated = true;
         state.error = null;
       })
@@ -422,37 +373,37 @@ const authSlice = createSlice({
       });
 
     // Update Profile
-    builder
-      .addCase(updateProfile.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(updateProfile.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.user = action.payload;
-        state.error = null;
-      })
-      .addCase(updateProfile.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-      });
+    // builder
+    //   .addCase(updateProfile.pending, (state) => {
+    //     state.isLoading = true;
+    //     state.error = null;
+    //   })
+    //   .addCase(updateProfile.fulfilled, (state, action) => {
+    //     state.isLoading = false;
+    //     state.user = action.payload as AuthUser;
+    //     state.error = null;
+    //   })
+    //   .addCase(updateProfile.rejected, (state, action) => {
+    //     state.isLoading = false;
+    //     state.error = action.payload as string;
+    //   });
 
     // Delete Account
-    builder
-      .addCase(deleteAccount.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(deleteAccount.fulfilled, (state) => {
-        state.isLoading = false;
-        state.user = null;
-        state.isAuthenticated = false;
-        state.error = null;
-      })
-      .addCase(deleteAccount.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-      });
+    // builder
+    //   .addCase(deleteAccount.pending, (state) => {
+    //     state.isLoading = true;
+    //     state.error = null;
+    //   })
+    //   .addCase(deleteAccount.fulfilled, (state) => {
+    //     state.isLoading = false;
+    //     state.user = null;
+    //     state.isAuthenticated = false;
+    //     state.error = null;
+    //   })
+    //   .addCase(deleteAccount.rejected, (state, action) => {
+    //     state.isLoading = false;
+    //     state.error = action.payload as string;
+    //   });
   },
 });
 
@@ -462,7 +413,7 @@ export const {
   clearError,
   setInitializing,
   setLoading,
-  cleanupAuth,
+  //cleanupAuth,
 } = authSlice.actions;
 
 export default authSlice.reducer;

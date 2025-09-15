@@ -1,23 +1,23 @@
-import { store } from "@/store";
+// import { store } from "@/store";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
-  cleanupAuth,
+  // cleanupAuth,
   clearAuth,
   clearError,
-  deleteAccount,
+  // deleteAccount,
   forgotPassword,
-  initializeAuth,
+  // initializeAuth,
   setLoading,
   signIn,
   signOut,
   signUp,
-  updateProfile,
+  // updateProfile,
 } from "@/store/slices/authSlice";
 import {
-  DeleteAccountData,
+  // DeleteAccountData,
   SignInCredentials,
   SignUpCredentials,
-  UpdateProfileData,
+  // UpdateProfileData,
 } from "@/types";
 
 export function useAuth() {
@@ -42,13 +42,13 @@ export function useAuth() {
     return await dispatch(forgotPassword(email));
   };
 
-  const updateUserProfile = async (profileData: UpdateProfileData) => {
-    return await dispatch(updateProfile(profileData));
-  };
+  // const updateUserProfile = async (profileData: UpdateProfileData) => {
+  //   return await dispatch(updateProfile(profileData));
+  // };
 
-  const deleteUserAccount = async (data: DeleteAccountData) => {
-    return await dispatch(deleteAccount(data));
-  };
+  // const deleteUserAccount = async (data: DeleteAccountData) => {
+  //   return await dispatch(deleteAccount(data));
+  // };
 
   const clearAuthData = () => {
     dispatch(clearAuth());
@@ -62,13 +62,13 @@ export function useAuth() {
     dispatch(setLoading(loading));
   };
 
-  const initializeAuthState = async () => {
-    return await dispatch(initializeAuth());
-  };
+  // const initializeAuthState = async () => {
+  //   return await dispatch(initializeAuth());
+  // };
 
-  const cleanupAuthState = () => {
-    dispatch(cleanupAuth());
-  };
+  // const cleanupAuthState = () => {
+  //   dispatch(cleanupAuth());
+  // };
 
   return {
     user,
@@ -80,25 +80,25 @@ export function useAuth() {
     register,
     logout,
     resetPassword,
-    updateUserProfile,
-    deleteUserAccount,
+    // updateUserProfile,
+    // deleteUserAccount,
     clearAuthData,
     clearAuthError,
     setLoadingState,
-    initializeAuthState,
-    cleanupAuthState,
+    // initializeAuthState,
+    // cleanupAuthState,
   };
 }
 
 // Export for use outside of hook
-export const initializeAuthStateDirect = async () => {
-  console.log("useAuth.ts: initializeAuthStateDirect called");
-  try {
-    const result = await store.dispatch(initializeAuth());
-    console.log("useAuth.ts: initializeAuth dispatch result:", result);
-    return result;
-  } catch (error) {
-    console.error("useAuth.ts: Error dispatching initializeAuth:", error);
-    throw error;
-  }
-};
+// export const initializeAuthStateDirect = async () => {
+//   console.log("useAuth.ts: initializeAuthStateDirect called");
+//   try {
+//     const result = await store.dispatch(initializeAuth());
+//     console.log("useAuth.ts: initializeAuth dispatch result:", result);
+//     return result;
+//   } catch (error) {
+//     console.error("useAuth.ts: Error dispatching initializeAuth:", error);
+//     throw error;
+//   }
+// };
