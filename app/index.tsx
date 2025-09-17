@@ -1,4 +1,3 @@
-// import { useAuth, useTheme } from "@/hooks";
 import { getAuth, onAuthStateChanged } from "@react-native-firebase/auth";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -17,13 +16,13 @@ const { width, height } = Dimensions.get("window");
 export default function OnboardingScreen() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // const { colors } = useTheme();
-  // const { isAuthenticated, isInitializing } = useAuth();
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   // Auth state'ini kontrol et (tek seferlik subscribe)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
       setIsAuthenticated(!!user);
+      setIsEmailVerified(user?.emailVerified || false);
       setIsInitializing(false);
     });
     return () => {
@@ -34,9 +33,15 @@ export default function OnboardingScreen() {
   // Kullanıcı hazır olduğunda yönlendir
   useEffect(() => {
     if (!isInitializing && isAuthenticated) {
-      router.replace("/(tabs)");
+      if (isEmailVerified) {
+        // Email doğrulanmış, ana sayfaya git
+        router.replace("/(tabs)");
+      } else {
+        // Email doğrulanmamış, verification sayfasına git
+        router.replace("/email-verification");
+      }
     }
-  }, [isInitializing, isAuthenticated]);
+  }, [isInitializing, isAuthenticated, isEmailVerified]);
   // Auth state hala initialize ediliyorsa loading göster
   if (isInitializing) {
     return (

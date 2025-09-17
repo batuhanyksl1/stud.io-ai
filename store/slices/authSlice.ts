@@ -1,6 +1,7 @@
 import auth, {
   createUserWithEmailAndPassword,
   FirebaseAuthTypes,
+  sendEmailVerification,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut as signOutFirebase,
@@ -166,6 +167,62 @@ export const forgotPassword = createAsyncThunk(
       }
 
       return rejectWithValue(errorMessage);
+    }
+  },
+);
+
+export const resendEmailVerification = createAsyncThunk(
+  "auth/resendEmailVerification",
+  async (_, { rejectWithValue }) => {
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        throw new Error("Kullanıcı oturumu bulunamadı");
+      }
+
+      await sendEmailVerification(currentUser);
+      return null;
+    } catch (error: any) {
+      let errorMessage = "Doğrulama e-postası gönderilemedi";
+
+      switch (error.code) {
+        case "auth/too-many-requests":
+          errorMessage =
+            "Çok fazla istek gönderildi. Lütfen daha sonra tekrar deneyin";
+          break;
+        case "auth/user-not-found":
+          errorMessage = "Kullanıcı bulunamadı";
+          break;
+        default:
+          errorMessage =
+            error.message ||
+            "Doğrulama e-postası gönderilirken bir hata oluştu";
+      }
+
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
+
+export const updateDisplayName = createAsyncThunk(
+  "auth/updateDisplayName",
+  async (displayName: string, { rejectWithValue }) => {
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        throw new Error("Kullanıcı oturumu bulunamadı");
+      }
+
+      await currentUser.updateProfile({
+        displayName: displayName,
+      });
+
+      // Güncellenmiş kullanıcı bilgilerini döndür
+      return currentUser;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.message || "Display name güncellenirken bir hata oluştu",
+      );
     }
   },
 );
@@ -376,6 +433,37 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(forgotPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Resend Email Verification
+    builder
+      .addCase(resendEmailVerification.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resendEmailVerification.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(resendEmailVerification.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Update Display Name
+    builder
+      .addCase(updateDisplayName.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateDisplayName.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload as AuthUser;
+        state.error = null;
+      })
+      .addCase(updateDisplayName.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });
