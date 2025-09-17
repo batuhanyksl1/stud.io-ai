@@ -1,20 +1,32 @@
 import { ThemedButton, ThemedCard, ThemedText, ThemedView } from "@/components";
 import { BorderRadius, Colors, Spacing } from "@/constants/Colors";
+import { useContentCreation } from "@/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Image, ScrollView, StyleSheet, View } from "react-native";
-import { useGeneration } from "../../hooks";
 
 // ===== Component =====
 export default function CreateRequestScreen() {
-  const {
-    selectedImage,
-    pickImage,
-    takePhoto,
-    processImageWithFalAI,
-    setSelectedImage,
-    error,
-  } = useGeneration();
+  const { error } = useContentCreation();
+
+  // Geçici olarak selectedImage state'ini local olarak yönetelim
+  const [selectedImage, setSelectedImage] = React.useState<any>(null);
+
+  // Eksik fonksiyonları tanımlayalım
+  const pickImage = async () => {
+    // TODO: Image picker implementasyonu
+    console.log("Galeri seçimi - henüz implement edilmedi");
+  };
+
+  const takePhoto = async () => {
+    // TODO: Camera implementasyonu
+    console.log("Kamera - henüz implement edilmedi");
+  };
+
+  const processImageWithFalAI = async (imageId: string) => {
+    // TODO: FalAI işleme implementasyonu
+    console.log("FalAI işleme - henüz implement edilmedi", imageId);
+  };
 
   const handleStartProcessing = () => {
     if (selectedImage) {
@@ -25,7 +37,11 @@ export default function CreateRequestScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Header */}
         <View style={styles.header}>
           <ThemedText variant="h2" weight="bold" style={styles.title}>
@@ -39,7 +55,7 @@ export default function CreateRequestScreen() {
         {/* Upload */}
         <ThemedCard style={styles.uploadCard} elevation="lg">
           {selectedImage ? (
-            <View style={styles.previewWrap}>
+            <ScrollView style={styles.previewWrap}>
               <Image
                 source={{ uri: selectedImage.uri }}
                 style={styles.preview}
@@ -78,10 +94,10 @@ export default function CreateRequestScreen() {
                   </ThemedText>
                 </ThemedButton>
               </View>
-            </View>
+            </ScrollView>
           ) : (
             // GÖRSEL SEÇİLMEMİŞSE
-            <View style={styles.dropArea}>
+            <ScrollView style={styles.dropArea}>
               <Ionicons name="cloud-upload" size={32} color={Colors.primary} />
               <ThemedText
                 variant="bodyLarge"
@@ -120,7 +136,7 @@ export default function CreateRequestScreen() {
                   </ThemedText>
                 </ThemedButton>
               </View>
-            </View>
+            </ScrollView>
           )}
         </ThemedCard>
 
@@ -178,6 +194,77 @@ export default function CreateRequestScreen() {
             </ThemedCard>
           </View>
         )}
+
+        {/* Test için ek içerik - ScrollView'in çalışıp çalışmadığını test etmek için */}
+        <View style={{ marginHorizontal: Spacing.lg, marginTop: Spacing.lg }}>
+          <ThemedCard
+            elevation="sm"
+            style={{ padding: Spacing.lg, marginBottom: Spacing.md }}
+          >
+            <ThemedText
+              variant="h4"
+              weight="semiBold"
+              style={{ marginBottom: Spacing.sm }}
+            >
+              Test İçeriği 1
+            </ThemedText>
+            <ThemedText variant="body">
+              Bu bölüm ScrollView&apos;in çalışıp çalışmadığını test etmek için
+              eklenmiştir.
+            </ThemedText>
+          </ThemedCard>
+
+          <ThemedCard
+            elevation="sm"
+            style={{ padding: Spacing.lg, marginBottom: Spacing.md }}
+          >
+            <ThemedText
+              variant="h4"
+              weight="semiBold"
+              style={{ marginBottom: Spacing.sm }}
+            >
+              Test İçeriği 2
+            </ThemedText>
+            <ThemedText variant="body">
+              Eğer bu içerikleri görebiliyorsanız ve aşağı kaydırabiliyorsanız
+              ScrollView çalışıyor demektir.
+            </ThemedText>
+          </ThemedCard>
+
+          <ThemedCard
+            elevation="sm"
+            style={{ padding: Spacing.lg, marginBottom: Spacing.md }}
+          >
+            <ThemedText
+              variant="h4"
+              weight="semiBold"
+              style={{ marginBottom: Spacing.sm }}
+            >
+              Test İçeriği 3
+            </ThemedText>
+            <ThemedText variant="body">
+              ScrollView&apos;in düzgün çalışması için yeterli içerik olması
+              gerekiyor.
+            </ThemedText>
+          </ThemedCard>
+
+          <ThemedCard
+            elevation="sm"
+            style={{ padding: Spacing.lg, marginBottom: Spacing.md }}
+          >
+            <ThemedText
+              variant="h4"
+              weight="semiBold"
+              style={{ marginBottom: Spacing.sm }}
+            >
+              Test İçeriği 4
+            </ThemedText>
+            <ThemedText variant="body">
+              Bu son test kartı. Eğer buraya kadar scroll yapabiliyorsanız her
+              şey yolunda!
+            </ThemedText>
+          </ThemedCard>
+        </View>
       </ScrollView>
     </ThemedView>
   );
@@ -187,6 +274,10 @@ export default function CreateRequestScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { flex: 1 },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: Spacing.xl,
+  },
 
   header: {
     paddingHorizontal: Spacing.lg,

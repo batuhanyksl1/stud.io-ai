@@ -43,13 +43,8 @@ const ImageGeneratorScreen = () => {
   console.log(servicePrompt);
   const dispatch = useAppDispatch();
   const { colors } = useTheme();
-  const {
-    uploadImageToStorage,
-    uploadImageToAITool,
-    createdImageUrl,
-    status,
-    error,
-  } = useContentCreation();
+  const { uploadImageToStorage, uploadImageToAITool, createdImageUrl, status } =
+    useContentCreation();
 
   // Component'e özel state'ler
   const [localImageUri, setLocalImageUri] = useState<string | null>(null);
@@ -97,7 +92,7 @@ const ImageGeneratorScreen = () => {
         resetState();
         setLocalImageUri(pickedImageUri);
       }
-    } catch (e) {
+    } catch (_e) {
       setErrorMessage("Görsel seçilirken bir hata oluştu.");
     }
   };
@@ -189,70 +184,77 @@ const ImageGeneratorScreen = () => {
 
   // Arayüzü duruma göre render eden fonksiyonlar
   const renderInitialView = () => (
-    <Animated.View
-      style={[
-        styles.centeredContainer,
-        { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
-      ]}
+    <ScrollView
+      contentContainerStyle={styles.scrollContentContainer}
+      showsVerticalScrollIndicator={false}
     >
-      <View style={[styles.heroContainer, { backgroundColor: colors.surface }]}>
-        <Text style={[styles.heroIcon, { color: colors.primary }]}>🎨</Text>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>
-          Yapay Zeka Stüdyosuuuu
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Bir görsel seçin ve nasıl dönüştüreceğinizi hayal edin
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          {servicePrompt}
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          {aiToolRequest}
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          {aiToolStatus}
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          {aiToolResult}
-        </Text>
-      </View>
-
-      <Pressable
-        style={[styles.ctaButton, { backgroundColor: colors.primary }]}
-        onPress={handleSelectImage}
+      <Animated.View
+        style={[
+          styles.centeredContainer,
+          { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+        ]}
       >
-        <Text style={[styles.ctaButtonText, { color: colors.textOnPrimary }]}>
-          🖼️ Galeriden Görsel Seç
-        </Text>
-      </Pressable>
+        <View
+          style={[styles.heroContainer, { backgroundColor: colors.surface }]}
+        >
+          <Text style={[styles.heroIcon, { color: colors.primary }]}>🎨</Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>
+            Yapay Zeka Stüdyosuuuu
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            Bir görsel seçin ve nasıl dönüştüreceğinizi hayal edin
+          </Text>
+          {/* <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            {servicePrompt}
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            {aiToolRequest}
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            {aiToolStatus}
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+            {aiToolResult}
+          </Text> */}
+        </View>
 
-      <View style={[styles.featureGrid, { backgroundColor: colors.surface }]}>
-        <View style={styles.featureItem}>
-          <Text style={[styles.featureIcon, { color: colors.primary }]}>
-            ✨
+        <Pressable
+          style={[styles.ctaButton, { backgroundColor: colors.primary }]}
+          onPress={handleSelectImage}
+        >
+          <Text style={[styles.ctaButtonText, { color: colors.textOnPrimary }]}>
+            🖼️ Galeriden Görsel Seç
           </Text>
-          <Text style={[styles.featureText, { color: colors.textSecondary }]}>
-            Hızlı Dönüştürme
-          </Text>
+        </Pressable>
+
+        <View style={[styles.featureGrid, { backgroundColor: colors.surface }]}>
+          <View style={styles.featureItem}>
+            <Text style={[styles.featureIcon, { color: colors.primary }]}>
+              ✨
+            </Text>
+            <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+              Hızlı Dönüştürme
+            </Text>
+          </View>
+          <View style={styles.featureItem}>
+            <Text style={[styles.featureIcon, { color: colors.primary }]}>
+              ��
+            </Text>
+            <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+              Yüksek Kalite
+            </Text>
+          </View>
+          <View style={styles.featureItem}>
+            <Text style={[styles.featureIcon, { color: colors.primary }]}>
+              💾
+            </Text>
+            <Text style={[styles.featureText, { color: colors.textSecondary }]}>
+              Kolay İndirme
+            </Text>
+          </View>
         </View>
-        <View style={styles.featureItem}>
-          <Text style={[styles.featureIcon, { color: colors.primary }]}>
-            ��
-          </Text>
-          <Text style={[styles.featureText, { color: colors.textSecondary }]}>
-            Yüksek Kalite
-          </Text>
-        </View>
-        <View style={styles.featureItem}>
-          <Text style={[styles.featureIcon, { color: colors.primary }]}>
-            💾
-          </Text>
-          <Text style={[styles.featureText, { color: colors.textSecondary }]}>
-            Kolay İndirme
-          </Text>
-        </View>
-      </View>
-    </Animated.View>
+      </Animated.View>
+    </ScrollView>
   );
 
   const renderEditingView = () =>
@@ -595,6 +597,10 @@ const styles = StyleSheet.create({
     padding: Spacing.xl,
   },
   contentContainer: {
+    flexGrow: 1,
+    padding: Spacing.xl,
+  },
+  scrollContentContainer: {
     flexGrow: 1,
     padding: Spacing.xl,
   },

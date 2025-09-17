@@ -1,6 +1,6 @@
 import {
+  Header,
   HomeCarousel,
-  HomeHeader,
   HomeServices,
   HomeStats,
   ThemedView,
@@ -15,7 +15,7 @@ export default function HomeScreen() {
   return (
     <ThemedView backgroundColor="background" style={styles.container}>
       <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
-      <HomeHeader />
+      <Header leftIconType="information" rightIconType="settings" />
 
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <ScrollView

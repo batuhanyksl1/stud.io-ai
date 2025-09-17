@@ -1,191 +1,384 @@
-import { ScrollContainer, ThemedCard, ThemedText, ThemedView } from '@/components';
-import { useTheme } from '@/hooks';
-import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
-import { Download, Plus, Settings, Share, Trash2 } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import { Dimensions, Image, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Header,
+  ScrollContainer,
+  ThemedCard,
+  ThemedText,
+  ThemedView,
+} from "@/components";
+import { useTheme } from "@/hooks";
+import { StatusBar } from "expo-status-bar";
+import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
-interface SavedProfile {
+
+interface CreatedImage {
   id: string;
   uri: string;
   timestamp: number;
   filterName: string;
+  isFavorite: boolean;
+  downloads: number;
 }
 
-export default function ProfileTab() {
-  const { colors } = useTheme();
-  const [savedProfiles, setSavedProfiles] = useState<SavedProfile[]>([]);
+interface UserProfile {
+  name: string;
+  email: string;
+  avatar?: string;
+  joinDate: Date;
+  totalCreations: number;
+}
 
-  const mockProfiles: SavedProfile[] = [
-    {
-      id: '1',
-      uri: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400',
-      timestamp: Date.now() - 86400000,
-      filterName: 'Professional',
-    },
-    {
-      id: '2',
-      uri: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400',
-      timestamp: Date.now() - 172800000,
-      filterName: 'Corporate',
-    },
-  ];
+// Mock Data
+const mockUserProfile: UserProfile = {
+  name: "Ahmet Yılmaz",
+  email: "ahmet@example.com",
+  avatar:
+    "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400",
+  joinDate: new Date("2024-01-15"),
+  totalCreations: 12,
+};
+
+const mockCreatedImages: CreatedImage[] = [
+  {
+    id: "1",
+    uri: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400",
+    timestamp: Date.now() - 86400000,
+    filterName: "Profesyonel",
+    isFavorite: true,
+    downloads: 24,
+  },
+  {
+    id: "2",
+    uri: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400",
+    timestamp: Date.now() - 172800000,
+    filterName: "Kurumsal",
+    isFavorite: false,
+    downloads: 18,
+  },
+  {
+    id: "3",
+    uri: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400",
+    timestamp: Date.now() - 259200000,
+    filterName: "Yaratıcı",
+    isFavorite: true,
+    downloads: 31,
+  },
+  {
+    id: "4",
+    uri: "https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400",
+    timestamp: Date.now() - 345600000,
+    filterName: "Modern",
+    isFavorite: false,
+    downloads: 15,
+  },
+  {
+    id: "5",
+    uri: "https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=400",
+    timestamp: Date.now() - 432000000,
+    filterName: "Klasik",
+    isFavorite: true,
+    downloads: 22,
+  },
+  {
+    id: "6",
+    uri: "https://images.pexels.com/photos/1040882/pexels-photo-1040882.jpeg?auto=compress&cs=tinysrgb&w=400",
+    timestamp: Date.now() - 518400000,
+    filterName: "Minimalist",
+    isFavorite: false,
+    downloads: 19,
+  },
+];
+
+// Components
+const UserProfileCard = React.memo(
+  ({ userProfile }: { userProfile: UserProfile }) => {
+    const formatJoinDate = useCallback((date: Date) => {
+      return date.toLocaleDateString("tr-TR", {
+        month: "long",
+        year: "numeric",
+      });
+    }, []);
+
+    return (
+      <ThemedCard style={styles.userProfileCard} padding="lg" elevation="sm">
+        <View style={styles.userInfo}>
+          <View style={styles.avatarContainer}>
+            <Image source={{ uri: userProfile.avatar }} style={styles.avatar} />
+          </View>
+          <View style={styles.userDetails}>
+            <ThemedText variant="h3" weight="bold">
+              {userProfile.name}
+            </ThemedText>
+            <ThemedText variant="body" color="secondary">
+              {userProfile.email}
+            </ThemedText>
+            <ThemedText variant="caption" color="tertiary">
+              {formatJoinDate(userProfile.joinDate)} tarihinde katıldı
+            </ThemedText>
+          </View>
+        </View>
+        <View style={styles.userStats}>
+          <View style={styles.statItem}>
+            <ThemedText variant="h4" weight="bold" color="primary">
+              {userProfile.totalCreations}
+            </ThemedText>
+            <ThemedText variant="caption" color="secondary">
+              Yaratılan Görsel
+            </ThemedText>
+          </View>
+        </View>
+      </ThemedCard>
+    );
+  },
+);
+
+UserProfileCard.displayName = "UserProfileCard";
+
+const ImageCard = React.memo(
+  ({
+    image,
+    onToggleFavorite,
+    onShare,
+    onDelete,
+  }: {
+    image: CreatedImage;
+    onToggleFavorite: (_id: string) => void;
+    onShare: (_image: CreatedImage) => void;
+    onDelete: (_id: string) => void;
+  }) => {
+    const { colors } = useTheme();
+
+    const formatDate = useCallback((timestamp: number) => {
+      const date = new Date(timestamp);
+      return date.toLocaleDateString("tr-TR", {
+        day: "numeric",
+        month: "short",
+      });
+    }, []);
+
+    return (
+      <ThemedCard style={styles.imageCard} padding="sm" elevation="sm">
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: image.uri }} style={styles.image} />
+          <TouchableOpacity
+            style={[
+              styles.favoriteButton,
+              {
+                backgroundColor: image.isFavorite
+                  ? colors.errorSubtle
+                  : colors.surface,
+              },
+            ]}
+            onPress={() => onToggleFavorite(image.id)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.favoriteIcon}>
+              {image.isFavorite ? "❤️" : "🤍"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.imageInfo}>
+          <ThemedText variant="caption" weight="semiBold">
+            {image.filterName}
+          </ThemedText>
+          <ThemedText variant="caption" color="tertiary">
+            {formatDate(image.timestamp)}
+          </ThemedText>
+          <View style={styles.imageActions}>
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                { backgroundColor: colors.primarySubtle },
+              ]}
+              onPress={() => onShare(image)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.actionIcon}>↗️</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                { backgroundColor: colors.errorSubtle },
+              ]}
+              onPress={() => onDelete(image.id)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.actionIcon}>🗑️</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ThemedCard>
+    );
+  },
+);
+
+ImageCard.displayName = "ImageCard";
+
+export default function ProfileTab() {
+  const { colors, colorScheme } = useTheme();
+  const [createdImages, setCreatedImages] = useState<CreatedImage[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile>(mockUserProfile);
 
   useEffect(() => {
-    setSavedProfiles(mockProfiles);
+    setCreatedImages(mockCreatedImages);
   }, []);
 
-  const createNewProfile = () => {
-    if (Platform.OS !== 'web') {
+  const createNewImage = useCallback(() => {
+    if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    router.push('/');
-  };
+    router.push("/");
+  }, []);
 
-  const shareProfile = (profile: SavedProfile) => {
-    if (Platform.OS !== 'web') {
+  const toggleFavorite = useCallback((id: string) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setCreatedImages((prev) =>
+      prev.map((img) =>
+        img.id === id ? { ...img, isFavorite: !img.isFavorite } : img,
+      ),
+    );
+  }, []);
+
+  const shareImage = useCallback((_image: CreatedImage) => {
+    if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     // Share functionality would be implemented here
-  };
+  }, []);
 
-  const deleteProfile = (profileId: string) => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const deleteImage = useCallback((id: string) => {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
-    setSavedProfiles((prev) => prev.filter((p) => p.id !== profileId));
-  };
+    setCreatedImages((prev) => prev.filter((img) => img.id !== id));
+    setUserProfile((prev) => ({
+      ...prev,
+      totalCreations: prev.totalCreations - 1,
+    }));
+  }, []);
 
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+  const renderImageCard = useCallback(
+    ({ item }: { item: CreatedImage }) => (
+      <ImageCard
+        image={item}
+        onToggleFavorite={toggleFavorite}
+        onShare={shareImage}
+        onDelete={deleteImage}
+      />
+    ),
+    [toggleFavorite, shareImage, deleteImage],
+  );
 
   return (
     <ThemedView style={styles.container}>
-      <View
-        style={[
-          styles.header,
-          { backgroundColor: colors.surface, borderBottomColor: colors.border },
-        ]}
-      >
+      {/* Header */}
+      {/* <View style={[styles.header, { backgroundColor: colors.surface }]}>
         <View style={styles.headerContent}>
           <ThemedText variant="h2" weight="bold">
-            Your Profiles
+            Profilim
           </ThemedText>
           <ThemedText variant="body" color="secondary">
-            Manage your professional profile pictures
+            Yaratılan görsellerinizi yönetin
           </ThemedText>
         </View>
         <TouchableOpacity
-          style={[styles.settingsButton, { backgroundColor: colors.secondarySubtle }]}
+          style={[
+            styles.settingsButton,
+            { backgroundColor: colors.secondarySubtle },
+          ]}
+          activeOpacity={0.7}
         >
-          <Settings size={24} color={colors.textSecondary} strokeWidth={2} />
+          <Text style={styles.settingsIcon}>⚙️</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
+      <Header leftIconType="home" rightIconType="settings" />
+      <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
 
       <ScrollContainer>
-        <View style={styles.statsContainer}>
-          <ThemedCard style={styles.statCard} padding="lg" elevation="sm">
-            <ThemedText variant="h3" weight="bold" color="primary" align="center">
-              {savedProfiles.length}
-            </ThemedText>
-            <ThemedText variant="caption" weight="medium" color="secondary" align="center">
-              Created
-            </ThemedText>
-          </ThemedCard>
-          <ThemedCard style={styles.statCard} padding="lg" elevation="sm">
-            <ThemedText variant="h3" weight="bold" color="primary" align="center">
-              2.4K
-            </ThemedText>
-            <ThemedText variant="caption" weight="medium" color="secondary" align="center">
-              Profile Views
-            </ThemedText>
-          </ThemedCard>
-          <ThemedCard style={styles.statCard} padding="lg" elevation="sm">
-            <ThemedText variant="h3" weight="bold" color="primary" align="center">
-              95%
-            </ThemedText>
-            <ThemedText variant="caption" weight="medium" color="secondary" align="center">
-              Professional Score
-            </ThemedText>
-          </ThemedCard>
-        </View>
+        {/* User Profile Card */}
+        <UserProfileCard userProfile={userProfile} />
 
+        {/* Create New Button */}
         <TouchableOpacity
           style={[styles.createButton, { backgroundColor: colors.primary }]}
-          onPress={createNewProfile}
+          onPress={createNewImage}
+          activeOpacity={0.8}
         >
-          <Plus size={24} color={colors.textOnPrimary} strokeWidth={2} />
-          <ThemedText variant="body" weight="semiBold" color="onPrimary" style={{ marginLeft: 8 }}>
-            Create New Profile Picture
+          <Text
+            style={[styles.createButtonIcon, { color: colors.textOnPrimary }]}
+          >
+            +
+          </Text>
+          <ThemedText
+            variant="body"
+            weight="semiBold"
+            color="onPrimary"
+            style={styles.createButtonText}
+          >
+            Yeni Görsel Oluştur
           </ThemedText>
         </TouchableOpacity>
 
-        <View style={styles.historyHeader}>
-          <ThemedText variant="h4" weight="semiBold">
-            Recent Creations
-          </ThemedText>
-          <ThemedText variant="caption" color="secondary">
-            {savedProfiles.length} pictures
-          </ThemedText>
-        </View>
-
-        {savedProfiles.map((profile) => (
-          <ThemedCard key={profile.id} style={styles.profileCard} padding="md" elevation="sm">
-            <View style={styles.profileImageContainer}>
-              <Image source={{ uri: profile.uri }} style={styles.profileImage} />
-            </View>
-
-            <View style={styles.profileInfo}>
-              <ThemedText variant="body" weight="semiBold">
-                {profile.filterName} Filter
-              </ThemedText>
-              <ThemedText variant="caption" color="secondary" style={{ marginTop: 4 }}>
-                {formatDate(profile.timestamp)}
-              </ThemedText>
-            </View>
-
-            <View style={styles.profileActions}>
-              <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: colors.secondarySubtle }]}
-                onPress={() => shareProfile(profile)}
-              >
-                <Share size={18} color={colors.textSecondary} strokeWidth={2} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: colors.errorSubtle }]}
-                onPress={() => deleteProfile(profile.id)}
-              >
-                <Trash2 size={18} color={colors.error} strokeWidth={2} />
-              </TouchableOpacity>
-            </View>
-          </ThemedCard>
-        ))}
-
-        {savedProfiles.length === 0 && (
-          <View style={styles.emptyState}>
-            <Download size={48} color={colors.textTertiary} strokeWidth={1.5} />
-            <ThemedText
-              variant="bodyLarge"
-              weight="semiBold"
-              align="center"
-              style={{ marginTop: 16, marginBottom: 8 }}
-            >
-              No Profile Pictures Yet
+        {/* Images Section */}
+        <View style={styles.imagesSection}>
+          <View style={styles.sectionHeader}>
+            <ThemedText variant="h4" weight="semiBold">
+              Yaratılan Görseller
             </ThemedText>
-            <ThemedText variant="body" color="secondary" align="center" style={{ lineHeight: 24 }}>
-              Create your first professional profile picture using the camera or gallery
+            <ThemedText variant="caption" color="secondary">
+              {createdImages.length} görsel
             </ThemedText>
           </View>
-        )}
+
+          {createdImages.length > 0 ? (
+            <FlatList
+              data={createdImages}
+              renderItem={renderImageCard}
+              keyExtractor={(item) => item.id}
+              numColumns={2}
+              columnWrapperStyle={styles.row}
+              showsVerticalScrollIndicator={false}
+              scrollEnabled={false}
+              contentContainerStyle={styles.imagesGrid}
+            />
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateIcon}>🎨</Text>
+              <ThemedText
+                variant="bodyLarge"
+                weight="semiBold"
+                align="center"
+                style={styles.emptyStateTitle}
+              >
+                Henüz Görsel Yok
+              </ThemedText>
+              <ThemedText
+                variant="body"
+                color="secondary"
+                align="center"
+                style={styles.emptyStateDescription}
+              >
+                İlk görselinizi oluşturmak için yukarıdaki butona tıklayın
+              </ThemedText>
+            </View>
+          )}
+        </View>
       </ScrollContainer>
     </ThemedView>
   );
@@ -194,181 +387,166 @@ export default function ProfileTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 24,
-    paddingHorizontal: 24,
-    backgroundColor: '#FFFFFF',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: "#E5E7EB",
   },
   headerContent: {
     flex: 1,
-  },
-  title: {
-    fontSize: 28,
-    fontFamily: 'Inter-Bold',
-    color: '#1F2937',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#6B7280',
   },
   settingsButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  statsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 24,
-    paddingVertical: 24,
-    gap: 16,
+  settingsIcon: {
+    fontSize: 20,
   },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    padding: 20,
+  userProfileCard: {
+    margin: 16,
     borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  statNumber: {
-    fontSize: 24,
-    fontFamily: 'Inter-Bold',
-    color: '#0077B5',
-    marginBottom: 4,
+  userInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
   },
-  statLabel: {
-    fontSize: 12,
-    fontFamily: 'Inter-Medium',
-    color: '#6B7280',
-    textAlign: 'center',
+  avatarContainer: {
+    marginRight: 16,
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
+  userDetails: {
+    flex: 1,
+  },
+  userStats: {
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  statItem: {
+    alignItems: "center",
   },
   createButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#0077B5',
-    marginHorizontal: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 16,
+    marginBottom: 24,
     paddingVertical: 16,
     borderRadius: 16,
-    shadowColor: '#0077B5',
+    shadowColor: "#0077B5",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 5,
   },
+  createButtonIcon: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
   createButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
     marginLeft: 8,
+    fontSize: 16,
   },
-  historyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
+  imagesSection: {
+    paddingHorizontal: 16,
+    paddingBottom: 32,
   },
-  historyTitle: {
-    fontSize: 20,
-    fontFamily: 'Inter-SemiBold',
-    color: '#1F2937',
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
   },
-  historyCount: {
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#6B7280',
+  imagesGrid: {
+    paddingBottom: 16,
   },
-  profilesList: {
-    flex: 1,
-    paddingHorizontal: 24,
-  },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 16,
+  row: {
+    justifyContent: "space-between",
     marginBottom: 12,
-    borderRadius: 16,
-    shadowColor: '#000',
+  },
+  imageCard: {
+    width: (width - 48) / 2,
+    borderRadius: 12,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  profileImageContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    overflow: 'hidden',
-    marginRight: 16,
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
+  imageContainer: {
+    position: "relative",
+    marginBottom: 8,
   },
-  profileImage: {
-    width: '100%',
-    height: '100%',
+  image: {
+    width: "100%",
+    height: 120,
+    borderRadius: 8,
   },
-  profileInfo: {
-    flex: 1,
+  favoriteButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  profileFilterName: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    color: '#1F2937',
-    marginBottom: 4,
-  },
-  profileDate: {
+  favoriteIcon: {
     fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    color: '#6B7280',
   },
-  profileActions: {
-    flexDirection: 'row',
-    gap: 8,
+  imageInfo: {
+    paddingHorizontal: 4,
+  },
+  imageActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
   },
   actionButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  actionIcon: {
+    fontSize: 12,
   },
   emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 64,
     paddingHorizontal: 32,
   },
-  emptyStateTitle: {
-    fontSize: 20,
-    fontFamily: 'Inter-SemiBold',
-    color: '#374151',
-    marginTop: 24,
-    marginBottom: 12,
+  emptyStateIcon: {
+    fontSize: 64,
+    marginBottom: 16,
   },
-  emptyStateText: {
-    fontSize: 16,
-    fontFamily: 'Inter-Regular',
-    color: '#6B7280',
-    textAlign: 'center',
+  emptyStateTitle: {
+    marginBottom: 8,
+    fontSize: 18,
+  },
+  emptyStateDescription: {
     lineHeight: 24,
+    textAlign: "center",
   },
 });
