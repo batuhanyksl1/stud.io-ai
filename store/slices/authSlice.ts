@@ -33,6 +33,7 @@ export interface DeleteAccountData {
 interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  isVerified: boolean;
   isLoading: boolean;
   isInitializing: boolean;
   error: string | null;
@@ -41,6 +42,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
+  isVerified: false,
   isLoading: false,
   isInitializing: false,
   error: null,
@@ -273,11 +275,13 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<AuthUser>) => {
       state.user = action.payload;
       state.isAuthenticated = true;
+      state.isVerified = action.payload.emailVerified;
       state.error = null;
     },
     clearAuth: (state) => {
       state.user = null;
       state.isAuthenticated = false;
+      state.isVerified = false;
       state.error = null;
     },
     clearError: (state) => {
@@ -317,6 +321,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload as AuthUser;
         state.isAuthenticated = true;
+        state.isVerified = action.payload.emailVerified;
         state.error = null;
       })
       .addCase(signIn.rejected, (state, action) => {
@@ -334,6 +339,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload as AuthUser;
         state.isAuthenticated = true;
+        state.isVerified = action.payload.emailVerified;
         state.error = null;
       })
       .addCase(signUp.rejected, (state, action) => {
@@ -350,6 +356,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
+        state.isVerified = false;
         state.error = null;
       })
       .addCase(signOut.rejected, (state, action) => {
@@ -365,6 +372,7 @@ const authSlice = createSlice({
       })
       .addCase(forgotPassword.fulfilled, (state) => {
         state.isLoading = false;
+        state.isVerified = false;
         state.error = null;
       })
       .addCase(forgotPassword.rejected, (state, action) => {

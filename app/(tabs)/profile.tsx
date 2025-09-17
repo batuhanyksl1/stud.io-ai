@@ -6,9 +6,10 @@ import {
   ThemedView,
 } from "@/components";
 import { useTheme } from "@/hooks";
-import { StatusBar } from "expo-status-bar";
+import auth from "@react-native-firebase/auth";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
@@ -22,7 +23,6 @@ import {
 } from "react-native";
 
 const { width } = Dimensions.get("window");
-
 
 interface CreatedImage {
   id: string;
@@ -43,8 +43,8 @@ interface UserProfile {
 
 // Mock Data
 const mockUserProfile: UserProfile = {
-  name: "Ahmet Yılmaz",
-  email: "ahmet@example.com",
+  name: auth().currentUser?.displayName || "",
+  email: auth().currentUser?.email || "",
   avatar:
     "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400",
   joinDate: new Date("2024-01-15"),
