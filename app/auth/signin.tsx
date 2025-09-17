@@ -91,7 +91,7 @@ export default function SignInScreen() {
         console.log("🚨 User needs display name - modal should be visible");
       }
     }
-  }, [isAuthenticated, user, needsDisplayName]);
+  }, [isAuthenticated, user]);
 
   const handleDisplayNameConfirm = async (displayName: string) => {
     try {

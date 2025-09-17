@@ -1,7 +1,6 @@
-import { getAuth, onAuthStateChanged } from "@react-native-firebase/auth";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Dimensions,
   Image,
@@ -14,54 +13,6 @@ import {
 const { width, height } = Dimensions.get("window");
 
 export default function OnboardingScreen() {
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
-
-  // Auth state'ini kontrol et (tek seferlik subscribe)
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
-      setIsAuthenticated(!!user);
-      setIsEmailVerified(user?.emailVerified || false);
-      setIsInitializing(false);
-    });
-    return () => {
-      if (typeof unsubscribe === "function") unsubscribe();
-    };
-  }, []);
-
-  // Kullanıcı hazır olduğunda yönlendir
-  useEffect(() => {
-    if (!isInitializing && isAuthenticated) {
-      if (isEmailVerified) {
-        const currentUser = getAuth().currentUser;
-
-        const hasDisplayName =
-          currentUser?.displayName && currentUser.displayName.trim() !== "";
-
-        if (hasDisplayName) {
-          router.replace("/(tabs)");
-        } else {
-          router.replace("/auth/signin");
-        }
-      } else {
-        router.replace("/email-verification");
-      }
-    }
-  }, [isInitializing, isAuthenticated, isEmailVerified]);
-  if (isInitializing) {
-    return (
-      <View
-        style={[
-          styles.container,
-          { justifyContent: "center", alignItems: "center" },
-        ]}
-      >
-        <Text style={{ color: "#ffffff", fontSize: 16 }}>Yükleniyor...</Text>
-      </View>
-    );
-  }
-
   const handleLogin = () => {
     router.push("/auth/signin");
   };
