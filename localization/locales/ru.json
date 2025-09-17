@@ -161,6 +161,16 @@
     "next": "Далее",
     "finish": "Завершить"
   },
+  "home": {
+    "mainTitle": "Твоё.",
+    "subTitle": "В движении.",
+    "description": "Никогда не упускай то, что любишь. Всё в приложении Stud.io.",
+    "logIn": "Войти",
+    "signUp": "Зарегистрироваться",
+    "continueAsGuest": "Продолжить как гость",
+    "curatedBy": "подборка от",
+    "craftexBrand": "CrafTex AI Studio"
+  },
   "errors": {
     "networkError": "Ошибка сетевого подключения",
     "serverError": "Произошла ошибка сервера",

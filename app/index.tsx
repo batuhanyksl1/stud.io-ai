@@ -1,6 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   Image,
@@ -13,6 +14,8 @@ import {
 const { width, height } = Dimensions.get("window");
 
 export default function OnboardingScreen() {
+  const { t } = useTranslation();
+
   const handleLogin = () => {
     router.push("/auth/signin");
   };
@@ -51,11 +54,9 @@ export default function OnboardingScreen() {
       {/* Ana içerik */}
       <View style={styles.content}>
         <View style={styles.textContainer}>
-          <Text style={styles.mainTitle}>Yours.</Text>
-          <Text style={styles.subTitle}>On the move.</Text>
-          <Text style={styles.description}>
-            Never miss out on what you love. All in the Stud.io app.
-          </Text>
+          <Text style={styles.mainTitle}>{t("home.mainTitle")}</Text>
+          <Text style={styles.subTitle}>{t("home.subTitle")}</Text>
+          <Text style={styles.description}>{t("home.description")}</Text>
         </View>
 
         {/* Butonlar */}
@@ -65,7 +66,7 @@ export default function OnboardingScreen() {
             onPress={handleLogin}
             activeOpacity={0.8}
           >
-            <Text style={styles.outlineButtonText}>Log in</Text>
+            <Text style={styles.outlineButtonText}>{t("home.logIn")}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -73,7 +74,7 @@ export default function OnboardingScreen() {
             onPress={handleSignUp}
             activeOpacity={0.8}
           >
-            <Text style={styles.filledButtonText}>Sign up</Text>
+            <Text style={styles.filledButtonText}>{t("home.signUp")}</Text>
           </TouchableOpacity>
         </View>
 
@@ -83,7 +84,9 @@ export default function OnboardingScreen() {
           onPress={handleGuestContinue}
           activeOpacity={0.7}
         >
-          <Text style={styles.guestButtonText}>Continue as guest</Text>
+          <Text style={styles.guestButtonText}>
+            {t("home.continueAsGuest")}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -93,8 +96,8 @@ export default function OnboardingScreen() {
           <Text style={styles.footerLogo}>Stud.io</Text>
         </View>
         <View style={styles.footerRight}>
-          <Text style={styles.footerText}>curated by</Text>
-          <Text style={styles.footerBrand}>CrafTex AI Studio</Text>
+          <Text style={styles.footerText}>{t("home.curatedBy")}</Text>
+          <Text style={styles.footerBrand}>{t("home.craftexBrand")}</Text>
         </View>
       </View>
     </View>

@@ -161,6 +161,16 @@
     "next": "Next",
     "finish": "Finish"
   },
+  "home": {
+    "mainTitle": "Yours.",
+    "subTitle": "On the move.",
+    "description": "Never miss out on what you love. All in the Stud.io app.",
+    "logIn": "Log in",
+    "signUp": "Sign up",
+    "continueAsGuest": "Continue as guest",
+    "curatedBy": "curated by",
+    "craftexBrand": "CrafTex AI Studio"
+  },
   "errors": {
     "networkError": "Network connection error",
     "serverError": "Server error occurred",

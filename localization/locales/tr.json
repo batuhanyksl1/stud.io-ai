@@ -161,6 +161,16 @@
     "next": "İleri",
     "finish": "Bitir"
   },
+  "home": {
+    "mainTitle": "Senin.",
+    "subTitle": "Hareket halinde.",
+    "description": "Sevdiğin hiçbir şeyi kaçırma. Hepsi Stud.io uygulamasında.",
+    "logIn": "Giriş Yap",
+    "signUp": "Kayıt Ol",
+    "continueAsGuest": "Giriş Yapmadan Devam Et",
+    "curatedBy": "hazırlayan",
+    "craftexBrand": "CrafTex Yapay Zeka Stüdyosu"
+  },
   "errors": {
     "networkError": "Ağ bağlantı hatası",
     "serverError": "Sunucu hatası oluştu",
