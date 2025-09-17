@@ -1,4 +1,3 @@
-import { updateDisplayName } from "@/store/slices/authSlice";
 import auth, { sendEmailVerification } from "@react-native-firebase/auth";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -12,15 +11,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useDispatch } from "react-redux";
+import { useAuth } from "@/hooks";
 
 const { width, height } = Dimensions.get("window");
 
 export default function EmailVerificationScreen() {
   const [isResending, setIsResending] = useState(false);
   const [user, setUser] = useState(auth().currentUser);
-  const dispatch = useDispatch();
-
+  const { updateUserName } = useAuth();
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((u) => {
       setUser(u || null);
@@ -37,9 +35,7 @@ export default function EmailVerificationScreen() {
         if (currentUser?.emailVerified) {
           if (currentUser.displayName) {
             try {
-              await dispatch(
-                updateDisplayName(currentUser.displayName as string),
-              ).unwrap();
+              await updateUserName(currentUser.displayName as string);
             } catch (error) {
               console.error("Display name güncellenirken hata:", error);
             }
@@ -53,7 +49,7 @@ export default function EmailVerificationScreen() {
 
     const interval = setInterval(checkVerificationStatus, 3000);
     return () => clearInterval(interval);
-  }, [dispatch]);
+  }, [updateUserName]);
 
   const handleResendVerification = async () => {
     const currentUser = auth().currentUser;

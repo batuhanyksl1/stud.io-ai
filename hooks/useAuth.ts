@@ -11,20 +11,25 @@ import {
   signIn,
   signOut,
   signUp,
-  // updateProfile,
+  updateDisplayName,
 } from "@/store/slices/authSlice";
 import {
   // DeleteAccountData,
   SignInCredentials,
   SignUpCredentials,
-  // UpdateProfileData,
 } from "@/types";
 
 export function useAuth() {
   const dispatch = useAppDispatch();
 
-  const { user, isAuthenticated, isLoading, isInitializing, error } =
-    useAppSelector((state) => state.auth);
+  const {
+    user,
+    isAuthenticated,
+    isLoading,
+    isInitializing,
+    error,
+    needsDisplayName,
+  } = useAppSelector((state) => state.auth);
 
   const login = async (credentials: SignInCredentials) => {
     return await dispatch(signIn(credentials));
@@ -40,6 +45,10 @@ export function useAuth() {
 
   const resetPassword = async (email: string) => {
     return await dispatch(forgotPassword(email));
+  };
+
+  const updateUserName = async (displayName: string) => {
+    return await dispatch(updateDisplayName(displayName));
   };
 
   // const updateUserProfile = async (profileData: UpdateProfileData) => {
@@ -76,15 +85,18 @@ export function useAuth() {
     isLoading,
     isInitializing,
     error,
+    needsDisplayName,
     login,
     register,
     logout,
     resetPassword,
+    updateDisplayName,
     // updateUserProfile,
     // deleteUserAccount,
     clearAuthData,
     clearAuthError,
     setLoadingState,
+    updateUserName,
     // initializeAuthState,
     // cleanupAuthState,
   };

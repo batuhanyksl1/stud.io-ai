@@ -38,6 +38,7 @@ interface AuthState {
   isLoading: boolean;
   isInitializing: boolean;
   error: string | null;
+  needsDisplayName: boolean;
 }
 
 const initialState: AuthState = {
@@ -47,6 +48,7 @@ const initialState: AuthState = {
   isLoading: false,
   isInitializing: false,
   error: null,
+  needsDisplayName: false,
 };
 
 // Async thunks
@@ -59,7 +61,19 @@ export const signIn = createAsyncThunk(
         credentials.email,
         credentials.password,
       );
-      return userCredential.user;
+
+      // Check if display name is empty
+      const needsDisplayName =
+        !userCredential.user.displayName ||
+        userCredential.user.displayName.trim() === "";
+
+      console.log("SignIn - Display Name:", userCredential.user.displayName);
+      console.log("SignIn - Needs Display Name:", needsDisplayName);
+
+      return {
+        user: userCredential.user,
+        needsDisplayName,
+      };
     } catch (error: any) {
       let errorMessage = "Giriş yapılamadı";
 
@@ -339,6 +353,7 @@ const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
       state.isVerified = false;
+      state.needsDisplayName = false;
       state.error = null;
     },
     clearError: (state) => {
@@ -376,9 +391,10 @@ const authSlice = createSlice({
       })
       .addCase(signIn.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload as AuthUser;
+        state.user = action.payload.user;
         state.isAuthenticated = true;
-        state.isVerified = action.payload.emailVerified;
+        state.isVerified = action.payload.user.emailVerified;
+        state.needsDisplayName = action.payload.needsDisplayName;
         state.error = null;
       })
       .addCase(signIn.rejected, (state, action) => {
@@ -461,6 +477,7 @@ const authSlice = createSlice({
       .addCase(updateDisplayName.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload as AuthUser;
+        state.needsDisplayName = false;
         state.error = null;
       })
       .addCase(updateDisplayName.rejected, (state, action) => {

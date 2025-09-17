@@ -13,7 +13,7 @@ export { default as ThemedView } from "./ThemedView";
 
 // Feature Components
 export { default as FilterPreview } from "./FilterPreview";
-export { default as ImageEditor } from "./ImageEditor";
+export { ImageEditor } from "./ImageEditor";
 export { default as Logo } from "./Logo";
 export { default as ScrollContainer } from "./ScrollContainer";
 
@@ -22,3 +22,4 @@ export * from "./home";
 
 // Auth Components
 export { AuthScreen } from "./auth/AuthScreen";
+export { default as DisplayNameModal } from "./DisplayNameModal";

@@ -34,15 +34,21 @@ export default function OnboardingScreen() {
   useEffect(() => {
     if (!isInitializing && isAuthenticated) {
       if (isEmailVerified) {
-        // Email doğrulanmış, ana sayfaya git
-        router.replace("/(tabs)");
+        const currentUser = getAuth().currentUser;
+
+        const hasDisplayName =
+          currentUser?.displayName && currentUser.displayName.trim() !== "";
+
+        if (hasDisplayName) {
+          router.replace("/(tabs)");
+        } else {
+          router.replace("/auth/signin");
+        }
       } else {
-        // Email doğrulanmamış, verification sayfasına git
         router.replace("/email-verification");
       }
     }
   }, [isInitializing, isAuthenticated, isEmailVerified]);
-  // Auth state hala initialize ediliyorsa loading göster
   if (isInitializing) {
     return (
       <View

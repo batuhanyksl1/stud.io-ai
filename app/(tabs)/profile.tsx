@@ -5,7 +5,7 @@ import {
   ThemedText,
   ThemedView,
 } from "@/components";
-import { useTheme } from "@/hooks";
+import { useAuth, useTheme } from "@/hooks";
 import auth from "@react-native-firebase/auth";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
@@ -20,6 +20,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Button,
 } from "react-native";
 
 const { width } = Dimensions.get("window");
@@ -232,7 +233,7 @@ export default function ProfileTab() {
   const { colors, colorScheme } = useTheme();
   const [createdImages, setCreatedImages] = useState<CreatedImage[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>(mockUserProfile);
-
+  const { logout } = useAuth();
   useEffect(() => {
     setCreatedImages(mockCreatedImages);
   }, []);
@@ -379,6 +380,7 @@ export default function ProfileTab() {
             </View>
           )}
         </View>
+        <Button title="Logout" onPress={logout} />
       </ScrollContainer>
     </ThemedView>
   );

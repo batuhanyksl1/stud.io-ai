@@ -1,10 +1,11 @@
-import { useAuth, useTheme } from "@/hooks";
+import { DisplayNameModal } from "@/components";
+import { useAuth } from "@/hooks";
 import { SignInCredentials } from "@/types";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
@@ -35,8 +36,14 @@ const schema = yup.object().shape({
 });
 
 export default function SignInScreen() {
-  const { colors } = useTheme();
-  const { login, isLoading, error } = useAuth();
+  const {
+    login,
+    isLoading,
+    needsDisplayName,
+    updateUserName,
+    isAuthenticated,
+    user,
+  } = useAuth();
 
   const {
     control,
@@ -51,7 +58,8 @@ export default function SignInScreen() {
     try {
       const result = await login(data);
       if (result.meta.requestStatus === "fulfilled") {
-        router.replace("/(tabs)");
+        // needsDisplayName state'i güncellendikten sonra useEffect ile kontrol edilecek
+        // Burada hiçbir şey yapmıyoruz
       } else {
         Alert.alert("Hata", result.payload as string);
       }
@@ -62,16 +70,56 @@ export default function SignInScreen() {
     }
   };
 
+  // Display name modal'ı göster (kullanıcı bu sayfaya geldiyse display name yok demektir)
+  useEffect(() => {
+    console.log("=== SIGNIN SCREEN DEBUG ===");
+    console.log("isAuthenticated:", isAuthenticated);
+    console.log("user:", user);
+    console.log("needsDisplayName:", needsDisplayName);
+
+    if (isAuthenticated && user) {
+      console.log("Current user display name:", user.displayName);
+      const hasDisplayName = user.displayName && user.displayName.trim() !== "";
+      console.log("Has display name:", hasDisplayName);
+
+      if (hasDisplayName) {
+        // Display name varsa ana uygulamaya git
+        console.log("✅ User has display name - navigating to main app");
+        router.replace("/(tabs)");
+      } else {
+        // Display name yoksa modal göster
+        console.log("🚨 User needs display name - modal should be visible");
+      }
+    }
+  }, [isAuthenticated, user, needsDisplayName]);
+
+  const handleDisplayNameConfirm = async (displayName: string) => {
+    try {
+      const result = await updateUserName(displayName);
+      if (result.meta.requestStatus === "fulfilled") {
+        router.replace("/(tabs)");
+      } else {
+        Alert.alert("Hata", result.payload as string);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "İsim güncellenemedi";
+      Alert.alert("Hata", errorMessage);
+    }
+  };
+
+  const handleDisplayNameCancel = () => {
+    // Logout user if they cancel display name entry
+    // This ensures they can't access the app without a display name
+    router.replace("/auth/signin");
+  };
+
   const handleForgotPassword = () => {
     router.push("/auth/forgot-password");
   };
 
   const handleGoToSignUp = () => {
     router.push("/auth/signup");
-  };
-
-  const handleGoBack = () => {
-    router.back();
   };
 
   return (
@@ -189,7 +237,7 @@ export default function SignInScreen() {
 
             {/* Sign up link */}
             <View style={styles.signUpContainer}>
-              <Text style={styles.signUpText}>Don't have an account?</Text>
+              <Text style={styles.signUpText}>Don&apos;t have an account?</Text>
               <TouchableOpacity onPress={handleGoToSignUp} activeOpacity={0.7}>
                 <Text style={styles.signUpLink}>Sign up</Text>
               </TouchableOpacity>
@@ -197,6 +245,29 @@ export default function SignInScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Display Name Modal */}
+      {(() => {
+        const shouldShowModal =
+          isAuthenticated &&
+          user !== null &&
+          (!user.displayName || user.displayName.trim() === "");
+
+        console.log("Modal visibility check:");
+        console.log("- isAuthenticated:", isAuthenticated);
+        console.log("- user !== null:", user !== null);
+        console.log("- user.displayName:", user?.displayName);
+        console.log("- shouldShowModal:", shouldShowModal);
+
+        return (
+          <DisplayNameModal
+            visible={shouldShowModal}
+            onConfirm={handleDisplayNameConfirm}
+            onCancel={handleDisplayNameCancel}
+            isLoading={isLoading}
+          />
+        );
+      })()}
     </View>
   );
 }
