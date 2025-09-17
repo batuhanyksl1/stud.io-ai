@@ -19,6 +19,8 @@
     "signIn": "Войти",
     "signUp": "Регистрация",
     "signOut": "Выйти",
+    "enterYourEmail": "Введите вашу электронную почту",
+    "enterYourPassword": "Введите ваш пароль",
     "email": "Электронная почта",
     "password": "Пароль",
     "confirmPassword": "Подтвердите пароль",
@@ -26,6 +28,7 @@
     "resetPassword": "Сбросить пароль",
     "createAccount": "Создать аккаунт",
     "alreadyHaveAccount": "Уже есть аккаунт?",
+    "signInToYourAccount": "Войти в ваш аккаунт",
     "dontHaveAccount": "Нет аккаунта?",
     "signInWithGoogle": "Войти через Google",
     "signInWithApple": "Войти через Apple",
@@ -161,7 +164,7 @@
     "next": "Далее",
     "finish": "Завершить"
   },
-  "home": {
+  "welcome": {
     "mainTitle": "Твоё.",
     "subTitle": "В движении.",
     "description": "Никогда не упускай то, что любишь. Всё в приложении Stud.io.",

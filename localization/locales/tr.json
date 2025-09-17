@@ -19,12 +19,15 @@
     "signIn": "Giriş Yap",
     "signUp": "Kayıt Ol",
     "signOut": "Çıkış Yap",
+    "enterYourEmail": "E-posta adresinizi girin",
+    "enterYourPassword": "Şifrenizi girin",
     "email": "E-posta",
     "password": "Şifre",
     "confirmPassword": "Şifreyi Onayla",
     "forgotPassword": "Şifremi Unuttum?",
     "resetPassword": "Şifreyi Sıfırla",
     "createAccount": "Hesap Oluştur",
+    "signInToYourAccount": "Hesabınıza giriş yapın",
     "alreadyHaveAccount": "Zaten hesabınız var mı?",
     "dontHaveAccount": "Hesabınız yok mu?",
     "signInWithGoogle": "Google ile Giriş Yap",
@@ -161,7 +164,7 @@
     "next": "İleri",
     "finish": "Bitir"
   },
-  "home": {
+  "welcome": {
     "mainTitle": "Senin.",
     "subTitle": "Hareket halinde.",
     "description": "Sevdiğin hiçbir şeyi kaçırma. Hepsi Stud.io uygulamasında.",

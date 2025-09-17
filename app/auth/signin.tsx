@@ -1,12 +1,12 @@
 import { DisplayNameModal } from "@/components";
 import { useAuth } from "@/hooks";
 import { SignInCredentials } from "@/types";
-
 import { yupResolver } from "@hookform/resolvers/yup";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import {
   Alert,
   Dimensions,
@@ -36,6 +36,8 @@ const schema = yup.object().shape({
 });
 
 export default function SignInScreen() {
+  const { t } = useTranslation();
+
   const {
     login,
     isLoading,
@@ -156,8 +158,10 @@ export default function SignInScreen() {
           {/* Form Container */}
           <View style={styles.formContainer}>
             <View style={styles.formHeader}>
-              <Text style={styles.formTitle}>Welcome back</Text>
-              <Text style={styles.formSubtitle}>Sign in to your account</Text>
+              <Text style={styles.formTitle}>{t("auth.welcomeBack")}</Text>
+              <Text style={styles.formSubtitle}>
+                {t("auth.signInToYourAccount")}
+              </Text>
             </View>
 
             <View style={styles.form}>
@@ -166,10 +170,10 @@ export default function SignInScreen() {
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>Email</Text>
+                    <Text style={styles.inputLabel}>{t("auth.email")}</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter your email"
+                      placeholder={t("auth.enterYourEmail")}
                       placeholderTextColor="rgba(255,255,255,0.6)"
                       value={value}
                       onChangeText={onChange}
@@ -192,10 +196,10 @@ export default function SignInScreen() {
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>Password</Text>
+                    <Text style={styles.inputLabel}>{t("auth.password")}</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Enter your password"
+                      placeholder={t("auth.enterYourPassword")}
                       placeholderTextColor="rgba(255,255,255,0.6)"
                       value={value}
                       onChangeText={onChange}
@@ -217,7 +221,9 @@ export default function SignInScreen() {
                 onPress={handleForgotPassword}
                 activeOpacity={0.7}
               >
-                <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+                <Text style={styles.forgotPasswordText}>
+                  {t("auth.forgotPassword")}
+                </Text>
               </TouchableOpacity>
               {/* Sign in button */}
               <TouchableOpacity
@@ -230,16 +236,16 @@ export default function SignInScreen() {
                 activeOpacity={0.8}
               >
                 <Text style={styles.signInButtonText}>
-                  {isLoading ? "Signing in..." : "Sign in"}
+                  {isLoading ? t("common.loading") : t("auth.signIn")}
                 </Text>
               </TouchableOpacity>
             </View>
 
             {/* Sign up link */}
             <View style={styles.signUpContainer}>
-              <Text style={styles.signUpText}>Don&apos;t have an account?</Text>
+              <Text style={styles.signUpText}>{t("auth.dontHaveAccount")}</Text>
               <TouchableOpacity onPress={handleGoToSignUp} activeOpacity={0.7}>
-                <Text style={styles.signUpLink}>Sign up</Text>
+                <Text style={styles.signUpLink}>{t("auth.signUp")}</Text>
               </TouchableOpacity>
             </View>
           </View>

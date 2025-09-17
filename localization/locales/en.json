@@ -19,12 +19,15 @@
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "signOut": "Sign Out",
+    "enterYourEmail": "Enter your email",
+    "enterYourPassword": "Enter your password",
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "forgotPassword": "Forgot Password?",
     "resetPassword": "Reset Password",
     "createAccount": "Create Account",
+    "signInToYourAccount": "Sign in to your account",
     "alreadyHaveAccount": "Already have an account?",
     "dontHaveAccount": "Don't have an account?",
     "signInWithGoogle": "Sign in with Google",
@@ -161,7 +164,7 @@
     "next": "Next",
     "finish": "Finish"
   },
-  "home": {
+  "welcome": {
     "mainTitle": "Yours.",
     "subTitle": "On the move.",
     "description": "Never miss out on what you love. All in the Stud.io app.",
