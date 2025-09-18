@@ -1,0 +1,3 @@
+- Ekranların lokalizasyonu yapılacak. 
+- profil ekranı düzenlenecek. yaratılanlar aktarılacak.
+- backend serivi yazılacak bunun için.
