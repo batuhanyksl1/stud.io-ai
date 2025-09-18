@@ -8,7 +8,7 @@ import {
 import { useTheme } from "@/hooks";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Platform, ScrollView, StyleSheet, View } from "react-native";
 export default function HomeScreen() {
   const { colors, colorScheme } = useTheme();
 
@@ -39,7 +39,8 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    marginHorizontal: 16,
+    // Platform spesifik margin - iOS'te gerekli, Android'de sorun yaratıyor
+    marginHorizontal: Platform.OS === "ios" ? 16 : -8,
   },
   scrollContent: {
     paddingBottom: 34,

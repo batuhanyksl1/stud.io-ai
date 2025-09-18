@@ -13,6 +13,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
 import { Badge } from "../ui/Badge";
 
@@ -185,7 +186,8 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 const styles = StyleSheet.create({
   carouselSection: {
     paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingVertical: Platform.OS === "ios" ? 0 : 10,
+    marginBottom: Platform.OS === "ios" ? 10 : 0,
   },
   carouselContainer: {
     height: 240,
@@ -219,7 +221,7 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   carouselImage: {
-    width: 195,
+    width: 200 * (Platform.OS === "ios" ? 1 : 1.06),
     height: 235,
     borderRadius: 16,
     opacity: 0.7,

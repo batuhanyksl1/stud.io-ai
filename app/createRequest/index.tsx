@@ -1,5 +1,5 @@
-import { ThemedButton, ThemedCard, ThemedText, ThemedView } from "@/components";
-import { BorderRadius, Colors, Spacing } from "@/constants/Colors";
+import { ThemedButton, ThemedText, ThemedView } from "@/components";
+import { Colors, Spacing } from "@/constants/Colors";
 import { useContentCreation } from "@/hooks";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
@@ -8,262 +8,157 @@ import { Image, ScrollView, StyleSheet, View } from "react-native";
 // ===== Component =====
 export default function CreateRequestScreen() {
   const { error } = useContentCreation();
-
-  // Geçici olarak selectedImage state'ini local olarak yönetelim
   const [selectedImage, setSelectedImage] = React.useState<any>(null);
+  const [isProcessing, setIsProcessing] = React.useState(false);
 
-  // Eksik fonksiyonları tanımlayalım
+  // Görsel seçme fonksiyonu
   const pickImage = async () => {
-    // TODO: Image picker implementasyonu
-    console.log("Galeri seçimi - henüz implement edilmedi");
+    console.log("Galeriden görsel seçimi başladı.");
+    // Demo amaçlı örnek bir görsel URI'si
+    setSelectedImage({
+      uri: "https://images.unsplash.com/photo-1621243886407-937299a67789?q=80&w=2070&auto=format&fit=crop",
+      id: "sample-image-2",
+    });
   };
 
+  // Kamera fonksiyonu
   const takePhoto = async () => {
-    // TODO: Camera implementasyonu
-    console.log("Kamera - henüz implement edilmedi");
+    console.log("Kamera açıldı - henüz implement edilmedi.");
   };
 
-  const processImageWithFalAI = async (imageId: string) => {
-    // TODO: FalAI işleme implementasyonu
-    console.log("FalAI işleme - henüz implement edilmedi", imageId);
-  };
-
+  // İşleme başlama fonksiyonu
   const handleStartProcessing = () => {
-    if (selectedImage) {
-      // processImageWithFalAI içinde otomatik olarak Firebase'e yükleme yapılacak
-      processImageWithFalAI(selectedImage.id);
-    }
+    if (!selectedImage) return;
+    setIsProcessing(true);
+    console.log(`İşleme başlanıyor: ${selectedImage.id}`);
+
+    // Demo amaçlı işlem simülasyonu
+    setTimeout(() => {
+      setIsProcessing(false);
+      console.log("İşlem tamamlandı.");
+      // Sonuç görseli gösterebilirsiniz, şimdilik sadece işlemi bitiriyoruz.
+    }, 3000);
   };
+
+  // Ekranın üst kısmındaki dinamik başlık alanı
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <ThemedText variant="h1" weight="bold" style={styles.headerTitle}>
+        AI Görsel İşleme
+      </ThemedText>
+      <ThemedText variant="body" style={styles.headerSubtitle}>
+        Görselinizi yükleyin, yapay zekanın dönüştürmesini izleyin.
+      </ThemedText>
+    </View>
+  );
+
+  // Görselin seçilmediği durum
+  const renderEmptyState = () => (
+    <View style={styles.emptyStateContainer}>
+      <Ionicons name="image-outline" size={64} color={Colors.gray400} />
+      <ThemedText
+        variant="h3"
+        weight="semiBold"
+        style={{ marginTop: Spacing.xl, color: Colors.text }}
+      >
+        Görsel Yükleyin
+      </ThemedText>
+      <ThemedText style={styles.emptyStateHint}>PNG, JPG, JPEG</ThemedText>
+
+      <View style={styles.actionButtons}>
+        <ThemedButton
+          variant="default"
+          size="lg"
+          onPress={pickImage}
+          style={styles.actionBtnPrimary}
+        >
+          <Ionicons name="images" size={18} color={Colors.white} />
+          <ThemedText style={styles.actionBtnText}>Galeriden Seç</ThemedText>
+        </ThemedButton>
+        <ThemedButton
+          variant="outline"
+          size="lg"
+          onPress={takePhoto}
+          style={styles.actionBtnSecondary}
+        >
+          <Ionicons name="camera" size={18} color={Colors.text} />
+          <ThemedText style={styles.actionBtnText}>Kamera</ThemedText>
+        </ThemedButton>
+      </View>
+    </View>
+  );
+
+  // Görselin seçildiği ve gösterildiği durum
+  const renderImagePreview = () => (
+    <View style={styles.previewContainer}>
+      <Image
+        source={{ uri: selectedImage.uri }}
+        style={styles.fullScreenImage}
+        resizeMode="cover"
+      />
+      <View style={styles.previewOverlay}>
+        <View style={styles.overlayTextContainer}>
+          <ThemedText variant="h2" weight="bold" style={styles.overlayTitle}>
+            Görsel Hazır
+          </ThemedText>
+          <ThemedText variant="body" style={styles.overlaySubtitle}>
+            İşlemi başlatmak için butona dokunun.
+          </ThemedText>
+        </View>
+
+        <View style={styles.overlayButtons}>
+          <ThemedButton
+            variant="default"
+            size="lg"
+            onPress={handleStartProcessing}
+            disabled={isProcessing}
+            style={styles.startButton}
+          >
+            <Ionicons name="rocket-outline" size={20} color={Colors.white} />
+            <ThemedText style={styles.startBtnText}>
+              {isProcessing ? "İşleniyor..." : "İşleme Başlat"}
+            </ThemedText>
+          </ThemedButton>
+          <ThemedButton
+            variant="ghost"
+            size="sm"
+            onPress={() => setSelectedImage(null)}
+            style={styles.changeButton}
+          >
+            <ThemedText style={styles.changeBtnText}>Görseli Değiştir</ThemedText>
+          </ThemedButton>
+        </View>
+      </View>
+    </View>
+  );
 
   return (
     <ThemedView style={styles.container}>
       <ScrollView
-        showsVerticalScrollIndicator={false}
-        style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <ThemedText variant="h2" weight="bold" style={styles.title}>
-            AI Görsel İşleme
-          </ThemedText>
-          <ThemedText variant="body" style={styles.subtitle}>
-            Görseli yükle • 3 servis paralel işlesin • Sonuçlar sırayla gelsin
-          </ThemedText>
-        </View>
+        {renderHeader()}
+        {selectedImage ? renderImagePreview() : renderEmptyState()}
 
-        {/* Upload */}
-        <ThemedCard style={styles.uploadCard} elevation="lg">
-          {selectedImage ? (
-            <ScrollView style={styles.previewWrap}>
-              <Image
-                source={{ uri: selectedImage.uri }}
-                style={styles.preview}
-              />
-              <View style={styles.overlayButtons}>
-                <ThemedButton
-                  variant="outline"
-                  size="sm"
-                  onPress={() => setSelectedImage(null)}
-                  style={styles.overlayBtn}
-                >
-                  <Ionicons name="refresh" size={16} color={Colors.primary} />
-                  <ThemedText variant="caption" style={styles.overlayText}>
-                    Değiştir
-                  </ThemedText>
-                </ThemedButton>
-                <ThemedButton
-                  size="sm"
-                  onPress={handleStartProcessing}
-                  disabled={
-                    selectedImage.status === "uploading" ||
-                    selectedImage.status === "processing"
-                  }
-                  style={styles.overlayBtnPrimary}
-                >
-                  <Ionicons name="rocket" size={16} color={Colors.white} />
-                  <ThemedText
-                    variant="caption"
-                    style={{ color: Colors.white, marginLeft: 6 }}
-                  >
-                    {selectedImage.status === "uploading"
-                      ? "Yükleniyor..."
-                      : selectedImage.status === "processing"
-                        ? "İşleniyor..."
-                        : "İşleme Başlat"}
-                  </ThemedText>
-                </ThemedButton>
-              </View>
-            </ScrollView>
-          ) : (
-            // GÖRSEL SEÇİLMEMİŞSE
-            <ScrollView style={styles.dropArea}>
-              <Ionicons name="cloud-upload" size={32} color={Colors.primary} />
-              <ThemedText
-                variant="bodyLarge"
-                weight="medium"
-                style={{ marginTop: Spacing.sm }}
-              >
-                Görsel Yükle
-              </ThemedText>
-              <ThemedText
-                variant="caption"
-                style={{ color: Colors.textSecondary, marginTop: 2 }}
-              >
-                PNG • JPG • JPEG
-              </ThemedText>
-              <View style={styles.uploadActions}>
-                <ThemedButton
-                  variant="outline"
-                  size="sm"
-                  onPress={pickImage}
-                  style={styles.actionBtn}
-                >
-                  <Ionicons name="images" size={16} color={Colors.primary} />
-                  <ThemedText variant="caption" style={{ marginLeft: 6 }}>
-                    Galeri
-                  </ThemedText>
-                </ThemedButton>
-                <ThemedButton
-                  variant="outline"
-                  size="sm"
-                  onPress={takePhoto}
-                  style={styles.actionBtn}
-                >
-                  <Ionicons name="camera" size={16} color={Colors.primary} />
-                  <ThemedText variant="caption" style={{ marginLeft: 6 }}>
-                    Kamera
-                  </ThemedText>
-                </ThemedButton>
-              </View>
-            </ScrollView>
-          )}
-        </ThemedCard>
-
-        {/* Error Display */}
+        {/* Hata Mesajı */}
         {error && (
-          <ThemedCard
-            style={
-              [
-                styles.uploadCard,
-                { backgroundColor: Colors.error + "10" },
-              ] as any
-            }
-          >
-            <ThemedText variant="body" style={{ color: Colors.error }}>
-              Hata: {error}
+          <View style={styles.errorContainer}>
+            <Ionicons name="warning-outline" size={20} color={Colors.error} />
+            <ThemedText variant="body" style={styles.errorText}>
+              {error}
             </ThemedText>
-          </ThemedCard>
-        )}
-
-        {/* Dashboard */}
-        <View style={styles.historyHeader}>
-          <ThemedText variant="h3" weight="semiBold">
-            İşlem Geçmişi
-          </ThemedText>
-        </View>
-
-        {!selectedImage ? (
-          <ThemedCard
-            elevation="sm"
-            style={{ marginHorizontal: Spacing.lg, padding: Spacing.lg }}
-          >
-            <ThemedText variant="body">
-              Henüz bir istek yok. Bir görsel yükleyip işleme başlat.
-            </ThemedText>
-          </ThemedCard>
-        ) : (
-          <View style={{ marginHorizontal: Spacing.lg }}>
-            <ThemedCard elevation="sm" style={{ padding: Spacing.lg }}>
-              <ThemedText variant="body" weight="medium">
-                Seçili Görsel: {selectedImage.id}
-              </ThemedText>
-              <ThemedText variant="caption" style={{ marginTop: Spacing.xs }}>
-                Durum: {selectedImage.status}
-              </ThemedText>
-              {selectedImage.progress !== undefined && (
-                <ThemedText variant="caption" style={{ marginTop: 2 }}>
-                  İlerleme: %{selectedImage.progress}
-                </ThemedText>
-              )}
-              {selectedImage.downloadURL && (
-                <ThemedText variant="caption" style={{ marginTop: 2 }}>
-                  Firebase URL: {selectedImage.downloadURL.substring(0, 50)}...
-                </ThemedText>
-              )}
-            </ThemedCard>
           </View>
         )}
 
-        {/* Test için ek içerik - ScrollView'in çalışıp çalışmadığını test etmek için */}
-        <View style={{ marginHorizontal: Spacing.lg, marginTop: Spacing.lg }}>
-          <ThemedCard
-            elevation="sm"
-            style={{ padding: Spacing.lg, marginBottom: Spacing.md }}
-          >
-            <ThemedText
-              variant="h4"
-              weight="semiBold"
-              style={{ marginBottom: Spacing.sm }}
-            >
-              Test İçeriği 1
-            </ThemedText>
-            <ThemedText variant="body">
-              Bu bölüm ScrollView&apos;in çalışıp çalışmadığını test etmek için
-              eklenmiştir.
-            </ThemedText>
-          </ThemedCard>
-
-          <ThemedCard
-            elevation="sm"
-            style={{ padding: Spacing.lg, marginBottom: Spacing.md }}
-          >
-            <ThemedText
-              variant="h4"
-              weight="semiBold"
-              style={{ marginBottom: Spacing.sm }}
-            >
-              Test İçeriği 2
-            </ThemedText>
-            <ThemedText variant="body">
-              Eğer bu içerikleri görebiliyorsanız ve aşağı kaydırabiliyorsanız
-              ScrollView çalışıyor demektir.
-            </ThemedText>
-          </ThemedCard>
-
-          <ThemedCard
-            elevation="sm"
-            style={{ padding: Spacing.lg, marginBottom: Spacing.md }}
-          >
-            <ThemedText
-              variant="h4"
-              weight="semiBold"
-              style={{ marginBottom: Spacing.sm }}
-            >
-              Test İçeriği 3
-            </ThemedText>
-            <ThemedText variant="body">
-              ScrollView&apos;in düzgün çalışması için yeterli içerik olması
-              gerekiyor.
-            </ThemedText>
-          </ThemedCard>
-
-          <ThemedCard
-            elevation="sm"
-            style={{ padding: Spacing.lg, marginBottom: Spacing.md }}
-          >
-            <ThemedText
-              variant="h4"
-              weight="semiBold"
-              style={{ marginBottom: Spacing.sm }}
-            >
-              Test İçeriği 4
-            </ThemedText>
-            <ThemedText variant="body">
-              Bu son test kartı. Eğer buraya kadar scroll yapabiliyorsanız her
-              şey yolunda!
-            </ThemedText>
-          </ThemedCard>
+        {/* İşlem Geçmişi veya Sonuçlar */}
+        <View style={styles.historySection}>
+          <ThemedText variant="h3" weight="semiBold" style={{ color: Colors.text }}>
+            Son İşlemler
+          </ThemedText>
+          <ThemedText variant="body" style={styles.historyPlaceholder}>
+            Henüz bir işlem yok. İşlem sonuçları burada listelenecek.
+          </ThemedText>
         </View>
       </ScrollView>
     </ThemedView>
@@ -272,76 +167,135 @@ export default function CreateRequestScreen() {
 
 // ===== Styles =====
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scroll: { flex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: Spacing.xl,
+    paddingBottom: Spacing.xl * 2,
   },
-
   header: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.md,
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.gray100,
     alignItems: "center",
   },
-  title: { textAlign: "center", marginBottom: Spacing.xs },
-  subtitle: { textAlign: "center", color: Colors.textSecondary },
+  headerTitle: {
+    textAlign: "center",
+  },
+  headerSubtitle: {
+    textAlign: "center",
+    color: Colors.textSecondary,
+    marginTop: Spacing.xs,
+  },
 
-  uploadCard: { margin: Spacing.lg, marginTop: Spacing.xl },
-  dropArea: {
-    borderWidth: 2,
-    borderColor: Colors.gray200,
-    borderStyle: "dashed",
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.xl,
+  // Boş durum (görsel seçilmemiş)
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.gray50,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xxl * 2,
   },
-  uploadActions: {
-    flexDirection: "row",
-    gap: Spacing.md,
-    marginTop: Spacing.md,
+  emptyStateHint: {
+    color: Colors.gray400,
+    marginTop: Spacing.xs,
   },
-  actionBtn: { flexDirection: "row", alignItems: "center" },
-
-  previewWrap: { position: "relative" },
-  preview: {
+  actionButtons: {
+    marginTop: Spacing.xl,
     width: "100%",
-    height: 220,
-    borderRadius: BorderRadius.lg,
-    resizeMode: "cover",
+    gap: Spacing.md,
+  },
+  actionBtnPrimary: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  actionBtnSecondary: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  actionBtnText: {
+    marginLeft: Spacing.sm,
+    color: Colors.white,
+  },
+
+  // Görsel önizleme
+  previewContainer: {
+    width: "100%",
+    height: 450, // Sabit yükseklik ile tam ekran hissi
+  },
+  fullScreenImage: {
+    width: "100%",
+    height: "100%",
+  },
+  previewOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "flex-end",
+    padding: Spacing.lg,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Yarı saydam siyah overlay
+  },
+  overlayTextContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  overlayTitle: {
+    color: Colors.white,
+    textAlign: "center",
+  },
+  overlaySubtitle: {
+    color: Colors.white + "99",
+    textAlign: "center",
+    marginTop: Spacing.xs,
   },
   overlayButtons: {
-    position: "absolute",
-    top: Spacing.md,
-    right: Spacing.md,
-    gap: Spacing.sm,
+    width: "100%",
   },
-  overlayBtn: {
+  startButton: {
     flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.white + "E6",
   },
-  overlayBtnPrimary: {
-    flexDirection: "row",
+  startBtnText: {
+    marginLeft: Spacing.sm,
+    color: Colors.white,
+  },
+  changeButton: {
+    marginTop: Spacing.sm,
+    justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.primary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.md,
   },
-  overlayText: { marginLeft: 6 },
+  changeBtnText: {
+    color: Colors.white + "99",
+    textDecorationLine: "underline",
+  },
 
-  historyHeader: {
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.sm,
-    marginTop: -Spacing.sm,
+  // Hata Mesajı
+  errorContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    padding: Spacing.md,
+    backgroundColor: Colors.error + "10",
+    borderRadius: Spacing.sm,
+    marginHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
+  },
+  errorText: {
+    color: Colors.error,
+    marginLeft: Spacing.sm,
+  },
+
+  // Geçmiş Alanı
+  historySection: {
+    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.xxl,
+  },
+  historyPlaceholder: {
+    color: Colors.gray400,
+    textAlign: "center",
+    marginTop: Spacing.lg,
   },
 });

@@ -5,7 +5,7 @@ import Ionicon from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export const HomeServices: React.FC = () => {
   const router = useRouter();
@@ -110,7 +110,7 @@ export const HomeServices: React.FC = () => {
   return (
     <ThemedView style={styles.servicesSection}>
       <View style={styles.sectionHeader}>
-        <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
+        <ThemedText variant="h3" weight="bold">
           Tüm Servisler
         </ThemedText>
         <TouchableOpacity>
@@ -129,7 +129,7 @@ export const HomeServices: React.FC = () => {
 const styles = StyleSheet.create({
   servicesSection: {
     paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingTop: Platform.OS === "ios" ? 10 : 0,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -137,9 +137,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  sectionTitle: {
-    marginBottom: 16,
-  },
+  // sectionTitle: {
+  //   marginBottom: 16,
+  // },
   servicesGrid: {
     gap: 16,
   },

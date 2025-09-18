@@ -1,13 +1,18 @@
-import { Spacing } from '@/constants/DesignTokens';
-import { useTheme } from '@/hooks/useTheme';
-import React, { ReactNode } from 'react';
-import { SafeAreaView, ViewStyle } from 'react-native';
+import { Spacing } from "@/constants/DesignTokens";
+import { useTheme } from "@/hooks/useTheme";
+import React, { ReactNode } from "react";
+import { SafeAreaView, ViewStyle } from "react-native";
 
 // ThemedView bileşeninin alabileceği özellikler
 interface ThemedViewProps {
   children: ReactNode; // İçeride gösterilecek bileşenler
   style?: ViewStyle; // Ek stil özellikleri
-  backgroundColor?: 'background' | 'surface' | 'surfaceElevated' | 'primary' | 'transparent'; // Arka plan rengi seçenekleri
+  backgroundColor?:
+    | "background"
+    | "surface"
+    | "surfaceElevated"
+    | "primary"
+    | "transparent"; // Arka plan rengi seçenekleri
   padding?: keyof typeof Spacing; // İç boşluk (padding) değeri
   margin?: keyof typeof Spacing; // Dış boşluk (margin) değeri
 }
@@ -32,7 +37,7 @@ interface ThemedViewProps {
 export default function ThemedView({
   children,
   style,
-  backgroundColor = 'background', // Varsayılan olarak ana arka plan rengi
+  backgroundColor = "background", // Varsayılan olarak ana arka plan rengi
   padding,
   margin,
 }: ThemedViewProps) {
@@ -43,7 +48,10 @@ export default function ThemedView({
   const viewStyle: ViewStyle[] = [
     // 1. Arka plan rengini ayarla
     {
-      backgroundColor: backgroundColor === 'transparent' ? 'transparent' : colors[backgroundColor],
+      backgroundColor:
+        backgroundColor === "transparent"
+          ? "transparent"
+          : colors[backgroundColor],
     },
     // 2. Margin (dış boşluk) varsa ekle
     margin && { margin: Spacing[margin] },
