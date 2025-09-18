@@ -30,6 +30,7 @@ import {
   View,
 } from "react-native";
 import { pollAiToolStatus } from "../../store/slices/contentCreationSlice";
+import { editingServices } from "@/components/data/homeData";
 
 const ImageGeneratorScreen = () => {
   const { servicePrompt, aiToolRequest, aiToolStatus, aiToolResult } =
@@ -275,6 +276,18 @@ const ImageGeneratorScreen = () => {
     return `${servicePrompt.slice(0, 157)}...`;
   }, [servicePrompt]);
 
+  const exampleItems = useMemo(
+    () =>
+      editingServices.slice(0, 3).map((service) => ({
+        id: service.id,
+        title: service.title,
+        subtitle: service.subtitle,
+        beforeImage: service.image1,
+        afterImage: service.image2,
+      })),
+    [],
+  );
+
   const renderInitialView = () => (
     <ScrollView
       contentContainerStyle={styles.scrollArea}
@@ -397,6 +410,53 @@ const ImageGeneratorScreen = () => {
             </Text>
           </View>
         </View>
+      </View>
+
+      <View
+        style={[styles.examplesCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      >
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+          Örnek çıktılar
+        </Text>
+        <Text style={[styles.examplesDescription, { color: colors.textSecondary }]}>
+          Studio AI'nin farklı servisleriyle neler elde edebileceğinizi keşfedin.
+        </Text>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.exampleList}
+        >
+          {exampleItems.map((item, index) => (
+            <View
+              key={item.id}
+              style={[
+                styles.exampleItem,
+                { borderColor: colors.border, backgroundColor: colors.surfaceElevated },
+                index === exampleItems.length - 1 && styles.exampleItemLast,
+              ]}
+            >
+              <Text style={[styles.exampleTitle, { color: colors.textPrimary }]}>
+                {item.title}
+              </Text>
+              <Text style={[styles.exampleSubtitle, { color: colors.textSecondary }]}>
+                {item.subtitle}
+              </Text>
+
+              <View style={styles.exampleImageRow}>
+                <View style={styles.exampleImageWrapper}>
+                  <Text style={[styles.exampleImageLabel, { color: colors.textTertiary }]}>Önce</Text>
+                  <Image source={item.beforeImage} style={styles.exampleImage} />
+                </View>
+                <Text style={[styles.exampleArrow, { color: colors.primary }]}>→</Text>
+                <View style={styles.exampleImageWrapper}>
+                  <Text style={[styles.exampleImageLabel, { color: colors.textTertiary }]}>Sonra</Text>
+                  <Image source={item.afterImage} style={styles.exampleImage} />
+                </View>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
       </View>
     </ScrollView>
   );
@@ -805,6 +865,69 @@ const styles = StyleSheet.create({
     padding: Spacing.xxl,
     borderWidth: 1,
     ...Shadows.sm,
+  },
+  examplesCard: {
+    borderRadius: BorderRadius.xl,
+    paddingVertical: Spacing.xxl,
+    paddingHorizontal: Spacing.xl,
+    borderWidth: 1,
+    marginTop: Spacing.xl,
+    ...Shadows.none,
+  },
+  examplesDescription: {
+    fontSize: Typography.fontSize.md,
+    fontFamily: Typography.fontFamily.primary,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.md,
+    marginBottom: Spacing.xl,
+  },
+  exampleList: {
+    paddingRight: Spacing.xl,
+  },
+  exampleItem: {
+    width: 260,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    padding: Spacing.lg,
+    marginRight: Spacing.lg,
+  },
+  exampleItemLast: {
+    marginRight: 0,
+  },
+  exampleTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontFamily: Typography.fontFamily.semiBold,
+    marginBottom: Spacing.xs,
+  },
+  exampleSubtitle: {
+    fontSize: Typography.fontSize.sm,
+    fontFamily: Typography.fontFamily.medium,
+    marginBottom: Spacing.md,
+  },
+  exampleImageRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  exampleImageWrapper: {
+    alignItems: "center",
+    flex: 1,
+  },
+  exampleImageLabel: {
+    fontSize: Typography.fontSize.xs,
+    fontFamily: Typography.fontFamily.medium,
+    marginBottom: Spacing.xs,
+    textTransform: "uppercase",
+    letterSpacing: Typography.letterSpacing.wide,
+  },
+  exampleArrow: {
+    fontSize: Typography.fontSize.xxl,
+    marginHorizontal: Spacing.md,
+    fontFamily: Typography.fontFamily.semiBold,
+  },
+  exampleImage: {
+    width: 96,
+    height: 96,
+    borderRadius: BorderRadius.md,
   },
   sectionTitle: {
     fontSize: Typography.fontSize.xxl,
