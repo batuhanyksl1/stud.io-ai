@@ -44,13 +44,28 @@ export const uploadImageToStorage = createAsyncThunk<
 >(
   "contentCreation/uploadImageToStorage",
   async ({ fileUri }: { fileUri: string }, { rejectWithValue }) => {
+    console.log("📤 uploadImageToStorage - başladı");
+    console.log("📤 uploadImageToStorage - fileUri:", fileUri);
+
     try {
       const rawName = fileUri.split("/").pop() || `file-${Date.now()}`;
       const ext = rawName.includes(".") ? rawName.split(".").pop() : "jpg";
       const fileName = `${Date.now()}.${ext}`;
 
+      console.log("📤 uploadImageToStorage - rawName:", rawName);
+      console.log("📤 uploadImageToStorage - ext:", ext);
+      console.log("📤 uploadImageToStorage - fileName:", fileName);
+
+      const currentUser = auth().currentUser;
+      console.log("📤 uploadImageToStorage - currentUser:", currentUser?.uid);
+
       const reference = storage().ref(
-        `${initialState.pathPrefix}/${auth().currentUser?.uid}/${fileName}`,
+        `${initialState.pathPrefix}/${currentUser?.uid}/${fileName}`,
+      );
+
+      console.log(
+        "📤 uploadImageToStorage - reference path:",
+        `${initialState.pathPrefix}/${currentUser?.uid}/${fileName}`,
       );
 
       // Ensure we pass a valid local path to RNFirebase Storage
@@ -59,17 +74,24 @@ export const uploadImageToStorage = createAsyncThunk<
         ? fileUri.replace("file://", "")
         : fileUri;
 
+      console.log("📤 uploadImageToStorage - pathToFile:", pathToFile);
+
       // Upload the file from local storage
+      console.log("📤 uploadImageToStorage - dosya yükleniyor...");
       const task = reference.putFile(pathToFile);
 
       // Optionally, track progress with task.on('state_changed', ...)
       await task;
+      console.log("📤 uploadImageToStorage - dosya yükleme tamamlandı");
 
       // Retrieve the public download URL
+      console.log("📤 uploadImageToStorage - download URL alınıyor...");
       const downloadURL = await reference.getDownloadURL();
+      console.log("📤 uploadImageToStorage - downloadURL:", downloadURL);
+
       return downloadURL;
     } catch (error) {
-      console.error("Storage upload error:", error);
+      console.error("❌ uploadImageToStorage - hata:", error);
       return rejectWithValue(
         error instanceof Error ? error.message : "Unknown storage error",
       );
@@ -99,34 +121,54 @@ export const uploadImageToAITool = createAsyncThunk<
     { imageUrl, prompt, aiToolRequest, requestId },
     { rejectWithValue },
   ) => {
+    console.log("🤖 uploadImageToAITool - başladı");
+    console.log("🤖 uploadImageToAITool - imageUrl:", imageUrl);
+    console.log("🤖 uploadImageToAITool - prompt:", prompt);
+    console.log("🤖 uploadImageToAITool - aiToolRequest:", aiToolRequest);
+    console.log("🤖 uploadImageToAITool - requestId:", requestId);
+
     try {
       const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
-      const res = await fetch(
-        aiToolRequest.replace("${requestId}", requestId),
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Key ${FAL_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            prompt,
-            image_url: imageUrl,
-            guidance_scale: 3.5,
-            num_images: 1,
-            output_format: "jpeg",
-            safety_tolerance: "2",
-          }),
+      console.log("🤖 uploadImageToAITool - FAL_KEY var mı:", !!FAL_KEY);
+
+      const requestUrl = aiToolRequest.replace("${requestId}", requestId);
+      console.log("🤖 uploadImageToAITool - requestUrl:", requestUrl);
+
+      const requestBody = {
+        prompt,
+        image_urls: [imageUrl], // API image_urls (çoğul) bekliyor
+        guidance_scale: 3.5,
+        num_images: 1,
+        output_format: "jpeg",
+        safety_tolerance: "2",
+      };
+      console.log("🤖 uploadImageToAITool - requestBody:", requestBody);
+
+      const res = await fetch(requestUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Key ${FAL_KEY}`,
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log("🤖 uploadImageToAITool - response status:", res.status);
+      console.log("🤖 uploadImageToAITool - response ok:", res.ok);
+
       if (!res.ok) {
         const text = await res.text();
+        console.error("❌ uploadImageToAITool - response error:", text);
         throw new Error(`Fal queue start failed: ${res.status} ${text}`);
       }
+
       const data = (await res.json()) as any;
+      console.log("🤖 uploadImageToAITool - response data:", data);
+
       // Some responses might already include images if synchronous; pass through.
       return data;
     } catch (err) {
+      console.error("❌ uploadImageToAITool - hata:", err);
       return rejectWithValue(
         err instanceof Error ? err.message : "Unknown AI enqueue error",
       );
@@ -156,24 +198,42 @@ export const pollAiToolStatus = createAsyncThunk<
     },
     { rejectWithValue },
   ) => {
+    console.log("⏳ pollAiToolStatus - başladı");
+    console.log("⏳ pollAiToolStatus - requestId:", requestId);
+    console.log("⏳ pollAiToolStatus - maxAttempts:", maxAttempts);
+    console.log("⏳ pollAiToolStatus - intervalMs:", intervalMs);
+    console.log("⏳ pollAiToolStatus - aiToolStatus:", aiToolStatus);
+    console.log("⏳ pollAiToolStatus - aiToolResult:", aiToolResult);
+
     try {
       const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
+      console.log("⏳ pollAiToolStatus - FAL_KEY var mı:", !!FAL_KEY);
 
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        // Check status
+        console.log(
+          `⏳ pollAiToolStatus - deneme ${attempt + 1}/${maxAttempts}`,
+        );
 
-        const statusRes = await fetch(
-          aiToolStatus.replace("${requestId}", requestId),
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Key ${FAL_KEY}`,
-            },
+        // Check status
+        const statusUrl = aiToolStatus.replace("${requestId}", requestId);
+        console.log("⏳ pollAiToolStatus - statusUrl:", statusUrl);
+
+        const statusRes = await fetch(statusUrl, {
+          method: "GET",
+          headers: {
+            Authorization: `Key ${FAL_KEY}`,
           },
+        });
+
+        console.log("⏳ pollAiToolStatus - statusRes.ok:", statusRes.ok);
+        console.log(
+          "⏳ pollAiToolStatus - statusRes.status:",
+          statusRes.status,
         );
 
         if (!statusRes.ok) {
           const text = await statusRes.text();
+          console.error("❌ pollAiToolStatus - status error:", text);
           throw new Error(`Fal status failed: ${statusRes.status} ${text}`);
         }
 
@@ -182,21 +242,33 @@ export const pollAiToolStatus = createAsyncThunk<
           `🔄 Polling attempt ${attempt + 1}/${maxAttempts}, status:`,
           statusData.status,
         );
+        console.log("⏳ pollAiToolStatus - statusData:", statusData);
 
         // If completed, get the result
         if (statusData.status === "COMPLETED") {
-          const resultRes = await fetch(
-            aiToolResult.replace("${requestId}", requestId),
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Key ${FAL_KEY}`,
-              },
+          console.log(
+            "✅ pollAiToolStatus - işlem tamamlandı, sonuç alınıyor...",
+          );
+
+          const resultUrl = aiToolResult.replace("${requestId}", requestId);
+          console.log("⏳ pollAiToolStatus - resultUrl:", resultUrl);
+
+          const resultRes = await fetch(resultUrl, {
+            method: "GET",
+            headers: {
+              Authorization: `Key ${FAL_KEY}`,
             },
+          });
+
+          console.log("⏳ pollAiToolStatus - resultRes.ok:", resultRes.ok);
+          console.log(
+            "⏳ pollAiToolStatus - resultRes.status:",
+            resultRes.status,
           );
 
           if (!resultRes.ok) {
             const text = await resultRes.text();
+            console.error("❌ pollAiToolStatus - result error:", text);
             throw new Error(`Fal result failed: ${resultRes.status} ${text}`);
           }
 
@@ -207,6 +279,10 @@ export const pollAiToolStatus = createAsyncThunk<
 
         // If failed, throw error
         if (statusData.status === "FAILED") {
+          console.error(
+            "❌ pollAiToolStatus - AI Tool başarısız:",
+            statusData.error,
+          );
           throw new Error(
             `AI Tool failed: ${statusData.error || "Unknown error"}`,
           );
@@ -214,12 +290,17 @@ export const pollAiToolStatus = createAsyncThunk<
 
         // Wait before next attempt (except for last attempt)
         if (attempt < maxAttempts - 1) {
+          console.log(`⏳ pollAiToolStatus - ${intervalMs}ms bekleniyor...`);
           await new Promise((resolve) => setTimeout(resolve, intervalMs));
         }
       }
 
+      console.error(
+        `❌ pollAiToolStatus - timeout after ${maxAttempts} attempts`,
+      );
       throw new Error(`AI Tool polling timeout after ${maxAttempts} attempts`);
     } catch (err) {
+      console.error("❌ pollAiToolStatus - hata:", err);
       return rejectWithValue(
         err instanceof Error ? err.message : "Unknown AI polling error",
       );

@@ -23,7 +23,8 @@ export const editingServices = [
     aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiToolStatus:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult: "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+    aiToolResult:
+      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
   },

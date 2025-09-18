@@ -40,11 +40,18 @@ const ImageGeneratorScreen = () => {
       aiToolStatus: string;
       aiToolResult: string;
     }>();
-  console.log(servicePrompt);
+  console.log("🔍 CreationPage - servicePrompt:", servicePrompt);
+  console.log("🔍 CreationPage - aiToolRequest:", aiToolRequest);
+  console.log("🔍 CreationPage - aiToolStatus:", aiToolStatus);
+  console.log("🔍 CreationPage - aiToolResult:", aiToolResult);
+
   const dispatch = useAppDispatch();
   const { colors } = useTheme();
   const { uploadImageToStorage, uploadImageToAITool, createdImageUrl, status } =
     useContentCreation();
+
+  console.log("🔍 CreationPage - current status:", status);
+  console.log("🔍 CreationPage - createdImageUrl:", createdImageUrl);
 
   // Component'e özel state'ler
   const [localImageUri, setLocalImageUri] = useState<string | null>(null);
@@ -86,34 +93,58 @@ const ImageGeneratorScreen = () => {
 
   // Adım 1: Sadece galeriden görsel seçme
   const handleSelectImage = async () => {
+    console.log("🖼️ handleSelectImage - başladı");
     try {
       const pickedImageUri = await pickImage();
+      console.log("🖼️ handleSelectImage - pickedImageUri:", pickedImageUri);
       if (pickedImageUri) {
         resetState();
         setLocalImageUri(pickedImageUri);
+        console.log("🖼️ handleSelectImage - görsel başarıyla seçildi");
+      } else {
+        console.log("🖼️ handleSelectImage - görsel seçilmedi");
       }
-    } catch (_e) {
+    } catch (error) {
+      console.error("🖼️ handleSelectImage - hata:", error);
       setErrorMessage("Görsel seçilirken bir hata oluştu.");
     }
   };
 
   // Adım 2: Görseli işleme sürecini başlatma
   const handleGenerateImage = async () => {
+    console.log("✨ handleGenerateImage - başladı");
+    console.log("✨ handleGenerateImage - localImageUri:", localImageUri);
+    console.log("✨ handleGenerateImage - servicePrompt:", servicePrompt);
+
     if (!localImageUri) {
+      console.log("❌ handleGenerateImage - görsel seçilmemiş");
       setErrorMessage("Lütfen önce bir görsel seçin.");
       return;
     }
     if (!servicePrompt) {
+      console.log("❌ handleGenerateImage - prompt yazılmamış");
       setErrorMessage("Lütfen bir prompt yazın.");
       return;
     }
 
     setErrorMessage(null);
     setOriginalImageForResult(localImageUri);
+    console.log("✨ handleGenerateImage - işlem başlatılıyor...");
 
     try {
+      console.log("📤 handleGenerateImage - görsel storage'a yükleniyor...");
       const imageUrl = await uploadImageToStorage(localImageUri);
-      if (!imageUrl) throw new Error("Görsel sunucuya yüklenemedi.");
+      console.log("📤 handleGenerateImage - storage yanıtı:", imageUrl);
+
+      if (!imageUrl) {
+        console.error("❌ handleGenerateImage - storage yanıtı boş");
+        throw new Error("Görsel sunucuya yüklenemedi.");
+      }
+
+      console.log("🤖 handleGenerateImage - AI Tool'a görsel yükleniyor...");
+      console.log("🤖 handleGenerateImage - imageUrl:", imageUrl);
+      console.log("🤖 handleGenerateImage - servicePrompt:", servicePrompt);
+      console.log("🤖 handleGenerateImage - aiToolRequest:", aiToolRequest);
 
       // AI Tool'a görsel yükle
       const aiToolResponse = await uploadImageToAITool(
@@ -123,17 +154,32 @@ const ImageGeneratorScreen = () => {
         "", // requestId henüz yok, boş string olarak gönder
       );
 
+      console.log("🤖 handleGenerateImage - AI Tool yanıtı:", aiToolResponse);
+
       // Type guard for request_id
       let generatedRequestId: string | undefined;
       if (typeof aiToolResponse === "string") {
+        console.error(
+          "❌ handleGenerateImage - beklenmeyen yanıt formatı:",
+          typeof aiToolResponse,
+        );
         throw new Error("Beklenmeyen yanıt formatı alındı.");
       } else {
         generatedRequestId = aiToolResponse?.request_id?.toString();
+        console.log(
+          "🆔 handleGenerateImage - generatedRequestId:",
+          generatedRequestId,
+        );
       }
 
-      if (!generatedRequestId)
+      if (!generatedRequestId) {
+        console.error("❌ handleGenerateImage - request_id alınamadı");
         throw new Error("Yapay zeka aracı başlatılamadı.");
+      }
 
+      console.log(
+        "⏳ handleGenerateImage - AI Tool durumu kontrol ediliyor...",
+      );
       const aiToolStatusResult = await dispatch(
         pollAiToolStatus({
           requestId: generatedRequestId,
@@ -141,18 +187,36 @@ const ImageGeneratorScreen = () => {
           aiToolResult: aiToolResult || "",
         }),
       );
+
+      console.log(
+        "⏳ handleGenerateImage - pollAiToolStatus sonucu:",
+        aiToolStatusResult,
+      );
+
       if (aiToolStatusResult.meta.requestStatus === "rejected") {
+        console.error(
+          "❌ handleGenerateImage - AI Tool reddedildi:",
+          aiToolStatusResult.meta,
+        );
         throw new Error("Yapay zeka görseli işleyemedi.");
       }
 
       const resultPayload = aiToolStatusResult.payload as any;
+      console.log("📊 handleGenerateImage - resultPayload:", resultPayload);
+
       const finalUrl = resultPayload?.images?.[0]?.url;
+      console.log("🖼️ handleGenerateImage - finalUrl:", finalUrl);
 
       if (!finalUrl) {
+        console.error("❌ handleGenerateImage - finalUrl bulunamadı");
         throw new Error("Yapay zekadan geçerli bir sonuç alınamadı.");
       }
+
+      console.log("✅ handleGenerateImage - işlem başarıyla tamamlandı");
     } catch (err: any) {
+      console.error("❌ handleGenerateImage - hata yakalandı:", err);
       const message = err.message || "Bilinmeyen bir hata oluştu.";
+      console.error("❌ handleGenerateImage - hata mesajı:", message);
       Alert.alert("İşlem Başarısız", message);
       setErrorMessage(message);
       setOriginalImageForResult(null);
@@ -161,11 +225,21 @@ const ImageGeneratorScreen = () => {
 
   // Görseli galeriye indirme fonksiyonu
   const handleDownloadImage = async () => {
-    if (!createdImageUrl) return;
+    console.log("💾 handleDownloadImage - başladı");
+    console.log("💾 handleDownloadImage - createdImageUrl:", createdImageUrl);
+
+    if (!createdImageUrl) {
+      console.log("❌ handleDownloadImage - createdImageUrl yok");
+      return;
+    }
 
     try {
+      console.log("🔐 handleDownloadImage - izin isteniyor...");
       const { status } = await MediaLibrary.requestPermissionsAsync();
+      console.log("🔐 handleDownloadImage - izin durumu:", status);
+
       if (status !== "granted") {
+        console.log("❌ handleDownloadImage - izin reddedildi");
         Alert.alert(
           "İzin Gerekli",
           "Görseli kaydetmek için film rulosuna erişim izni vermeniz gerekiyor.",
@@ -173,11 +247,13 @@ const ImageGeneratorScreen = () => {
         return;
       }
 
+      console.log("💾 handleDownloadImage - görsel kaydediliyor...");
       await MediaLibrary.saveToLibraryAsync(createdImageUrl);
+      console.log("✅ handleDownloadImage - görsel başarıyla kaydedildi");
       Alert.alert("Başarılı!", "Görsel galerinize kaydedildi.");
       setImageViewerVisible(false);
     } catch (error) {
-      console.error(error);
+      console.error("❌ handleDownloadImage - hata:", error);
       Alert.alert("Hata", "Görsel kaydedilirken bir sorun oluştu.");
     }
   };
