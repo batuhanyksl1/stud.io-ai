@@ -1,3 +1,4 @@
+import { editingServices } from "@/components/data/homeData";
 import {
   Animations,
   BorderRadius,
@@ -30,7 +31,6 @@ import {
   View,
 } from "react-native";
 import { pollAiToolStatus } from "../../store/slices/contentCreationSlice";
-import { editingServices } from "@/components/data/homeData";
 
 const ImageGeneratorScreen = () => {
   const { servicePrompt, aiToolRequest, aiToolStatus, aiToolResult } =
@@ -59,8 +59,9 @@ const ImageGeneratorScreen = () => {
   console.log("🔍 CreationPage - createdImageUrl:", createdImageUrl);
 
   const [localImageUri, setLocalImageUri] = useState<string | null>(null);
-  const [originalImageForResult, setOriginalImageForResult] =
-    useState<string | null>(null);
+  const [originalImageForResult, setOriginalImageForResult] = useState<
+    string | null
+  >(null);
   const [isImageViewerVisible, setImageViewerVisible] = useState(false);
   const [isExamplesModalVisible, setExamplesModalVisible] = useState(true);
   const [activeExampleIndex, setActiveExampleIndex] = useState(0);
@@ -115,7 +116,9 @@ const ImageGeneratorScreen = () => {
       }
     } catch (error) {
       console.error("🖼️ handleSelectImage - hata:", error);
-      setErrorMessage("Görsel seçilirken bir sorun oluştu. Lütfen tekrar deneyin.");
+      setErrorMessage(
+        "Görsel seçilirken bir sorun oluştu. Lütfen tekrar deneyin.",
+      );
     }
   };
 
@@ -132,7 +135,9 @@ const ImageGeneratorScreen = () => {
 
     if (!servicePrompt) {
       console.log("❌ handleGenerateImage - prompt yazılmamış");
-      setErrorMessage("Talimat bulunamadı. Lütfen ana ekrandan tekrar deneyin.");
+      setErrorMessage(
+        "Talimat bulunamadı. Lütfen ana ekrandan tekrar deneyin.",
+      );
       return;
     }
 
@@ -184,7 +189,9 @@ const ImageGeneratorScreen = () => {
         throw new Error("Yapay zeka aracı başlatılamadı.");
       }
 
-      console.log("⏳ handleGenerateImage - AI Tool durumu kontrol ediliyor...");
+      console.log(
+        "⏳ handleGenerateImage - AI Tool durumu kontrol ediliyor...",
+      );
       const aiToolStatusResult = await dispatch(
         pollAiToolStatus({
           requestId: generatedRequestId,
@@ -325,7 +332,10 @@ const ImageGeneratorScreen = () => {
         ]}
       >
         <Text
-          style={[styles.heroBadge, { color: colors.textOnPrimary, backgroundColor: colors.primary }]}
+          style={[
+            styles.heroBadge,
+            { color: colors.textOnPrimary, backgroundColor: colors.primary },
+          ]}
         >
           Studio AI
         </Text>
@@ -333,14 +343,15 @@ const ImageGeneratorScreen = () => {
           Hayalinizi saniyeler içinde hayata geçirin
         </Text>
         <Text style={[styles.heroDescription, { color: colors.textSecondary }]}>
-          Referans görselinizi ekleyin, talimatınızı paylaşın ve Studio AI gerisini sizin için yönetsin.
+          Referans görselinizi ekleyin, talimatınızı paylaşın ve Studio AI
+          gerisini sizin için yönetsin.
         </Text>
 
         <View style={styles.heroMetaRow}>
-          <View
-            style={[styles.heroMetaItem, { borderColor: colors.border }]}
-          >
-            <Text style={[styles.heroMetaLabel, { color: colors.textTertiary }]}>
+          <View style={[styles.heroMetaItem, { borderColor: colors.border }]}>
+            <Text
+              style={[styles.heroMetaLabel, { color: colors.textTertiary }]}
+            >
               Talimat
             </Text>
             <Text style={[styles.heroMetaValue, { color: colors.textPrimary }]}>
@@ -348,9 +359,7 @@ const ImageGeneratorScreen = () => {
             </Text>
           </View>
           {aiToolRequest ? (
-            <View
-              style={[styles.heroMetaItem, { borderColor: colors.border }]}
-            >
+            <View style={[styles.heroMetaItem, { borderColor: colors.border }]}>
               <Text
                 style={[styles.heroMetaLabel, { color: colors.textTertiary }]}
               >
@@ -378,69 +387,86 @@ const ImageGeneratorScreen = () => {
       </Animated.View>
 
       <View
-        style={[styles.stepsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        style={[
+          styles.stepsCard,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
       >
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
           Nasıl çalışıyor?
         </Text>
 
         <View style={styles.stepItem}>
-          <View
-            style={[styles.stepNumber, { borderColor: colors.primary }]}
-          >
-            <Text style={[styles.stepNumberText, { color: colors.primary }]}>1</Text>
+          <View style={[styles.stepNumber, { borderColor: colors.primary }]}>
+            <Text style={[styles.stepNumberText, { color: colors.primary }]}>
+              1
+            </Text>
           </View>
           <View style={styles.stepContent}>
             <Text style={[styles.stepTitle, { color: colors.textPrimary }]}>
               Referans görselinizi yükleyin
             </Text>
-            <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
+            <Text
+              style={[styles.stepSubtitle, { color: colors.textSecondary }]}
+            >
               Yapay zekanın doğru bağlamı yakalaması için net bir görsel seçin.
             </Text>
           </View>
         </View>
 
         <View style={styles.stepItem}>
-          <View
-            style={[styles.stepNumber, { borderColor: colors.primary }]}
-          >
-            <Text style={[styles.stepNumberText, { color: colors.primary }]}>2</Text>
+          <View style={[styles.stepNumber, { borderColor: colors.primary }]}>
+            <Text style={[styles.stepNumberText, { color: colors.primary }]}>
+              2
+            </Text>
           </View>
           <View style={styles.stepContent}>
             <Text style={[styles.stepTitle, { color: colors.textPrimary }]}>
               Studio AI talimatınızı uygulasın
             </Text>
-            <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-              Platform, promptunuzu ve görseli eşleştirerek yeni versiyonu üretir.
+            <Text
+              style={[styles.stepSubtitle, { color: colors.textSecondary }]}
+            >
+              Platform, promptunuzu ve görseli eşleştirerek yeni versiyonu
+              üretir.
             </Text>
           </View>
         </View>
 
         <View style={styles.stepItem}>
-          <View
-            style={[styles.stepNumber, { borderColor: colors.primary }]}
-          >
-            <Text style={[styles.stepNumberText, { color: colors.primary }]}>3</Text>
+          <View style={[styles.stepNumber, { borderColor: colors.primary }]}>
+            <Text style={[styles.stepNumberText, { color: colors.primary }]}>
+              3
+            </Text>
           </View>
           <View style={styles.stepContent}>
             <Text style={[styles.stepTitle, { color: colors.textPrimary }]}>
               Sonucu gözden geçirip indirin
             </Text>
-            <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-              Beğendiğiniz anda eseri kaydedebilir veya yeni bir deneme başlatabilirsiniz.
+            <Text
+              style={[styles.stepSubtitle, { color: colors.textSecondary }]}
+            >
+              Beğendiğiniz anda eseri kaydedebilir veya yeni bir deneme
+              başlatabilirsiniz.
             </Text>
           </View>
         </View>
       </View>
 
       <View
-        style={[styles.examplesCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+        style={[
+          styles.examplesCard,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
       >
         <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
           Örnek çıktılar
         </Text>
-        <Text style={[styles.examplesDescription, { color: colors.textSecondary }]}>
-          Studio AI'nin farklı servisleriyle neler elde edebileceğinizi keşfedin.
+        <Text
+          style={[styles.examplesDescription, { color: colors.textSecondary }]}
+        >
+          Studio AI'nin farklı servisleriyle neler elde edebileceğinizi
+          keşfedin.
         </Text>
 
         <ScrollView
@@ -453,25 +479,54 @@ const ImageGeneratorScreen = () => {
               key={item.id}
               style={[
                 styles.exampleItem,
-                { borderColor: colors.border, backgroundColor: colors.surfaceElevated },
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.surfaceElevated,
+                },
                 index === exampleItems.length - 1 && styles.exampleItemLast,
               ]}
             >
-              <Text style={[styles.exampleTitle, { color: colors.textPrimary }]}>
+              <Text
+                style={[styles.exampleTitle, { color: colors.textPrimary }]}
+              >
                 {item.title}
               </Text>
-              <Text style={[styles.exampleSubtitle, { color: colors.textSecondary }]}>
+              <Text
+                style={[
+                  styles.exampleSubtitle,
+                  { color: colors.textSecondary },
+                ]}
+              >
                 {item.subtitle}
               </Text>
 
               <View style={styles.exampleImageRow}>
                 <View style={styles.exampleImageWrapper}>
-                  <Text style={[styles.exampleImageLabel, { color: colors.textTertiary }]}>Önce</Text>
-                  <Image source={item.beforeImage} style={styles.exampleImage} />
+                  <Text
+                    style={[
+                      styles.exampleImageLabel,
+                      { color: colors.textTertiary },
+                    ]}
+                  >
+                    Önce
+                  </Text>
+                  <Image
+                    source={item.beforeImage}
+                    style={styles.exampleImage}
+                  />
                 </View>
-                <Text style={[styles.exampleArrow, { color: colors.primary }]}>→</Text>
+                <Text style={[styles.exampleArrow, { color: colors.primary }]}>
+                  →
+                </Text>
                 <View style={styles.exampleImageWrapper}>
-                  <Text style={[styles.exampleImageLabel, { color: colors.textTertiary }]}>Sonra</Text>
+                  <Text
+                    style={[
+                      styles.exampleImageLabel,
+                      { color: colors.textTertiary },
+                    ]}
+                  >
+                    Sonra
+                  </Text>
                   <Image source={item.afterImage} style={styles.exampleImage} />
                 </View>
               </View>
@@ -501,32 +556,56 @@ const ImageGeneratorScreen = () => {
           ]}
         >
           <View
-            style={[styles.sectionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            style={[
+              styles.sectionCard,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
           >
-            <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+            <Text
+              style={[styles.sectionLabel, { color: colors.textSecondary }]}
+            >
               Seçilen görsel
             </Text>
             <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
               Her şey hazır
             </Text>
-            <Image source={{ uri: localImageUri || "" }} style={styles.imagePreview} />
-            <Text style={[styles.sectionHelper, { color: colors.textSecondary }]}>
-              Profesyonel sonuçlar için yüksek çözünürlüklü ve iyi aydınlatılmış görseller öneriyoruz.
+            <Image
+              source={{ uri: localImageUri || "" }}
+              style={styles.imagePreview}
+            />
+            <Text
+              style={[styles.sectionHelper, { color: colors.textSecondary }]}
+            >
+              Profesyonel sonuçlar için yüksek çözünürlüklü ve iyi aydınlatılmış
+              görseller öneriyoruz.
             </Text>
           </View>
 
           <View
-            style={[styles.sectionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            style={[
+              styles.sectionCard,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
           >
-            <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+            <Text
+              style={[styles.sectionLabel, { color: colors.textSecondary }]}
+            >
               Talimat özeti
             </Text>
-            <Text style={[styles.sectionContent, { color: colors.textPrimary }]}>
+            <Text
+              style={[styles.sectionContent, { color: colors.textPrimary }]}
+            >
               {servicePrompt}
             </Text>
             {aiToolRequest ? (
               <View
-                style={[styles.chip, { borderColor: colors.primary, backgroundColor: colors.background }]}
+                style={[
+                  styles.chip,
+                  {
+                    borderColor: colors.primary,
+                    backgroundColor: colors.background,
+                  },
+                ]}
               >
                 <Text style={[styles.chipText, { color: colors.primary }]}>
                   {aiToolRequest}
@@ -561,7 +640,10 @@ const ImageGeneratorScreen = () => {
                 </View>
               ) : (
                 <Text
-                  style={[styles.buttonTextPrimary, { color: colors.textOnPrimary }]}
+                  style={[
+                    styles.buttonTextPrimary,
+                    { color: colors.textOnPrimary },
+                  ]}
                 >
                   Sihri başlat
                 </Text>
@@ -577,7 +659,10 @@ const ImageGeneratorScreen = () => {
               onPress={handleSelectImage}
             >
               <Text
-                style={[styles.buttonTextSecondary, { color: colors.textSecondary }]}
+                style={[
+                  styles.buttonTextSecondary,
+                  { color: colors.textSecondary },
+                ]}
               >
                 Farklı görsel seç
               </Text>
@@ -585,13 +670,17 @@ const ImageGeneratorScreen = () => {
           </View>
 
           <View
-            style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            style={[
+              styles.infoCard,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
           >
             <Text style={[styles.infoTitle, { color: colors.textPrimary }]}>
               İpucu
             </Text>
             <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-              Daha farklı sonuçlar için yeni bir görsel seçebilir veya promptu güncelleyerek yeniden deneyebilirsiniz.
+              Daha farklı sonuçlar için yeni bir görsel seçebilir veya promptu
+              güncelleyerek yeniden deneyebilirsiniz.
             </Text>
           </View>
         </Animated.View>
@@ -614,7 +703,10 @@ const ImageGeneratorScreen = () => {
         ]}
       >
         <View
-          style={[styles.sectionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          style={[
+            styles.sectionCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
         >
           <Text style={[styles.sectionLabel, { color: colors.success }]}>
             Sonuç hazır
@@ -623,14 +715,25 @@ const ImageGeneratorScreen = () => {
             Studio AI talimatınızı tamamladı
           </Text>
           <Text style={[styles.sectionHelper, { color: colors.textSecondary }]}>
-            Sonucu tam ekranda inceleyebilir, cihazınıza indirebilir veya yeni bir proje başlatabilirsiniz.
+            Sonucu tam ekranda inceleyebilir, cihazınıza indirebilir veya yeni
+            bir proje başlatabilirsiniz.
           </Text>
 
           <View style={styles.resultRow}>
             <View
-              style={[styles.resultImageWrapper, { borderColor: colors.border, backgroundColor: colors.background }]}
+              style={[
+                styles.resultImageWrapper,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.background,
+                },
+              ]}
             >
-              <Text style={[styles.resultLabel, { color: colors.textSecondary }]}>Önce</Text>
+              <Text
+                style={[styles.resultLabel, { color: colors.textSecondary }]}
+              >
+                Önce
+              </Text>
               <Image
                 source={{ uri: originalImageForResult || localImageUri || "" }}
                 style={styles.resultImage}
@@ -638,12 +741,22 @@ const ImageGeneratorScreen = () => {
             </View>
 
             <View
-              style={[styles.resultImageWrapper, { borderColor: colors.primary, backgroundColor: colors.background }]}
+              style={[
+                styles.resultImageWrapper,
+                {
+                  borderColor: colors.primary,
+                  backgroundColor: colors.background,
+                },
+              ]}
             >
               <View style={styles.resultLabelRow}>
-                <Text style={[styles.resultLabel, { color: colors.primary }]}>Sonuç</Text>
+                <Text style={[styles.resultLabel, { color: colors.primary }]}>
+                  Sonuç
+                </Text>
                 <Pressable onPress={() => setImageViewerVisible(true)}>
-                  <Text style={[styles.viewerLink, { color: colors.primary }]}>Tam ekran</Text>
+                  <Text style={[styles.viewerLink, { color: colors.primary }]}>
+                    Tam ekran
+                  </Text>
                 </Pressable>
               </View>
               <Image
@@ -664,7 +777,10 @@ const ImageGeneratorScreen = () => {
               onPress={handleDownloadImage}
             >
               <Text
-                style={[styles.buttonTextPrimary, { color: colors.textOnPrimary }]}
+                style={[
+                  styles.buttonTextPrimary,
+                  { color: colors.textOnPrimary },
+                ]}
               >
                 Cihaza indir
               </Text>
@@ -679,7 +795,10 @@ const ImageGeneratorScreen = () => {
               onPress={handleStartNew}
             >
               <Text
-                style={[styles.buttonTextSecondary, { color: colors.textSecondary }]}
+                style={[
+                  styles.buttonTextSecondary,
+                  { color: colors.textSecondary },
+                ]}
               >
                 Yeni proje başlat
               </Text>
@@ -688,13 +807,17 @@ const ImageGeneratorScreen = () => {
         </View>
 
         <View
-          style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          style={[
+            styles.infoCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
         >
           <Text style={[styles.infoTitle, { color: colors.textPrimary }]}>
             Sonuçtan memnun değil misiniz?
           </Text>
           <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-            Farklı bir görsel veya revize edilmiş bir prompt ile kısa sürede yepyeni bir versiyon elde edebilirsiniz.
+            Farklı bir görsel veya revize edilmiş bir prompt ile kısa sürede
+            yepyeni bir versiyon elde edebilirsiniz.
           </Text>
         </View>
       </Animated.View>
@@ -763,16 +886,27 @@ const ImageGeneratorScreen = () => {
         onRequestClose={() => setExamplesModalVisible(false)}
       >
         <View
-          style={[styles.examplesModalOverlay, { backgroundColor: colors.overlay }]}
+          style={[
+            styles.examplesModalOverlay,
+            { backgroundColor: colors.overlay },
+          ]}
         >
           <View
-            style={[styles.examplesModalContainer, { backgroundColor: colors.surface }]}
+            style={[
+              styles.examplesModalContainer,
+              { backgroundColor: colors.surface },
+            ]}
           >
-            <Text style={[styles.examplesModalTitle, { color: colors.textPrimary }]}>
+            <Text
+              style={[styles.examplesModalTitle, { color: colors.textPrimary }]}
+            >
               Studio AI ile neler mümkün?
             </Text>
             <Text
-              style={[styles.examplesModalSubtitle, { color: colors.textSecondary }]}
+              style={[
+                styles.examplesModalSubtitle,
+                { color: colors.textSecondary },
+              ]}
             >
               Örnekleri kaydırarak farklı senaryoları inceleyin.
             </Text>
@@ -791,16 +925,25 @@ const ImageGeneratorScreen = () => {
                   <View
                     style={[
                       styles.examplesModalCard,
-                      { backgroundColor: colors.surfaceElevated, borderColor: colors.border },
+                      {
+                        backgroundColor: colors.surfaceElevated,
+                        borderColor: colors.border,
+                      },
                     ]}
                   >
                     <Text
-                      style={[styles.examplesModalSlideTitle, { color: colors.textPrimary }]}
+                      style={[
+                        styles.examplesModalSlideTitle,
+                        { color: colors.textPrimary },
+                      ]}
                     >
                       {item.title}
                     </Text>
                     <Text
-                      style={[styles.examplesModalSlideSubtitle, { color: colors.textSecondary }]}
+                      style={[
+                        styles.examplesModalSlideSubtitle,
+                        { color: colors.textSecondary },
+                      ]}
                     >
                       {item.subtitle}
                     </Text>
@@ -808,24 +951,39 @@ const ImageGeneratorScreen = () => {
                     <View style={styles.examplesModalImageRow}>
                       <View style={styles.examplesModalImageWrapper}>
                         <Text
-                          style={[styles.examplesModalImageLabel, { color: colors.textTertiary }]}
+                          style={[
+                            styles.examplesModalImageLabel,
+                            { color: colors.textTertiary },
+                          ]}
                         >
                           Önce
                         </Text>
-                        <Image source={item.beforeImage} style={styles.examplesModalImage} />
+                        <Image
+                          source={item.beforeImage}
+                          style={styles.examplesModalImage}
+                        />
                       </View>
                       <Text
-                        style={[styles.examplesModalArrow, { color: colors.primary }]}
+                        style={[
+                          styles.examplesModalArrow,
+                          { color: colors.primary },
+                        ]}
                       >
                         →
                       </Text>
                       <View style={styles.examplesModalImageWrapper}>
                         <Text
-                          style={[styles.examplesModalImageLabel, { color: colors.textTertiary }]}
+                          style={[
+                            styles.examplesModalImageLabel,
+                            { color: colors.textTertiary },
+                          ]}
                         >
                           Sonra
                         </Text>
-                        <Image source={item.afterImage} style={styles.examplesModalImage} />
+                        <Image
+                          source={item.afterImage}
+                          style={styles.examplesModalImage}
+                        />
                       </View>
                     </View>
                   </View>
@@ -849,11 +1007,17 @@ const ImageGeneratorScreen = () => {
             </View>
 
             <Pressable
-              style={[styles.examplesModalSkipButton, { borderColor: colors.border }]}
+              style={[
+                styles.examplesModalSkipButton,
+                { borderColor: colors.border },
+              ]}
               onPress={() => setExamplesModalVisible(false)}
             >
               <Text
-                style={[styles.examplesModalSkipText, { color: colors.textSecondary }]}
+                style={[
+                  styles.examplesModalSkipText,
+                  { color: colors.textSecondary },
+                ]}
               >
                 Geç / Skip
               </Text>
@@ -877,27 +1041,41 @@ const ImageGeneratorScreen = () => {
             <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
               Studio AI çalışıyor
             </Text>
-            <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
+            <Text
+              style={[styles.modalSubtitle, { color: colors.textSecondary }]}
+            >
               Talimatınız uygulanıyor, lütfen birkaç saniye bekleyin.
             </Text>
 
             <View style={styles.modalTimeline}>
               <View style={styles.modalTimelineItem}>
                 <View
-                  style={[styles.modalTimelineDot, { backgroundColor: colors.primary }]}
+                  style={[
+                    styles.modalTimelineDot,
+                    { backgroundColor: colors.primary },
+                  ]}
                 />
                 <Text
-                  style={[styles.modalTimelineText, { color: colors.textSecondary }]}
+                  style={[
+                    styles.modalTimelineText,
+                    { color: colors.textSecondary },
+                  ]}
                 >
                   Görsel yükleniyor
                 </Text>
               </View>
               <View style={styles.modalTimelineItem}>
                 <View
-                  style={[styles.modalTimelineDot, { backgroundColor: colors.primary }]}
+                  style={[
+                    styles.modalTimelineDot,
+                    { backgroundColor: colors.primary },
+                  ]}
                 />
                 <Text
-                  style={[styles.modalTimelineText, { color: colors.textSecondary }]}
+                  style={[
+                    styles.modalTimelineText,
+                    { color: colors.textSecondary },
+                  ]}
                 >
                   Yapay zeka sonucu hazırlıyor
                 </Text>
@@ -915,7 +1093,10 @@ const ImageGeneratorScreen = () => {
 
       {errorMessage && (
         <View
-          style={[styles.errorBanner, { backgroundColor: colors.errorSubtle, borderColor: colors.error }]}
+          style={[
+            styles.errorBanner,
+            { backgroundColor: colors.errorSubtle, borderColor: colors.error },
+          ]}
         >
           <Text style={[styles.errorText, { color: colors.error }]}>
             {errorMessage}
@@ -931,7 +1112,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollArea: {
-    paddingHorizontal: Spacing.xl,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xxl,
   },
   heroCard: {
@@ -1239,8 +1420,8 @@ const styles = StyleSheet.create({
   },
   sectionCard: {
     width: "100%",
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.xxl,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
     borderWidth: 1,
     ...Shadows.sm,
     marginBottom: Spacing.xl,

@@ -1,41 +1,50 @@
 import { auth, storage } from "@/firebase.config";
 import { AiToolResult } from "@/types";
 import { fal } from "@fal-ai/client";
-
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 fal.config({
   credentials: "YOUR_FAL_KEY",
 });
 
-// Types
+export type ProcessingStatus = "idle" | "pending" | "fulfilled" | "failed";
+export type PollStatus = "idle" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
+
 export interface ContentCreationState {
-  createdImageUrl: string | null;
-  imageStorageUrl: string | null;
-  storageUploadProcessingStatus: "idle" | "pending" | "fulfilled" | "failed";
-  aiToolProcessingStatus: "idle" | "pending" | "fulfilled" | "failed";
-  pollAiToolStatus: "idle" | "IN_PROGRESS" | "COMPLETED" | "FAILED";
-  error: string | null;
+  // Storage Upload
   pathPrefix: string;
-  status: "idle" | "pending" | "fulfilled" | "failed";
-  activityIndicatorColor: string;
+  storageUploadProcessingStatus: ProcessingStatus;
+  imageStorageUrl: string | null;
+
+  // AI Tool Processing
+  aiToolProcessingStatus: ProcessingStatus;
+  pollAiToolStatus: PollStatus;
   requestId: string | null;
+  createdImageUrl: string | null;
+
+  // General
+  error: string | null;
+  status: ProcessingStatus;
+  activityIndicatorColor: string;
 }
 
 const initialState: ContentCreationState = {
-  createdImageUrl: null,
-  imageStorageUrl: null,
+  // Storage Upload
+  pathPrefix: "uploads",
   storageUploadProcessingStatus: "idle",
+  imageStorageUrl: null,
+
+  // AI Tool Processing
   aiToolProcessingStatus: "idle",
   pollAiToolStatus: "idle",
+  requestId: null,
+  createdImageUrl: null,
+
+  // General
   error: null,
-  pathPrefix: "uploads",
   status: "idle",
   activityIndicatorColor: "#000000",
-  requestId: null,
 };
-
-// Async thunks for image operations
 
 export const uploadImageToStorage = createAsyncThunk<
   string,
@@ -48,44 +57,36 @@ export const uploadImageToStorage = createAsyncThunk<
     console.log("📤 uploadImageToStorage - fileUri:", fileUri);
 
     try {
+      // Dosya adını oluştur
       const rawName = fileUri.split("/").pop() || `file-${Date.now()}`;
       const ext = rawName.includes(".") ? rawName.split(".").pop() : "jpg";
       const fileName = `${Date.now()}.${ext}`;
 
-      console.log("📤 uploadImageToStorage - rawName:", rawName);
-      console.log("📤 uploadImageToStorage - ext:", ext);
-      console.log("📤 uploadImageToStorage - fileName:", fileName);
-
+      // Kullanıcı bilgilerini al
       const currentUser = auth().currentUser;
-      console.log("📤 uploadImageToStorage - currentUser:", currentUser?.uid);
+      if (!currentUser) {
+        throw new Error("Kullanıcı giriş yapmamış");
+      }
 
+      // Firebase Storage referansı oluştur
       const reference = storage().ref(
-        `${initialState.pathPrefix}/${currentUser?.uid}/${fileName}`,
+        `${initialState.pathPrefix}/${currentUser.uid}/${fileName}`,
       );
 
-      console.log(
-        "📤 uploadImageToStorage - reference path:",
-        `${initialState.pathPrefix}/${currentUser?.uid}/${fileName}`,
-      );
-
-      // Ensure we pass a valid local path to RNFirebase Storage
-      // RNFirebase expects a file system path (without the file:// scheme)
+      // Dosya yolunu düzenle (file:// scheme'ini kaldır)
       const pathToFile = fileUri.startsWith("file://")
         ? fileUri.replace("file://", "")
         : fileUri;
 
-      console.log("📤 uploadImageToStorage - pathToFile:", pathToFile);
-
-      // Upload the file from local storage
       console.log("📤 uploadImageToStorage - dosya yükleniyor...");
-      const task = reference.putFile(pathToFile);
 
-      // Optionally, track progress with task.on('state_changed', ...)
+      // Dosyayı yükle
+      const task = reference.putFile(pathToFile);
       await task;
+
       console.log("📤 uploadImageToStorage - dosya yükleme tamamlandı");
 
-      // Retrieve the public download URL
-      console.log("📤 uploadImageToStorage - download URL alınıyor...");
+      // Download URL'ini al
       const downloadURL = await reference.getDownloadURL();
       console.log("📤 uploadImageToStorage - downloadURL:", downloadURL);
 
@@ -99,7 +100,6 @@ export const uploadImageToStorage = createAsyncThunk<
   },
 );
 
-// New thunk: startAIToolJob (enqueue job without waiting)
 export const uploadImageToAITool = createAsyncThunk<
   {
     request_id?: string;
@@ -124,26 +124,29 @@ export const uploadImageToAITool = createAsyncThunk<
     console.log("🤖 uploadImageToAITool - başladı");
     console.log("🤖 uploadImageToAITool - imageUrl:", imageUrl);
     console.log("🤖 uploadImageToAITool - prompt:", prompt);
-    console.log("🤖 uploadImageToAITool - aiToolRequest:", aiToolRequest);
-    console.log("🤖 uploadImageToAITool - requestId:", requestId);
 
     try {
+      // FAL API anahtarını al
       const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
-      console.log("🤖 uploadImageToAITool - FAL_KEY var mı:", !!FAL_KEY);
+      if (!FAL_KEY || FAL_KEY === "YOUR_FAL_KEY") {
+        throw new Error("FAL API anahtarı bulunamadı");
+      }
 
+      // Request URL'ini oluştur
       const requestUrl = aiToolRequest.replace("${requestId}", requestId);
       console.log("🤖 uploadImageToAITool - requestUrl:", requestUrl);
 
+      // Request body'yi hazırla
       const requestBody = {
         prompt,
-        image_urls: [imageUrl], // API image_urls (çoğul) bekliyor
+        image_urls: [imageUrl],
         guidance_scale: 3.5,
         num_images: 1,
         output_format: "jpeg",
         safety_tolerance: "2",
       };
-      console.log("🤖 uploadImageToAITool - requestBody:", requestBody);
 
+      // API'ye istek gönder
       const res = await fetch(requestUrl, {
         method: "POST",
         headers: {
@@ -152,9 +155,6 @@ export const uploadImageToAITool = createAsyncThunk<
         },
         body: JSON.stringify(requestBody),
       });
-
-      console.log("🤖 uploadImageToAITool - response status:", res.status);
-      console.log("🤖 uploadImageToAITool - response ok:", res.ok);
 
       if (!res.ok) {
         const text = await res.text();
@@ -165,7 +165,6 @@ export const uploadImageToAITool = createAsyncThunk<
       const data = (await res.json()) as any;
       console.log("🤖 uploadImageToAITool - response data:", data);
 
-      // Some responses might already include images if synchronous; pass through.
       return data;
     } catch (err) {
       console.error("❌ uploadImageToAITool - hata:", err);
@@ -176,7 +175,9 @@ export const uploadImageToAITool = createAsyncThunk<
   },
 );
 
-// New thunk: poll AI tool status until completed
+/**
+ * AI Tool işleminin durumunu kontrol eder ve tamamlanana kadar bekler
+ */
 export const pollAiToolStatus = createAsyncThunk<
   AiToolResult,
   {
@@ -200,36 +201,28 @@ export const pollAiToolStatus = createAsyncThunk<
   ) => {
     console.log("⏳ pollAiToolStatus - başladı");
     console.log("⏳ pollAiToolStatus - requestId:", requestId);
-    console.log("⏳ pollAiToolStatus - maxAttempts:", maxAttempts);
-    console.log("⏳ pollAiToolStatus - intervalMs:", intervalMs);
-    console.log("⏳ pollAiToolStatus - aiToolStatus:", aiToolStatus);
-    console.log("⏳ pollAiToolStatus - aiToolResult:", aiToolResult);
 
     try {
+      // FAL API anahtarını al
       const FAL_KEY = process.env.EXPO_PUBLIC_FAL_KEY || "YOUR_FAL_KEY";
-      console.log("⏳ pollAiToolStatus - FAL_KEY var mı:", !!FAL_KEY);
+      if (!FAL_KEY || FAL_KEY === "YOUR_FAL_KEY") {
+        throw new Error("FAL API anahtarı bulunamadı");
+      }
 
+      // Maksimum deneme sayısı kadar döngü
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         console.log(
           `⏳ pollAiToolStatus - deneme ${attempt + 1}/${maxAttempts}`,
         );
 
-        // Check status
+        // Durum kontrolü yap
         const statusUrl = aiToolStatus.replace("${requestId}", requestId);
-        console.log("⏳ pollAiToolStatus - statusUrl:", statusUrl);
-
         const statusRes = await fetch(statusUrl, {
           method: "GET",
           headers: {
             Authorization: `Key ${FAL_KEY}`,
           },
         });
-
-        console.log("⏳ pollAiToolStatus - statusRes.ok:", statusRes.ok);
-        console.log(
-          "⏳ pollAiToolStatus - statusRes.status:",
-          statusRes.status,
-        );
 
         if (!statusRes.ok) {
           const text = await statusRes.text();
@@ -242,29 +235,20 @@ export const pollAiToolStatus = createAsyncThunk<
           `🔄 Polling attempt ${attempt + 1}/${maxAttempts}, status:`,
           statusData.status,
         );
-        console.log("⏳ pollAiToolStatus - statusData:", statusData);
 
-        // If completed, get the result
+        // İşlem tamamlandıysa sonucu al
         if (statusData.status === "COMPLETED") {
           console.log(
             "✅ pollAiToolStatus - işlem tamamlandı, sonuç alınıyor...",
           );
 
           const resultUrl = aiToolResult.replace("${requestId}", requestId);
-          console.log("⏳ pollAiToolStatus - resultUrl:", resultUrl);
-
           const resultRes = await fetch(resultUrl, {
             method: "GET",
             headers: {
               Authorization: `Key ${FAL_KEY}`,
             },
           });
-
-          console.log("⏳ pollAiToolStatus - resultRes.ok:", resultRes.ok);
-          console.log(
-            "⏳ pollAiToolStatus - resultRes.status:",
-            resultRes.status,
-          );
 
           if (!resultRes.ok) {
             const text = await resultRes.text();
@@ -277,7 +261,7 @@ export const pollAiToolStatus = createAsyncThunk<
           return resultData;
         }
 
-        // If failed, throw error
+        // İşlem başarısızsa hata fırlat
         if (statusData.status === "FAILED") {
           console.error(
             "❌ pollAiToolStatus - AI Tool başarısız:",
@@ -288,13 +272,14 @@ export const pollAiToolStatus = createAsyncThunk<
           );
         }
 
-        // Wait before next attempt (except for last attempt)
+        // Son deneme değilse bekle
         if (attempt < maxAttempts - 1) {
           console.log(`⏳ pollAiToolStatus - ${intervalMs}ms bekleniyor...`);
           await new Promise((resolve) => setTimeout(resolve, intervalMs));
         }
       }
 
+      // Timeout hatası
       console.error(
         `❌ pollAiToolStatus - timeout after ${maxAttempts} attempts`,
       );
@@ -308,32 +293,43 @@ export const pollAiToolStatus = createAsyncThunk<
   },
 );
 
-// Slice
 const contentCreationSlice = createSlice({
   name: "contentCreation",
   initialState,
   reducers: {
+    // Resim URL'lerini yönet
     setCreatedImageUrl: (state, action: PayloadAction<string | null>) => {
       state.createdImageUrl = action.payload;
     },
+    setImageStorageUrl: (state, action: PayloadAction<string | null>) => {
+      state.imageStorageUrl = action.payload;
+    },
+
+    // UI durumlarını yönet
     setActivityIndicatorColor: (state, action: PayloadAction<string>) => {
       state.activityIndicatorColor = action.payload;
     },
+
+    // İşlem durumlarını yönet
     setStorageUploadProcessingStatus: (
       state,
-      action: PayloadAction<"idle" | "pending" | "fulfilled" | "failed">,
+      action: PayloadAction<ProcessingStatus>,
     ) => {
       state.storageUploadProcessingStatus = action.payload;
     },
     setAiToolProcessingStatus: (
       state,
-      action: PayloadAction<"idle" | "pending" | "fulfilled" | "failed">,
+      action: PayloadAction<ProcessingStatus>,
     ) => {
       state.aiToolProcessingStatus = action.payload;
     },
+
+    // Hata yönetimi
     clearError: (state) => {
       state.error = null;
     },
+
+    // Tüm verileri temizle
     clearAllImages: (state) => {
       state.imageStorageUrl = null;
       state.createdImageUrl = null;
@@ -342,12 +338,9 @@ const contentCreationSlice = createSlice({
       state.aiToolProcessingStatus = "idle";
       state.status = "idle";
     },
-    setImageStorageUrl: (state, action: PayloadAction<string | null>) => {
-      state.imageStorageUrl = action.payload;
-    },
   },
   extraReducers: (builder) => {
-    // Upload Image to Storage
+    // STORAGE UPLOAD REDUCERS
     builder
       .addCase(uploadImageToStorage.pending, (state) => {
         state.storageUploadProcessingStatus = "pending";
@@ -355,7 +348,7 @@ const contentCreationSlice = createSlice({
         state.status = "pending";
       })
       .addCase(uploadImageToStorage.fulfilled, (state, action) => {
-        state.imageStorageUrl = action.payload; // payload is the download URL (string)
+        state.imageStorageUrl = action.payload; // Download URL
         state.storageUploadProcessingStatus = "fulfilled";
         state.error = null;
         state.status = "pending";
@@ -366,7 +359,7 @@ const contentCreationSlice = createSlice({
         state.storageUploadProcessingStatus = "failed";
         state.status = "failed";
       })
-      // Upload Image to AI Tool
+      // AI TOOL UPLOAD REDUCERS
       .addCase(uploadImageToAITool.pending, (state) => {
         state.aiToolProcessingStatus = "pending";
         state.error = null;
@@ -386,7 +379,8 @@ const contentCreationSlice = createSlice({
         state.createdImageUrl = null;
         state.imageStorageUrl = null;
       })
-      // Poll AI Tool Status
+
+      // AI TOOL POLLING REDUCERS
       .addCase(pollAiToolStatus.pending, (state) => {
         state.pollAiToolStatus = "IN_PROGRESS";
       })
@@ -405,14 +399,16 @@ const contentCreationSlice = createSlice({
   },
 });
 
+// EXPORTS
+
 export const {
   setCreatedImageUrl,
-  clearError,
-  clearAllImages,
+  setImageStorageUrl,
+  setActivityIndicatorColor,
   setStorageUploadProcessingStatus,
   setAiToolProcessingStatus,
-  setActivityIndicatorColor,
-  setImageStorageUrl,
+  clearError,
+  clearAllImages,
 } = contentCreationSlice.actions;
 
 export default contentCreationSlice.reducer;
