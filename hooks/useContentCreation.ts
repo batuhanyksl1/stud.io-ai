@@ -2,8 +2,17 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   clearAllImages as clearAllImagesAction,
   clearError as clearErrorAction,
+  downloadImage as downloadImageAction,
+  generateImage as generateImageAction,
   pollAiToolStatus as pollAiToolStatusAction,
+  resetUIState as resetUIStateAction,
+  setActiveExampleIndex as setActiveExampleIndexAction,
   setActivityIndicatorColor as setActivityIndicatorColorAction,
+  setErrorMessage as setErrorMessageAction,
+  setExamplesModalVisible as setExamplesModalVisibleAction,
+  setImageViewerVisible as setImageViewerVisibleAction,
+  setLocalImageUri as setLocalImageUriAction,
+  setOriginalImageForResult as setOriginalImageForResultAction,
   uploadImageToAITool as uploadImageToAIToolAction,
   uploadImageToStorage as uploadImageToStorageAction,
 } from "@/store/slices/contentCreationSlice";
@@ -20,6 +29,13 @@ export function useContentCreation() {
     aiToolProcessingStatus,
     error,
     activityIndicatorColor,
+    // UI State
+    localImageUri,
+    originalImageForResult,
+    errorMessage,
+    isImageViewerVisible,
+    isExamplesModalVisible,
+    activeExampleIndex,
   } = useAppSelector((state) => state.contentCreation);
 
   console.log("🔧 useContentCreation - state güncellendi:");
@@ -101,6 +117,65 @@ export function useContentCreation() {
     dispatch(setActivityIndicatorColorAction(color));
   };
 
+  // UI State Actions
+  const setLocalImageUri = (uri: string | null) => {
+    dispatch(setLocalImageUriAction(uri));
+  };
+
+  const setOriginalImageForResult = (uri: string | null) => {
+    dispatch(setOriginalImageForResultAction(uri));
+  };
+
+  const setErrorMessage = (message: string | null) => {
+    dispatch(setErrorMessageAction(message));
+  };
+
+  const setImageViewerVisible = (visible: boolean) => {
+    dispatch(setImageViewerVisibleAction(visible));
+  };
+
+  const setExamplesModalVisible = (visible: boolean) => {
+    dispatch(setExamplesModalVisibleAction(visible));
+  };
+
+  const setActiveExampleIndex = (index: number) => {
+    dispatch(setActiveExampleIndexAction(index));
+  };
+
+  const resetUIState = () => {
+    dispatch(resetUIStateAction());
+  };
+
+  // New Actions
+  const generateImage = async (
+    servicePrompt: string,
+    aiToolRequest: string,
+    aiToolStatus: string,
+    aiToolResult: string,
+  ) => {
+    if (!localImageUri) {
+      throw new Error("Görsel seçilmemiş");
+    }
+
+    return await dispatch(
+      generateImageAction({
+        localImageUri,
+        servicePrompt,
+        aiToolRequest,
+        aiToolStatus,
+        aiToolResult,
+      }),
+    );
+  };
+
+  const downloadImage = async () => {
+    if (!createdImageUrl) {
+      throw new Error("İndirilecek görsel bulunamadı");
+    }
+
+    return await dispatch(downloadImageAction({ imageUrl: createdImageUrl }));
+  };
+
   return {
     // State
     imageStorageUrl,
@@ -110,12 +185,30 @@ export function useContentCreation() {
     error,
     status,
     activityIndicatorColor,
-    setActivityIndicatorColor,
+    // UI State
+    localImageUri,
+    originalImageForResult,
+    errorMessage,
+    isImageViewerVisible,
+    isExamplesModalVisible,
+    activeExampleIndex,
     // Actions
     uploadImageToStorage,
     uploadImageToAITool,
     clearError,
     clearAllImages,
     pollAiToolStatus,
+    setActivityIndicatorColor,
+    // UI Actions
+    setLocalImageUri,
+    setOriginalImageForResult,
+    setErrorMessage,
+    setImageViewerVisible,
+    setExamplesModalVisible,
+    setActiveExampleIndex,
+    resetUIState,
+    // New Actions
+    generateImage,
+    downloadImage,
   };
 }

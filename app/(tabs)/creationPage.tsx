@@ -9,9 +9,7 @@ import {
 } from "@/constants/DesignTokens";
 import { useContentCreation } from "@/hooks";
 import { useTheme } from "@/hooks/useTheme";
-import { useAppDispatch } from "@/store/hooks";
 import { pickImage } from "@/utils/pickImage";
-import * as MediaLibrary from "expo-media-library";
 import { useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -30,7 +28,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { pollAiToolStatus } from "../../store/slices/contentCreationSlice";
 
 const ImageGeneratorScreen = () => {
   const { servicePrompt, aiToolRequest, aiToolStatus, aiToolResult } =
@@ -45,27 +42,32 @@ const ImageGeneratorScreen = () => {
   console.log("🔍 CreationPage - aiToolStatus:", aiToolStatus);
   console.log("🔍 CreationPage - aiToolResult:", aiToolResult);
 
-  const dispatch = useAppDispatch();
   const { colors } = useTheme();
   const {
-    uploadImageToStorage,
-    uploadImageToAITool,
     createdImageUrl,
     status,
+    localImageUri,
+    originalImageForResult,
+    errorMessage,
+    isImageViewerVisible,
+    isExamplesModalVisible,
+    activeExampleIndex,
     clearAllImages,
+    setLocalImageUri,
+    setOriginalImageForResult: _setOriginalImageForResult,
+    setErrorMessage,
+    setImageViewerVisible,
+    setExamplesModalVisible,
+    setActiveExampleIndex,
+    resetUIState,
+    generateImage,
+    downloadImage,
   } = useContentCreation();
 
   console.log("🔍 CreationPage - current status:", status);
   console.log("🔍 CreationPage - createdImageUrl:", createdImageUrl);
 
-  const [localImageUri, setLocalImageUri] = useState<string | null>(null);
-  const [originalImageForResult, setOriginalImageForResult] = useState<
-    string | null
-  >(null);
-  const [isImageViewerVisible, setImageViewerVisible] = useState(false);
-  const [isExamplesModalVisible, setExamplesModalVisible] = useState(true);
-  const [activeExampleIndex, setActiveExampleIndex] = useState(0);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Local state'ler artık slice'da yönetiliyor
 
   const [fadeAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(0.95));
@@ -78,11 +80,8 @@ const ImageGeneratorScreen = () => {
   const screenWidth = useMemo(() => Dimensions.get("window").width, []);
 
   const resetState = useCallback(() => {
-    setLocalImageUri(null);
-    setOriginalImageForResult(null);
-    setErrorMessage(null);
-    setImageViewerVisible(false);
-  }, []);
+    resetUIState();
+  }, [resetUIState]);
 
   React.useEffect(() => {
     Animated.parallel([
@@ -142,96 +141,21 @@ const ImageGeneratorScreen = () => {
     }
 
     setErrorMessage(null);
-    setOriginalImageForResult(localImageUri);
     console.log("✨ handleGenerateImage - işlem başlatılıyor...");
 
     try {
-      console.log("📤 handleGenerateImage - görsel storage'a yükleniyor...");
-      const imageUrl = await uploadImageToStorage(localImageUri);
-      console.log("📤 handleGenerateImage - storage yanıtı:", imageUrl);
-
-      if (!imageUrl) {
-        console.error("❌ handleGenerateImage - storage yanıtı boş");
-        throw new Error("Görsel sunucuya yüklenemedi.");
-      }
-
-      console.log("🤖 handleGenerateImage - AI Tool'a görsel yükleniyor...");
-      console.log("🤖 handleGenerateImage - imageUrl:", imageUrl);
-      console.log("🤖 handleGenerateImage - servicePrompt:", servicePrompt);
-      console.log("🤖 handleGenerateImage - aiToolRequest:", aiToolRequest);
-
-      const aiToolResponse = await uploadImageToAITool(
-        imageUrl,
-        servicePrompt || "",
+      await generateImage(
+        servicePrompt,
         aiToolRequest || "",
-        "",
+        aiToolStatus || "",
+        aiToolResult || "",
       );
-
-      console.log("🤖 handleGenerateImage - AI Tool yanıtı:", aiToolResponse);
-
-      let generatedRequestId: string | undefined;
-      if (typeof aiToolResponse === "string") {
-        console.error(
-          "❌ handleGenerateImage - beklenmeyen yanıt formatı:",
-          typeof aiToolResponse,
-        );
-        throw new Error("Beklenmeyen yanıt formatı alındı.");
-      } else {
-        generatedRequestId = aiToolResponse?.request_id?.toString();
-        console.log(
-          "🆔 handleGenerateImage - generatedRequestId:",
-          generatedRequestId,
-        );
-      }
-
-      if (!generatedRequestId) {
-        console.error("❌ handleGenerateImage - request_id alınamadı");
-        throw new Error("Yapay zeka aracı başlatılamadı.");
-      }
-
-      console.log(
-        "⏳ handleGenerateImage - AI Tool durumu kontrol ediliyor...",
-      );
-      const aiToolStatusResult = await dispatch(
-        pollAiToolStatus({
-          requestId: generatedRequestId,
-          aiToolStatus: aiToolStatus || "",
-          aiToolResult: aiToolResult || "",
-        }),
-      );
-
-      console.log(
-        "⏳ handleGenerateImage - pollAiToolStatus sonucu:",
-        aiToolStatusResult,
-      );
-
-      if (aiToolStatusResult.meta.requestStatus === "rejected") {
-        console.error(
-          "❌ handleGenerateImage - AI Tool reddedildi:",
-          aiToolStatusResult.meta,
-        );
-        throw new Error("Yapay zeka görseli işleyemedi.");
-      }
-
-      const resultPayload = aiToolStatusResult.payload as any;
-      console.log("📊 handleGenerateImage - resultPayload:", resultPayload);
-
-      const finalUrl = resultPayload?.images?.[0]?.url;
-      console.log("🖼️ handleGenerateImage - finalUrl:", finalUrl);
-
-      if (!finalUrl) {
-        console.error("❌ handleGenerateImage - finalUrl bulunamadı");
-        throw new Error("Yapay zekadan geçerli bir sonuç alınamadı.");
-      }
-
       console.log("✅ handleGenerateImage - işlem başarıyla tamamlandı");
     } catch (err: any) {
       console.error("❌ handleGenerateImage - hata yakalandı:", err);
       const message = err.message || "Beklenmeyen bir hata oluştu.";
       console.error("❌ handleGenerateImage - hata mesajı:", message);
       Alert.alert("İşlem başarısız", message);
-      setErrorMessage(message);
-      setOriginalImageForResult(null);
     }
   };
 
@@ -245,28 +169,10 @@ const ImageGeneratorScreen = () => {
     }
 
     try {
-      console.log("🔐 handleDownloadImage - izin isteniyor...");
-      const { status: permissionStatus } =
-        await MediaLibrary.requestPermissionsAsync();
-      console.log("🔐 handleDownloadImage - izin durumu:", permissionStatus);
-
-      if (permissionStatus !== "granted") {
-        console.log("❌ handleDownloadImage - izin reddedildi");
-        Alert.alert(
-          "İzin gerekli",
-          "Görseli kaydetmek için film rulosuna erişim izni vermeniz gerekiyor.",
-        );
-        return;
-      }
-
-      console.log("💾 handleDownloadImage - görsel kaydediliyor...");
-      await MediaLibrary.saveToLibraryAsync(createdImageUrl);
+      await downloadImage();
       console.log("✅ handleDownloadImage - görsel başarıyla kaydedildi");
-      Alert.alert("Başarılı", "Görsel galerinize kaydedildi.");
-      setImageViewerVisible(false);
     } catch (error) {
       console.error("❌ handleDownloadImage - hata:", error);
-      Alert.alert("Hata", "Görsel kaydedilirken bir sorun oluştu.");
     }
   };
 
@@ -313,7 +219,7 @@ const ImageGeneratorScreen = () => {
       );
       setActiveExampleIndex(boundedIndex);
     },
-    [screenWidth, exampleItems.length],
+    [screenWidth, exampleItems.length, setActiveExampleIndex],
   );
 
   const renderInitialView = () => (
@@ -465,7 +371,7 @@ const ImageGeneratorScreen = () => {
         <Text
           style={[styles.examplesDescription, { color: colors.textSecondary }]}
         >
-          Studio AI'nin farklı servisleriyle neler elde edebileceğinizi
+          Studio AI&apos;nin farklı servisleriyle neler elde edebileceğinizi
           keşfedin.
         </Text>
 

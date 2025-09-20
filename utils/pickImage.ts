@@ -15,9 +15,8 @@ export const pickImage = async (): Promise<string> => {
     // Pick Image
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
+      allowsEditing: false, // Görseli orijinal boyutunda al
+      quality: 1.0, // En yüksek kalite
       allowsMultipleSelection: false,
     });
 

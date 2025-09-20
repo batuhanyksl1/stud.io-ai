@@ -2,6 +2,7 @@ import { auth, storage } from "@/firebase.config";
 import { AiToolResult } from "@/types";
 import { fal } from "@fal-ai/client";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Alert } from "react-native";
 
 fal.config({
   credentials: "YOUR_FAL_KEY",
@@ -22,6 +23,14 @@ export interface ContentCreationState {
   requestId: string | null;
   createdImageUrl: string | null;
 
+  // UI State Management
+  localImageUri: string | null;
+  originalImageForResult: string | null;
+  errorMessage: string | null;
+  isImageViewerVisible: boolean;
+  isExamplesModalVisible: boolean;
+  activeExampleIndex: number;
+
   // General
   error: string | null;
   status: ProcessingStatus;
@@ -39,6 +48,14 @@ const initialState: ContentCreationState = {
   pollAiToolStatus: "idle",
   requestId: null,
   createdImageUrl: null,
+
+  // UI State Management
+  localImageUri: null,
+  originalImageForResult: null,
+  errorMessage: null,
+  isImageViewerVisible: false,
+  isExamplesModalVisible: true,
+  activeExampleIndex: 0,
 
   // General
   error: null,
@@ -193,7 +210,7 @@ export const pollAiToolStatus = createAsyncThunk<
     {
       requestId,
       maxAttempts = 60,
-      intervalMs = 60000,
+      intervalMs = 3000,
       aiToolStatus,
       aiToolResult,
     },
@@ -293,6 +310,160 @@ export const pollAiToolStatus = createAsyncThunk<
   },
 );
 
+/**
+ * Complete image generation workflow - handles the entire process from image selection to result
+ */
+export const generateImage = createAsyncThunk<
+  string,
+  {
+    localImageUri: string;
+    servicePrompt: string;
+    aiToolRequest: string;
+    aiToolStatus: string;
+    aiToolResult: string;
+  },
+  { rejectValue: string }
+>(
+  "contentCreation/generateImage",
+  async (
+    { localImageUri, servicePrompt, aiToolRequest, aiToolStatus, aiToolResult },
+    { dispatch, rejectWithValue },
+  ) => {
+    console.log("✨ generateImage - başladı");
+    console.log("✨ generateImage - localImageUri:", localImageUri);
+    console.log("✨ generateImage - servicePrompt:", servicePrompt);
+
+    if (!localImageUri) {
+      const error = "Devam etmek için önce bir görsel seçin.";
+      console.log("❌ generateImage - görsel seçilmemiş");
+      return rejectWithValue(error);
+    }
+
+    if (!servicePrompt) {
+      const error = "Talimat bulunamadı. Lütfen ana ekrandan tekrar deneyin.";
+      console.log("❌ generateImage - prompt yazılmamış");
+      return rejectWithValue(error);
+    }
+
+    try {
+      console.log("📤 generateImage - görsel storage'a yükleniyor...");
+      const imageUrl = await dispatch(
+        uploadImageToStorage({ fileUri: localImageUri }),
+      );
+      if (imageUrl.meta.requestStatus === "rejected") {
+        console.error("❌ generateImage - storage yanıtı reddedildi");
+        throw new Error("Görsel sunucuya yüklenemedi.");
+      }
+
+      const storageUrl = imageUrl.payload as string;
+      if (!storageUrl) {
+        console.error("❌ generateImage - storage yanıtı boş");
+        throw new Error("Görsel sunucuya yüklenemedi.");
+      }
+
+      console.log("🤖 generateImage - AI Tool'a görsel yükleniyor...");
+      const aiToolResponse = await dispatch(
+        uploadImageToAITool({
+          imageUrl: storageUrl,
+          prompt: servicePrompt,
+          aiToolRequest: aiToolRequest || "",
+          requestId: "",
+        }),
+      );
+
+      if (aiToolResponse.meta.requestStatus === "rejected") {
+        console.error("❌ generateImage - AI Tool reddedildi");
+        throw new Error("Yapay zeka aracı başlatılamadı.");
+      }
+
+      const aiToolPayload = aiToolResponse.payload as any;
+      const generatedRequestId = aiToolPayload?.request_id?.toString();
+
+      if (!generatedRequestId) {
+        console.error("❌ generateImage - request_id alınamadı");
+        throw new Error("Yapay zeka aracı başlatılamadı.");
+      }
+
+      console.log("⏳ generateImage - AI Tool durumu kontrol ediliyor...");
+      const aiToolStatusResult = await dispatch(
+        pollAiToolStatus({
+          requestId: generatedRequestId,
+          aiToolStatus: aiToolStatus || "",
+          aiToolResult: aiToolResult || "",
+        }),
+      );
+
+      if (aiToolStatusResult.meta.requestStatus === "rejected") {
+        console.error("❌ generateImage - AI Tool reddedildi");
+        throw new Error("Yapay zeka görseli işleyemedi.");
+      }
+
+      const resultPayload = aiToolStatusResult.payload as any;
+      const finalUrl = resultPayload?.images?.[0]?.url;
+
+      if (!finalUrl) {
+        console.error("❌ generateImage - finalUrl bulunamadı");
+        throw new Error("Yapay zekadan geçerli bir sonuç alınamadı.");
+      }
+
+      console.log("✅ generateImage - işlem başarıyla tamamlandı");
+      return finalUrl;
+    } catch (err: any) {
+      console.error("❌ generateImage - hata yakalandı:", err);
+      const message = err.message || "Beklenmeyen bir hata oluştu.";
+      console.error("❌ generateImage - hata mesajı:", message);
+      return rejectWithValue(message);
+    }
+  },
+);
+
+/**
+ * Download image to device
+ */
+export const downloadImage = createAsyncThunk<
+  void,
+  { imageUrl: string },
+  { rejectValue: string }
+>(
+  "contentCreation/downloadImage",
+  async ({ imageUrl }, { rejectWithValue }) => {
+    console.log("💾 downloadImage - başladı");
+    console.log("💾 downloadImage - imageUrl:", imageUrl);
+
+    if (!imageUrl) {
+      console.log("❌ downloadImage - imageUrl yok");
+      return rejectWithValue("İndirilecek görsel bulunamadı.");
+    }
+
+    try {
+      const MediaLibrary = await import("expo-media-library");
+
+      console.log("🔐 downloadImage - izin isteniyor...");
+      const { status: permissionStatus } =
+        await MediaLibrary.requestPermissionsAsync();
+      console.log("🔐 downloadImage - izin durumu:", permissionStatus);
+
+      if (permissionStatus !== "granted") {
+        console.log("❌ downloadImage - izin reddedildi");
+        Alert.alert(
+          "İzin gerekli",
+          "Görseli kaydetmek için film rulosuna erişim izni vermeniz gerekiyor.",
+        );
+        return rejectWithValue("İzin reddedildi");
+      }
+
+      console.log("💾 downloadImage - görsel kaydediliyor...");
+      await MediaLibrary.saveToLibraryAsync(imageUrl);
+      console.log("✅ downloadImage - görsel başarıyla kaydedildi");
+      Alert.alert("Başarılı", "Görsel galerinize kaydedildi.");
+    } catch (error) {
+      console.error("❌ downloadImage - hata:", error);
+      Alert.alert("Hata", "Görsel kaydedilirken bir sorun oluştu.");
+      return rejectWithValue("Görsel kaydedilemedi");
+    }
+  },
+);
+
 const contentCreationSlice = createSlice({
   name: "contentCreation",
   initialState,
@@ -329,11 +500,44 @@ const contentCreationSlice = createSlice({
       state.error = null;
     },
 
+    // UI State Management
+    setLocalImageUri: (state, action: PayloadAction<string | null>) => {
+      state.localImageUri = action.payload;
+    },
+    setOriginalImageForResult: (
+      state,
+      action: PayloadAction<string | null>,
+    ) => {
+      state.originalImageForResult = action.payload;
+    },
+    setErrorMessage: (state, action: PayloadAction<string | null>) => {
+      state.errorMessage = action.payload;
+    },
+    setImageViewerVisible: (state, action: PayloadAction<boolean>) => {
+      state.isImageViewerVisible = action.payload;
+    },
+    setExamplesModalVisible: (state, action: PayloadAction<boolean>) => {
+      state.isExamplesModalVisible = action.payload;
+    },
+    setActiveExampleIndex: (state, action: PayloadAction<number>) => {
+      state.activeExampleIndex = action.payload;
+    },
+    resetUIState: (state) => {
+      state.localImageUri = null;
+      state.originalImageForResult = null;
+      state.errorMessage = null;
+      state.isImageViewerVisible = false;
+    },
+
     // Tüm verileri temizle
     clearAllImages: (state) => {
       state.imageStorageUrl = null;
       state.createdImageUrl = null;
       state.error = null;
+      state.localImageUri = null;
+      state.originalImageForResult = null;
+      state.errorMessage = null;
+      state.isImageViewerVisible = false;
       state.storageUploadProcessingStatus = "idle";
       state.aiToolProcessingStatus = "idle";
       state.status = "idle";
@@ -395,6 +599,37 @@ const contentCreationSlice = createSlice({
         state.createdImageUrl = null;
         state.imageStorageUrl = null;
         state.error = action.payload as string;
+      })
+
+      // GENERATE IMAGE REDUCERS
+      .addCase(generateImage.pending, (state) => {
+        state.status = "pending";
+        state.error = null;
+        state.errorMessage = null;
+        state.originalImageForResult = state.localImageUri;
+      })
+      .addCase(generateImage.fulfilled, (state, action) => {
+        state.status = "fulfilled";
+        state.createdImageUrl = action.payload;
+        state.error = null;
+        state.errorMessage = null;
+      })
+      .addCase(generateImage.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+        state.errorMessage = action.payload as string;
+        state.originalImageForResult = null;
+      })
+
+      // DOWNLOAD IMAGE REDUCERS
+      .addCase(downloadImage.pending, (_state) => {
+        // Download işlemi için özel bir status gerekmez
+      })
+      .addCase(downloadImage.fulfilled, (state) => {
+        state.isImageViewerVisible = false;
+      })
+      .addCase(downloadImage.rejected, (state, action) => {
+        state.errorMessage = action.payload as string;
       });
   },
 });
@@ -409,6 +644,14 @@ export const {
   setAiToolProcessingStatus,
   clearError,
   clearAllImages,
+  // UI State Management
+  setLocalImageUri,
+  setOriginalImageForResult,
+  setErrorMessage,
+  setImageViewerVisible,
+  setExamplesModalVisible,
+  setActiveExampleIndex,
+  resetUIState,
 } = contentCreationSlice.actions;
 
 export default contentCreationSlice.reducer;

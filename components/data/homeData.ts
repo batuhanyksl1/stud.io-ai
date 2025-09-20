@@ -337,7 +337,7 @@ export const editingServices = [
     disabled: false,
     title: "Film Renkleri",
     subtitle: "Cinematic",
-    description: "Fotoğraflarınıza profesyonel sinema renk düzeni uygulayın.",
+    description: "Profesyonel sinema renk düzeni uygulayın.",
     prompt:
       "Apply cinematic color grading with balanced contrast, subtle film-like grain, and preserved skin tones. Avoid oversaturation.",
     icon: "film-outline",
@@ -383,9 +383,9 @@ export const editingServices = [
   {
     id: "photo-restoration",
     disabled: false,
-    title: "Eski Fotoğraf Restorasyonu",
+    title: "Restorasyonu",
     subtitle: "Onarım + Renk",
-    description: "Çizik, yıpranma ve solmaları onarın; gerekirse renklendirin.",
+    description: "Çizik, yıpranma ve solmaları onarın, renklendirin.",
     prompt:
       "Restore old scanned photo: remove scratches and dust, repair tears, recover detail, optionally colorize while keeping a realistic look.",
     icon: "time",
