@@ -217,8 +217,7 @@ export const editingServices = [
     disabled: false,
     title: "Makyaj Ekle",
     subtitle: "Doğal Stil",
-    description:
-      "Hafif makyaj ekle ya da revize et",
+    description: "Hafif makyaj ekle ya da revize et",
     prompt:
       "Apply a subtle, natural makeup look (even skin tone, soft blush, mild eye enhancement) OR gently remove heavy makeup for a clean natural face. Keep realism.",
     icon: "color-palette",
