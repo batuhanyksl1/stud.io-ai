@@ -439,6 +439,12 @@ const contentCreationSlice = createSlice({
     setLocalImageUris: (state, action: PayloadAction<string[]>) => {
       state.localImageUris = action.payload;
     },
+    removeLocalImageUri: (state, action: PayloadAction<number>) => {
+      const index = action.payload;
+      if (index >= 0 && index < state.localImageUris.length) {
+        state.localImageUris.splice(index, 1);
+      }
+    },
     setOriginalImageForResult: (
       state,
       action: PayloadAction<string | null>,
@@ -549,6 +555,7 @@ export const {
   // UI State Management
   setLocalImageUri,
   setLocalImageUris,
+  removeLocalImageUri,
   setOriginalImageForResult,
   setOriginalImagesForResult,
   setErrorMessage,

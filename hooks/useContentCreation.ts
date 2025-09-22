@@ -4,6 +4,7 @@ import {
   clearError as clearErrorAction,
   downloadImage as downloadImageAction,
   generateImage as generateImageAction,
+  removeLocalImageUri as removeLocalImageUriAction,
   resetUIState as resetUIStateAction,
   setActiveExampleIndex as setActiveExampleIndexAction,
   setActivityIndicatorColor as setActivityIndicatorColorAction,
@@ -65,6 +66,10 @@ export function useContentCreation() {
 
   const setLocalImageUris = (uris: string[]) => {
     dispatch(setLocalImageUrisAction(uris));
+  };
+
+  const removeLocalImageUri = (index: number) => {
+    dispatch(removeLocalImageUriAction(index));
   };
 
   const setOriginalImageForResult = (uri: string | null) => {
@@ -152,6 +157,7 @@ export function useContentCreation() {
     // UI Actions
     setLocalImageUri,
     setLocalImageUris,
+    removeLocalImageUri,
     setOriginalImageForResult,
     setOriginalImagesForResult,
     setErrorMessage,
