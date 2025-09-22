@@ -1,0 +1,1 @@
+1- Initialize ediyorsa dahi setIsInitialize(false) yapmıyor olabilir. kontrol et
