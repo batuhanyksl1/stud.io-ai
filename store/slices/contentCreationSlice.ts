@@ -184,8 +184,7 @@ export const generateImage = createAsyncThunk<
         console.log(`⏳ generateImage - deneme ${attempt + 1}/${maxAttempts}`);
 
         // aiToolStatus servisine durum kontrolü yap
-        const StatusUrl =
-          "https://europe-west1-studioai-980a7.cloudfunctions.net/aiToolStatus";
+        const StatusUrl = "https://aitoolstatus-br4qccjs7a-ew.a.run.app";
         const statusBody = {
           requestId: requestId,
           serviceUrl: aiStatusUrl.replace("${requestId}", requestId), // FAL API endpoint
@@ -219,15 +218,14 @@ export const generateImage = createAsyncThunk<
           console.log("✅ generateImage - işlem tamamlandı, sonuç alınıyor...");
 
           // aiToolResult servisinden sonucu al
-          const ResultUrl =
-            "https://europe-west1-studioai-980a7.cloudfunctions.net/aiToolResult";
+          const ResultUrl = "https://aitoolresult-br4qccjs7a-ew.a.run.app";
           const resultBody = {
             requestId: requestId,
             serviceUrl: aiResultUrl.replace("${requestId}", requestId), // FAL API endpoint
             extra: {},
           };
           const resultRes = await fetch(ResultUrl, {
-            method: "POST",
+            method: "POST", // Firebase Functions servisi POST bekliyor
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${firebaseToken}`,
