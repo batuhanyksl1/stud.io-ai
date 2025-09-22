@@ -1,6 +1,7 @@
 import ThemedText from "@/components/ThemedText";
 import ThemedView from "@/components/ThemedView";
 import { editingServices } from "@/components/data";
+import { useContentCreation } from "@/hooks";
 import Ionicon from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -9,6 +10,7 @@ import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export const HomeServices: React.FC = () => {
   const router = useRouter();
+  const { clearAllImages, resetUIState } = useContentCreation();
 
   const handleServicePress = (
     servicePrompt: string,
@@ -20,6 +22,10 @@ export const HomeServices: React.FC = () => {
     gradient: string[],
     title: string,
   ) => {
+    // Yeni servis seçildiğinde tüm görselleri ve UI state'ini temizle
+    clearAllImages();
+    resetUIState();
+
     router.push({
       pathname: "/(tabs)/creationPage",
       params: {

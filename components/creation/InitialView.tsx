@@ -8,15 +8,15 @@ import {
 } from "@/constants/DesignTokens";
 import { useTheme } from "@/hooks/useTheme";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Animated,
-  Dimensions,
   Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 
@@ -24,9 +24,9 @@ interface InitialViewProps {
   title: string;
   gradientColors: string[];
   servicePrompt: string;
-  aiRequestUrl?: string;
   hasMultipleInputImage: string;
   onSelectImage: () => void;
+  onPromptChange?: (_prompt: string) => void;
   fadeAnim: Animated.Value;
   scaleAnim: Animated.Value;
 }
@@ -35,26 +35,20 @@ export const InitialView: React.FC<InitialViewProps> = ({
   title,
   gradientColors,
   servicePrompt,
-  aiRequestUrl,
   hasMultipleInputImage,
   onSelectImage,
+  onPromptChange,
   fadeAnim,
   scaleAnim,
 }) => {
   const { colors } = useTheme();
-  const screenWidth = useMemo(() => Dimensions.get("window").width, []);
+  const [showCustomPrompt, setShowCustomPrompt] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState("");
 
-  const promptDetails = useMemo(() => {
-    if (!servicePrompt) {
-      return "Talimat henüz oluşturulmadı.";
-    }
-
-    if (servicePrompt.length <= 160) {
-      return servicePrompt;
-    }
-
-    return `${servicePrompt.slice(0, 157)}...`;
-  }, [servicePrompt]);
+  const handleCustomPromptChange = (text: string) => {
+    setCustomPrompt(text);
+    onPromptChange?.(text);
+  };
 
   const exampleItems = useMemo(
     () =>
@@ -85,7 +79,7 @@ export const InitialView: React.FC<InitialViewProps> = ({
       >
         <View style={{ flexDirection: "row", gap: Spacing.sm }}>
           <LinearGradient
-            colors={gradientColors}
+            colors={gradientColors as [string, string, ...string[]]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.heroBadge}
@@ -98,39 +92,79 @@ export const InitialView: React.FC<InitialViewProps> = ({
           </LinearGradient>
         </View>
         <Text style={[styles.heroTitle, { color: colors.textPrimary }]}>
-          Hayalinizi saniyeler içinde hayata geçirin
+          Fotoğraflarınızı saniyeler içinde düzenleyin
         </Text>
         <Text style={[styles.heroDescription, { color: colors.textSecondary }]}>
-          Referans görselinizi ekleyin, talimatınızı paylaşın ve Studio AI
-          gerisini sizin için yönetsin.
+          Referans görselinizi ekleyin, talimatınızı paylaşın yada Studio
+          AI&apos;ın sizin için düzenlesin.
         </Text>
 
-        <View style={styles.heroMetaRow}>
-          <View style={[styles.heroMetaItem, { borderColor: colors.border }]}>
+        {/* Custom Prompt Section */}
+        {showCustomPrompt ? (
+          <View
+            style={[styles.customPromptSection, { borderColor: colors.border }]}
+          >
             <Text
-              style={[styles.heroMetaLabel, { color: colors.textTertiary }]}
+              style={[
+                styles.customPromptLabel,
+                { color: colors.textSecondary },
+              ]}
             >
-              Talimat
+              Kendi talimatınızı yazın
             </Text>
-            <Text style={[styles.heroMetaValue, { color: colors.textPrimary }]}>
-              {promptDetails}
-            </Text>
+            <TextInput
+              style={[
+                styles.customPromptInput,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.surfaceElevated,
+                  color: colors.textPrimary,
+                },
+              ]}
+              value={customPrompt}
+              onChangeText={handleCustomPromptChange}
+              placeholder="Özel talimatınızı buraya yazın..."
+              placeholderTextColor={colors.textTertiary}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+            <Pressable
+              style={[
+                styles.customPromptCancelButton,
+                { borderColor: colors.border },
+              ]}
+              onPress={() => {
+                setShowCustomPrompt(false);
+                setCustomPrompt("");
+                onPromptChange?.(servicePrompt);
+              }}
+            >
+              <Text
+                style={[
+                  styles.customPromptCancelText,
+                  { color: colors.textSecondary },
+                ]}
+              >
+                Varsayılan talimatı kullan
+              </Text>
+            </Pressable>
           </View>
-          {aiRequestUrl ? (
-            <View style={[styles.heroMetaItem, { borderColor: colors.border }]}>
-              <Text
-                style={[styles.heroMetaLabel, { color: colors.textTertiary }]}
-              >
-                Araç
-              </Text>
-              <Text
-                style={[styles.heroMetaValue, { color: colors.textPrimary }]}
-              >
-                {aiRequestUrl}
-              </Text>
-            </View>
-          ) : null}
-        </View>
+        ) : (
+          <Pressable
+            style={[styles.customPromptButton, { borderColor: colors.border }]}
+            onPress={() => setShowCustomPrompt(true)}
+          >
+            <Text
+              style={[
+                styles.customPromptButtonText,
+                { color: colors.textTertiary },
+              ]}
+            >
+              Kendi talimatını ekle
+            </Text>
+          </Pressable>
+        )}
 
         <Pressable
           style={[styles.buttonPrimary, { backgroundColor: colors.primary }]}
@@ -187,8 +221,8 @@ export const InitialView: React.FC<InitialViewProps> = ({
             <Text
               style={[styles.stepSubtitle, { color: colors.textSecondary }]}
             >
-              Platform, promptunuzu ve görseli eşleştirerek yeni versiyonu
-              üretir.
+              Platform, varsayılan promptu kullanır veya özel talimatınızı
+              uygulayarak yeni versiyonu üretir.
             </Text>
           </View>
         </View>
@@ -477,5 +511,49 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontFamily.semiBold,
     textTransform: "uppercase",
     letterSpacing: Typography.letterSpacing.wide,
+  },
+  customPromptButton: {
+    alignSelf: "flex-start",
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+    marginBottom: Spacing.lg,
+  },
+  customPromptButtonText: {
+    fontSize: Typography.fontSize.xs,
+    fontFamily: Typography.fontFamily.medium,
+    //textDecorationLine: "underline",
+  },
+  customPromptSection: {
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+  },
+  customPromptLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontFamily: Typography.fontFamily.semiBold,
+    marginBottom: Spacing.sm,
+  },
+  customPromptInput: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.sm,
+    fontSize: Typography.fontSize.sm,
+    fontFamily: Typography.fontFamily.primary,
+    minHeight: 80,
+    marginBottom: Spacing.sm,
+  },
+  customPromptCancelButton: {
+    alignSelf: "flex-start",
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
+    borderWidth: 1,
+  },
+  customPromptCancelText: {
+    fontSize: Typography.fontSize.xs,
+    fontFamily: Typography.fontFamily.medium,
   },
 });

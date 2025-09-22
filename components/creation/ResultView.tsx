@@ -21,9 +21,11 @@ interface ResultViewProps {
   createdImageUrl?: string;
   originalImageForResult?: string;
   localImageUri?: string;
+  localImageUris?: string[];
+  hasMultipleInputImage: string;
   onDownloadImage: () => void;
   onStartNew: () => void;
-  onOpenImageViewer: () => void;
+  onOpenImageViewer: (_imageUrl: string) => void;
   fadeAnim: Animated.Value;
   scaleAnim: Animated.Value;
 }
@@ -32,6 +34,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
   createdImageUrl,
   originalImageForResult,
   localImageUri,
+  localImageUris,
+  hasMultipleInputImage,
   onDownloadImage,
   onStartNew,
   onOpenImageViewer,
@@ -71,50 +75,86 @@ export const ResultView: React.FC<ResultViewProps> = ({
             bir proje başlatabilirsiniz.
           </Text>
 
-          <View style={styles.resultRow}>
-            <View
-              style={[
-                styles.resultImageWrapper,
-                {
-                  borderColor: colors.border,
-                  backgroundColor: colors.background,
-                },
-              ]}
-            >
-              <Text
-                style={[styles.resultLabel, { color: colors.textSecondary }]}
-              >
-                Önce
+          {/* Ana Sonuç Görseli - Ortada Büyük */}
+          <View style={styles.mainResultContainer}>
+            <View style={styles.mainResultLabelRow}>
+              <Text style={[styles.mainResultLabel, { color: colors.primary }]}>
+                Sonuç
               </Text>
-              <Image
-                source={{ uri: originalImageForResult || localImageUri || "" }}
-                style={styles.resultImage}
-              />
+              <Pressable
+                onPress={() => onOpenImageViewer(createdImageUrl || "")}
+              >
+                <Text style={[styles.viewerLink, { color: colors.primary }]}>
+                  Tam ekran
+                </Text>
+              </Pressable>
             </View>
-
-            <View
+            <Pressable
               style={[
-                styles.resultImageWrapper,
+                styles.mainResultImageWrapper,
                 {
                   borderColor: colors.primary,
                   backgroundColor: colors.background,
                 },
               ]}
+              onPress={() => onOpenImageViewer(createdImageUrl || "")}
             >
-              <View style={styles.resultLabelRow}>
-                <Text style={[styles.resultLabel, { color: colors.primary }]}>
-                  Sonuç
-                </Text>
-                <Pressable onPress={onOpenImageViewer}>
-                  <Text style={[styles.viewerLink, { color: colors.primary }]}>
-                    Tam ekran
-                  </Text>
-                </Pressable>
-              </View>
               <Image
                 source={{ uri: createdImageUrl || "" }}
-                style={styles.resultImage}
+                style={styles.mainResultImage}
               />
+            </Pressable>
+          </View>
+
+          {/* Referans Görseller - Alt Kısımda Küçük */}
+          <View style={styles.referenceImagesContainer}>
+            <Text
+              style={[styles.referenceLabel, { color: colors.textSecondary }]}
+            >
+              Referans görseller
+            </Text>
+            <View style={styles.referenceImagesRow}>
+              {hasMultipleInputImage === "true" &&
+              localImageUris &&
+              localImageUris.length > 0 ? (
+                localImageUris.map((uri, index) => (
+                  <Pressable
+                    key={index}
+                    style={[
+                      styles.referenceImageWrapper,
+                      {
+                        borderColor: colors.border,
+                        backgroundColor: colors.background,
+                      },
+                    ]}
+                    onPress={() => onOpenImageViewer(uri)}
+                  >
+                    <Image source={{ uri }} style={styles.referenceImage} />
+                  </Pressable>
+                ))
+              ) : (
+                <Pressable
+                  style={[
+                    styles.referenceImageWrapper,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: colors.background,
+                    },
+                  ]}
+                  onPress={() =>
+                    onOpenImageViewer(
+                      originalImageForResult || localImageUri || "",
+                    )
+                  }
+                >
+                  <Image
+                    source={{
+                      uri: originalImageForResult || localImageUri || "",
+                    }}
+                    style={styles.referenceImage}
+                  />
+                </Pressable>
+              )}
             </View>
           </View>
 
@@ -211,26 +251,19 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
   },
-  resultRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+  // Ana sonuç görseli stilleri
+  mainResultContainer: {
     marginTop: Spacing.xl,
+    alignItems: "center",
   },
-  resultImageWrapper: {
-    flexBasis: "48%",
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
-  },
-  resultLabelRow: {
+  mainResultLabelRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    width: "100%",
     marginBottom: Spacing.sm,
   },
-  resultLabel: {
+  mainResultLabel: {
     fontSize: Typography.fontSize.sm,
     fontFamily: Typography.fontFamily.semiBold,
     textTransform: "uppercase",
@@ -241,10 +274,46 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontFamily.semiBold,
     textTransform: "uppercase",
   },
-  resultImage: {
+  mainResultImageWrapper: {
+    borderRadius: BorderRadius.xl,
+    borderWidth: 2,
+    padding: Spacing.sm,
     width: "100%",
-    height: 220,
+    maxWidth: 400,
+    aspectRatio: 1,
+  },
+  mainResultImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: BorderRadius.lg,
+  },
+  // Referans görseller stilleri
+  referenceImagesContainer: {
+    marginTop: Spacing.xl,
+  },
+  referenceLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontFamily: Typography.fontFamily.semiBold,
+    textTransform: "uppercase",
+    letterSpacing: Typography.letterSpacing.wide,
+    marginBottom: Spacing.sm,
+  },
+  referenceImagesRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: Spacing.sm,
+  },
+  referenceImageWrapper: {
     borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    padding: Spacing.xs,
+    width: 80,
+    height: 80,
+  },
+  referenceImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: BorderRadius.sm,
   },
   resultPrimaryAction: {
     marginBottom: Spacing.md,

@@ -93,6 +93,8 @@ const ImageGeneratorScreen = () => {
 
   const [fadeAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(0.95));
+  const [currentPrompt, setCurrentPrompt] = useState(servicePrompt);
+  const [currentViewingImage, setCurrentViewingImage] = useState<string>("");
 
   const isGenerating = status === "pending";
   const hasImages =
@@ -173,7 +175,7 @@ const ImageGeneratorScreen = () => {
       return;
     }
 
-    if (!servicePrompt) {
+    if (!currentPrompt) {
       setErrorMessage(
         "Talimat bulunamadı. Lütfen ana ekrandan tekrar deneyin.",
       );
@@ -201,7 +203,7 @@ const ImageGeneratorScreen = () => {
 
     try {
       await generateImage(
-        servicePrompt,
+        currentPrompt,
         aiRequestUrl,
         aiStatusUrl,
         aiResultUrl,
@@ -259,9 +261,9 @@ const ImageGeneratorScreen = () => {
       title={title}
       gradientColors={gradientColors}
       servicePrompt={servicePrompt}
-      aiRequestUrl={aiRequestUrl}
       hasMultipleInputImage={hasMultipleInputImage}
       onSelectImage={handleSelectImage}
+      onPromptChange={setCurrentPrompt}
       fadeAnim={fadeAnim}
       scaleAnim={scaleAnim}
     />
@@ -289,9 +291,14 @@ const ImageGeneratorScreen = () => {
       createdImageUrl={createdImageUrl || undefined}
       originalImageForResult={originalImageForResult || undefined}
       localImageUri={localImageUri || undefined}
+      localImageUris={localImageUris}
+      hasMultipleInputImage={hasMultipleInputImage}
       onDownloadImage={handleDownloadImage}
       onStartNew={handleStartNew}
-      onOpenImageViewer={() => setImageViewerVisible(true)}
+      onOpenImageViewer={(imageUrl) => {
+        setCurrentViewingImage(imageUrl);
+        setImageViewerVisible(true);
+      }}
       fadeAnim={fadeAnim}
       scaleAnim={scaleAnim}
     />
@@ -300,7 +307,7 @@ const ImageGeneratorScreen = () => {
   const renderImageViewer = () => (
     <ImageViewer
       visible={isImageViewerVisible}
-      imageUrl={createdImageUrl || undefined}
+      imageUrl={currentViewingImage || undefined}
       onClose={() => setImageViewerVisible(false)}
       onDownload={handleDownloadImage}
     />
