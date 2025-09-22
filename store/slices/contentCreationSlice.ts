@@ -209,13 +209,16 @@ export const generateImage = createAsyncThunk<
       const RequestUrl = "https://aitoolrequest-br4qccjs7a-ew.a.run.app";
       const requestBody = {
         prompt: servicePrompt,
-        imageUrl: storageUrls.length === 1 ? storageUrls[0] : storageUrls, // Tek görsel ise string, çoklu ise array
+        image_urls: storageUrls, // Her durumda array formatında gönder
         serviceUrl: aiRequestUrl, // FAL API endpoint
         extra: {
           strength: 0.8,
         },
       };
-      console.log("🔍 generateImage - requestBody:", requestBody);
+      console.log(
+        "🔍 AŞLSDKFJAŞLSKDFJAŞLKSDJFŞALKSDJFŞLAKSDJFADFŞ ASLŞDKJFAŞLSKDJF     ASDFJAŞLKSDJF generateImage - requestBody:",
+        requestBody,
+      );
       const requestRes = await fetch(RequestUrl, {
         method: "POST",
         headers: {
