@@ -184,22 +184,31 @@ export const generateImage = createAsyncThunk<
         console.log(`⏳ generateImage - deneme ${attempt + 1}/${maxAttempts}`);
 
         // aiToolStatus servisine durum kontrolü yap
-        const statusRes = await fetch(aiStatusUrl, {
+        const StatusUrl =
+          "https://europe-west1-studioai-980a7.cloudfunctions.net/aiToolStatus";
+        const statusBody = {
+          requestId: requestId,
+          serviceUrl: aiStatusUrl.replace("${requestId}", requestId), // FAL API endpoint
+          extra: {},
+        };
+        const statusRes = await fetch(StatusUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${firebaseToken}`,
           },
-          body: JSON.stringify({ requestId }),
+          body: JSON.stringify(statusBody),
         });
-
+        console.log("🔍 generateImage - aiToolStatus response:", statusRes);
         if (!statusRes.ok) {
           const text = await statusRes.text();
+          console.log("🔍 generateImage - aiToolStatus error:", text);
           console.error("❌ generateImage - aiToolStatus error:", text);
           throw new Error(`aiToolStatus failed: ${statusRes.status} ${text}`);
         }
 
         const statusData = (await statusRes.json()) as any;
+        console.log("🔍 generateImage - aiToolStatus data:", statusData);
         console.log(
           `🔄 Polling attempt ${attempt + 1}/${maxAttempts}, status:`,
           statusData?.data?.status,
@@ -210,13 +219,20 @@ export const generateImage = createAsyncThunk<
           console.log("✅ generateImage - işlem tamamlandı, sonuç alınıyor...");
 
           // aiToolResult servisinden sonucu al
-          const resultRes = await fetch(aiResultUrl, {
+          const ResultUrl =
+            "https://europe-west1-studioai-980a7.cloudfunctions.net/aiToolResult";
+          const resultBody = {
+            requestId: requestId,
+            serviceUrl: aiResultUrl.replace("${requestId}", requestId), // FAL API endpoint
+            extra: {},
+          };
+          const resultRes = await fetch(ResultUrl, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${firebaseToken}`,
             },
-            body: JSON.stringify({ requestId }),
+            body: JSON.stringify(resultBody),
           });
 
           if (!resultRes.ok) {
