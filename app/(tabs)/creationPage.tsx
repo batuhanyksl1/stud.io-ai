@@ -30,31 +30,39 @@ import {
 } from "react-native";
 
 const ImageGeneratorScreen = () => {
-  const { servicePrompt, aiRequestUrl, aiStatusUrl, aiResultUrl } =
-    useLocalSearchParams<{
-      servicePrompt: string;
-      aiRequestUrl: string;
-      aiStatusUrl: string;
-      aiResultUrl: string;
-    }>();
-  console.log("🔍 CreationPage - servicePrompt:", servicePrompt);
-  console.log("🔍 CreationPage - aiRequestUrl:", aiRequestUrl);
-  console.log("🔍 CreationPage - aiStatusUrl:", aiStatusUrl);
-  console.log("🔍 CreationPage - aiResultUrl:", aiResultUrl);
+  const {
+    servicePrompt,
+    aiRequestUrl,
+    aiStatusUrl,
+    aiResultUrl,
+    hasMultipleInputImage,
+    hasPreSelectedImage: _hasPreSelectedImage,
+  } = useLocalSearchParams<{
+    servicePrompt: string;
+    aiRequestUrl: string;
+    aiStatusUrl: string;
+    aiResultUrl: string;
+    hasMultipleInputImage: string;
+    hasPreSelectedImage: string;
+  }>();
 
   const { colors } = useTheme();
   const {
     createdImageUrl,
     status,
     localImageUri,
+    localImageUris,
     originalImageForResult,
+    originalImagesForResult: _originalImagesForResult,
     errorMessage,
     isImageViewerVisible,
     isExamplesModalVisible,
     activeExampleIndex,
     clearAllImages,
     setLocalImageUri,
+    setLocalImageUris,
     setOriginalImageForResult: _setOriginalImageForResult,
+    setOriginalImagesForResult: _setOriginalImagesForResult,
     setErrorMessage,
     setImageViewerVisible,
     setExamplesModalVisible,
@@ -70,8 +78,10 @@ const ImageGeneratorScreen = () => {
   const [scaleAnim] = useState(new Animated.Value(0.95));
 
   const isGenerating = status === "pending";
-  const isIdle = !localImageUri && !createdImageUrl;
-  const isEditing = !!localImageUri && !createdImageUrl;
+  const hasImages =
+    localImageUri || (localImageUris && localImageUris.length > 0);
+  const isIdle = !hasImages && !createdImageUrl;
+  const isEditing = hasImages && !createdImageUrl;
   const hasResult = !!createdImageUrl;
 
   const screenWidth = useMemo(() => Dimensions.get("window").width, []);
@@ -99,14 +109,27 @@ const ImageGeneratorScreen = () => {
   const handleSelectImage = async () => {
     console.log("🖼️ handleSelectImage - başladı");
     try {
-      const pickedImageUri = await pickImage();
-      console.log("🖼️ handleSelectImage - pickedImageUri:", pickedImageUri);
+      const allowMultiple = hasMultipleInputImage === "true";
+      const pickedImages = await pickImage(allowMultiple);
+      console.log("🖼️ handleSelectImage - pickedImages:", pickedImages);
 
-      if (pickedImageUri) {
+      if (pickedImages) {
         clearAllImages();
         resetState();
-        setLocalImageUri(pickedImageUri);
-        console.log("🖼️ handleSelectImage - görsel başarıyla seçildi");
+
+        if (allowMultiple && Array.isArray(pickedImages)) {
+          setLocalImageUris(pickedImages);
+          console.log(
+            "🖼️ handleSelectImage - çoklu görsel başarıyla seçildi:",
+            pickedImages.length,
+            "adet",
+          );
+        } else if (!allowMultiple && typeof pickedImages === "string") {
+          setLocalImageUri(pickedImages);
+          console.log("🖼️ handleSelectImage - tek görsel başarıyla seçildi");
+        } else {
+          console.log("🖼️ handleSelectImage - görsel seçilmedi");
+        }
       } else {
         console.log("🖼️ handleSelectImage - görsel seçilmedi");
       }
@@ -126,7 +149,9 @@ const ImageGeneratorScreen = () => {
     console.log("✨ handleGenerateImage - aiStatusUrl:", aiStatusUrl);
     console.log("✨ handleGenerateImage - aiResultUrl:", aiResultUrl);
     console.log("✨ handleGenerateImage - localImageUri:", localImageUri);
-    if (!localImageUri) {
+    console.log("✨ handleGenerateImage - localImageUris:", localImageUris);
+
+    if (!localImageUri && (!localImageUris || localImageUris.length === 0)) {
       setErrorMessage("Devam etmek için önce bir görsel seçin.");
       return;
     }
@@ -301,7 +326,9 @@ const ImageGeneratorScreen = () => {
           <Text
             style={[styles.buttonTextPrimary, { color: colors.textOnPrimary }]}
           >
-            Galeriden görsel seç
+            {hasMultipleInputImage === "true"
+              ? "Galeriden görseller seç"
+              : "Galeriden görsel seç"}
           </Text>
         </Pressable>
       </Animated.View>
@@ -489,15 +516,46 @@ const ImageGeneratorScreen = () => {
             <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
               Her şey hazır
             </Text>
-            <Image
-              source={{ uri: localImageUri || "" }}
-              style={styles.imagePreview}
-            />
+
+            {/* Çoklu görsel preview */}
+            {hasMultipleInputImage === "true" &&
+            localImageUris &&
+            localImageUris.length > 0 ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.multipleImageContainer}
+              >
+                {localImageUris.map((uri, index) => (
+                  <View key={index} style={styles.multipleImageItem}>
+                    <Image
+                      source={{ uri }}
+                      style={styles.multipleImagePreview}
+                    />
+                    <Text
+                      style={[
+                        styles.multipleImageLabel,
+                        { color: colors.textSecondary },
+                      ]}
+                    >
+                      {index + 1}
+                    </Text>
+                  </View>
+                ))}
+              </ScrollView>
+            ) : (
+              <Image
+                source={{ uri: localImageUri || "" }}
+                style={styles.imagePreview}
+              />
+            )}
+
             <Text
               style={[styles.sectionHelper, { color: colors.textSecondary }]}
             >
-              Profesyonel sonuçlar için yüksek çözünürlüklü ve iyi aydınlatılmış
-              görseller öneriyoruz.
+              {hasMultipleInputImage === "true"
+                ? "Profesyonel sonuçlar için yüksek çözünürlüklü ve iyi aydınlatılmış görseller öneriyoruz."
+                : "Profesyonel sonuçlar için yüksek çözünürlüklü ve iyi aydınlatılmış görseller öneriyoruz."}
             </Text>
           </View>
 
@@ -584,7 +642,9 @@ const ImageGeneratorScreen = () => {
                   { color: colors.textSecondary },
                 ]}
               >
-                Farklı görsel seç
+                {hasMultipleInputImage === "true"
+                  ? "Farklı görseller seç"
+                  : "Farklı görsel seç"}
               </Text>
             </Pressable>
           </View>
@@ -1369,6 +1429,24 @@ const styles = StyleSheet.create({
     height: 320,
     borderRadius: BorderRadius.lg,
     marginTop: Spacing.lg,
+  },
+  multipleImageContainer: {
+    marginTop: Spacing.lg,
+    maxHeight: 200,
+  },
+  multipleImageItem: {
+    marginRight: Spacing.md,
+    alignItems: "center",
+  },
+  multipleImagePreview: {
+    width: 120,
+    height: 120,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.xs,
+  },
+  multipleImageLabel: {
+    fontSize: 12,
+    fontWeight: "500",
   },
   chip: {
     alignSelf: "flex-start",

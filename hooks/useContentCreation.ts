@@ -11,7 +11,9 @@ import {
   setExamplesModalVisible as setExamplesModalVisibleAction,
   setImageViewerVisible as setImageViewerVisibleAction,
   setLocalImageUri as setLocalImageUriAction,
+  setLocalImageUris as setLocalImageUrisAction,
   setOriginalImageForResult as setOriginalImageForResultAction,
+  setOriginalImagesForResult as setOriginalImagesForResultAction,
 } from "@/store/slices/contentCreationSlice";
 
 export function useContentCreation() {
@@ -22,34 +24,21 @@ export function useContentCreation() {
     status,
     createdImageUrl,
     imageStorageUrl,
+    imageStorageUrls,
     storageUploadProcessingStatus,
     aiToolProcessingStatus,
     error,
     activityIndicatorColor,
     // UI State
     localImageUri,
+    localImageUris,
     originalImageForResult,
+    originalImagesForResult,
     errorMessage,
     isImageViewerVisible,
     isExamplesModalVisible,
     activeExampleIndex,
   } = useAppSelector((state) => state.contentCreation);
-
-  // console.log("🔧 useContentCreation - state güncellendi:");
-  // console.log("🔧 useContentCreation - status:", status);
-  // console.log("🔧 useContentCreation - createdImageUrl:", createdImageUrl);
-  // console.log("🔧 useContentCreation - imageStorageUrl:", imageStorageUrl);
-  // console.log(
-  //   "🔧 useContentCreation - storageUploadProcessingStatus:",
-  //   storageUploadProcessingStatus,
-  // );
-  // console.log(
-  //   "🔧 useContentCreation - aiToolProcessingStatus:",
-  //   aiToolProcessingStatus,
-  // );
-  // console.log("🔧 useContentCreation - error:", error);
-
-  // Actions
 
   const clearError = () => {
     console.log("🔧 useContentCreation - clearError çağrıldı");
@@ -74,8 +63,16 @@ export function useContentCreation() {
     dispatch(setLocalImageUriAction(uri));
   };
 
+  const setLocalImageUris = (uris: string[]) => {
+    dispatch(setLocalImageUrisAction(uris));
+  };
+
   const setOriginalImageForResult = (uri: string | null) => {
     dispatch(setOriginalImageForResultAction(uri));
+  };
+
+  const setOriginalImagesForResult = (uris: string[]) => {
+    dispatch(setOriginalImagesForResultAction(uris));
   };
 
   const setErrorMessage = (message: string | null) => {
@@ -105,13 +102,14 @@ export function useContentCreation() {
     aiStatusUrl: string,
     aiResultUrl: string,
   ) => {
-    if (!localImageUri) {
+    if (!localImageUri && (!localImageUris || localImageUris.length === 0)) {
       throw new Error("Görsel seçilmemiş");
     }
 
     return await dispatch(
       generateImageAction({
-        localImageUri,
+        localImageUri: localImageUri || undefined,
+        localImageUris: localImageUris || undefined,
         servicePrompt,
         aiRequestUrl,
         aiStatusUrl,
@@ -131,6 +129,7 @@ export function useContentCreation() {
   return {
     // State
     imageStorageUrl,
+    imageStorageUrls,
     createdImageUrl,
     storageUploadProcessingStatus,
     aiToolProcessingStatus,
@@ -139,7 +138,9 @@ export function useContentCreation() {
     activityIndicatorColor,
     // UI State
     localImageUri,
+    localImageUris,
     originalImageForResult,
+    originalImagesForResult,
     errorMessage,
     isImageViewerVisible,
     isExamplesModalVisible,
@@ -150,7 +151,9 @@ export function useContentCreation() {
     setActivityIndicatorColor,
     // UI Actions
     setLocalImageUri,
+    setLocalImageUris,
     setOriginalImageForResult,
+    setOriginalImagesForResult,
     setErrorMessage,
     setImageViewerVisible,
     setExamplesModalVisible,

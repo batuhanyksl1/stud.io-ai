@@ -15,6 +15,8 @@ export const HomeServices: React.FC = () => {
     aiRequestUrl: string,
     aiStatusUrl: string,
     aiResultUrl: string,
+    hasMultipleInputImage: boolean,
+    hasPreSelectedImage: boolean,
   ) => {
     router.push({
       pathname: "/(tabs)/creationPage",
@@ -23,6 +25,8 @@ export const HomeServices: React.FC = () => {
         aiRequestUrl: aiRequestUrl,
         aiStatusUrl: aiStatusUrl,
         aiResultUrl: aiResultUrl,
+        hasMultipleInputImage: hasMultipleInputImage ? "true" : "false",
+        hasPreSelectedImage: hasPreSelectedImage ? "true" : "false",
       },
     });
     console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
@@ -38,6 +42,8 @@ export const HomeServices: React.FC = () => {
             service.aiRequestUrl as string,
             service.aiStatusUrl as string,
             service.aiResultUrl as string,
+            service.hasMultipleInputImage as boolean,
+            service.hasPreSelectedImage as boolean,
           )
         }
         activeOpacity={0.8}

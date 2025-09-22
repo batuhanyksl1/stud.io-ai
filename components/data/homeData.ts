@@ -7,7 +7,7 @@ export const editingServices = [
     subtitle: "LinkedIn Ready",
     description: "LinkedIn için profesyonel profil fotoğrafları oluşturun",
     prompt:
-      "Put this person into an image that taken in a studio with a good background. Clean looking face with a soft smile looking into the camera",
+      "Use all provided reference images of the same person as identity anchors. Generate a single high-resolution professional magazine-style corporate headshot preserving the subject’s exact facial features, hair texture, and natural skin tone from the reference set. Create a subtle, reassuring smile with soft, balanced three-point studio lighting that includes a gentle key light and natural fill. Place the subject in front of a modern office background rendered with tasteful shallow depth of field (soft blur) so the environment suggests a professional workspace without distraction. Keep the composition centered with direct eye contact and a relaxed upright posture. Emulate the look of an 85 mm lens at f/2.8 for natural separation and bokeh. Apply natural color grading and produce ultra-high-resolution (4k or higher) editorial quality suitable for a business magazine cover. Maintain the person’s real identity and proportions from the reference images, without altering facial structure, eye color, or hairstyle beyond minor grooming adjustments. Blend lighting and color so the final image appears as a cohesive professional studio shoot. Avoid harsh shadows, cartoon or illustration style, text or watermarks, cluttered foregrounds, oversaturated colors, plastic skin smoothing, or obvious digital artifacts. Aspect ratio 3:4.",
     icon: "person",
     color: "#0077B5",
     gradient: ["#0077B5", "#005885"],
@@ -27,6 +27,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "background-removal",
@@ -54,6 +56,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "photo-enhancement",
@@ -80,6 +84,8 @@ export const editingServices = [
     aiResultUrl: "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "style-transfer",
@@ -108,6 +114,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
 
   // --- YENİ SERVİSLER ---
@@ -140,6 +148,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "super-resolution",
@@ -163,6 +173,8 @@ export const editingServices = [
     aiResultUrl: "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "golden-hour",
@@ -187,6 +199,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "teeth-whitening",
@@ -211,6 +225,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "makeup",
@@ -235,6 +251,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "hair-color",
@@ -259,6 +277,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "bokeh-portrait",
@@ -283,6 +303,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "background-replace",
@@ -307,6 +329,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "object-removal",
@@ -331,6 +355,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "film-grade",
@@ -355,6 +381,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "seasonal-autumn",
@@ -379,6 +407,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "photo-restoration",
@@ -402,6 +432,8 @@ export const editingServices = [
     aiResultUrl: "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "cartoonize",
@@ -426,6 +458,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
   {
     id: "night-to-day",
@@ -450,6 +484,8 @@ export const editingServices = [
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
   },
 ];
 

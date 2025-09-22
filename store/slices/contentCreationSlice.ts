@@ -10,6 +10,7 @@ export interface ContentCreationState {
   pathPrefix: string;
   storageUploadProcessingStatus: ProcessingStatus;
   imageStorageUrl: string | null;
+  imageStorageUrls: string[]; // Çoklu görsel için
 
   // AI Tool Processing
   aiToolProcessingStatus: ProcessingStatus;
@@ -19,7 +20,9 @@ export interface ContentCreationState {
 
   // UI State Management
   localImageUri: string | null;
+  localImageUris: string[]; // Çoklu görsel URI'ları
   originalImageForResult: string | null;
+  originalImagesForResult: string[]; // Çoklu görsel için
   errorMessage: string | null;
   isImageViewerVisible: boolean;
   isExamplesModalVisible: boolean;
@@ -36,7 +39,9 @@ const initialState: ContentCreationState = {
   pathPrefix: "uploads",
   storageUploadProcessingStatus: "idle",
   imageStorageUrl: null,
+  imageStorageUrls: [], // Çoklu görsel için
   localImageUri: null,
+  localImageUris: [], // Çoklu görsel URI'ları
 
   // AI Tool Processing
   aiToolProcessingStatus: "idle",
@@ -46,6 +51,7 @@ const initialState: ContentCreationState = {
 
   // UI State Management
   originalImageForResult: null,
+  originalImagesForResult: [], // Çoklu görsel için
   errorMessage: null,
   isImageViewerVisible: false,
   isExamplesModalVisible: true,
@@ -63,7 +69,8 @@ const initialState: ContentCreationState = {
 export const generateImage = createAsyncThunk<
   string,
   {
-    localImageUri: string;
+    localImageUri?: string;
+    localImageUris?: string[];
     servicePrompt: string;
     aiRequestUrl: string;
     aiStatusUrl: string;
@@ -73,16 +80,29 @@ export const generateImage = createAsyncThunk<
 >(
   "contentCreation/generateImage",
   async (
-    { localImageUri, servicePrompt, aiRequestUrl, aiStatusUrl, aiResultUrl },
+    {
+      localImageUri,
+      localImageUris,
+      servicePrompt,
+      aiRequestUrl,
+      aiStatusUrl,
+      aiResultUrl,
+    },
     { rejectWithValue },
   ) => {
     console.log("✨ generateImage - başladı");
     console.log("✨ generateImage - localImageUri:", localImageUri);
+    console.log("✨ generateImage - localImageUris:", localImageUris);
     console.log("✨ generateImage - servicePrompt:", servicePrompt);
     console.log("✨ generateImage - aiRequestUrl:", aiRequestUrl);
     console.log("✨ generateImage - aiStatusUrl:", aiStatusUrl);
     console.log("✨ generateImage - aiResultUrl:", aiResultUrl);
-    if (!localImageUri) {
+
+    // Tek veya çoklu görsel kontrolü
+    const hasSingleImage = localImageUri && !localImageUris;
+    const hasMultipleImages = localImageUris && localImageUris.length > 0;
+
+    if (!hasSingleImage && !hasMultipleImages) {
       const error = "Devam etmek için önce bir görsel seçin.";
       console.log("❌ generateImage - görsel seçilmemiş");
       return rejectWithValue(error);
@@ -95,13 +115,8 @@ export const generateImage = createAsyncThunk<
     }
 
     try {
-      // 1. ADIM: Görseli Firebase Storage'a yükle
-      console.log("📤 generateImage - görsel storage'a yükleniyor...");
-
-      // Dosya adını oluştur
-      const rawName = localImageUri.split("/").pop() || `file-${Date.now()}`;
-      const ext = rawName.includes(".") ? rawName.split(".").pop() : "jpg";
-      const fileName = `${Date.now()}.${ext}`;
+      // 1. ADIM: Görsel(ler)i Firebase Storage'a yükle
+      console.log("📤 generateImage - görsel(ler) storage'a yükleniyor...");
 
       // Kullanıcı bilgilerini al
       const currentUser = auth().currentUser;
@@ -109,27 +124,79 @@ export const generateImage = createAsyncThunk<
         throw new Error("Kullanıcı giriş yapmamış");
       }
 
-      // Firebase Storage referansı oluştur
-      const reference = storage().ref(
-        `${initialState.pathPrefix}/${currentUser.uid}/${fileName}`,
-      );
+      let storageUrls: string[] = [];
 
-      // Dosya yolunu düzenle (file:// scheme'ini kaldır)
-      const pathToFile = localImageUri.startsWith("file://")
-        ? localImageUri.replace("file://", "")
-        : localImageUri;
+      if (hasMultipleImages && localImageUris) {
+        // Çoklu görsel yükleme
+        console.log(
+          `📤 generateImage - ${localImageUris.length} adet görsel yükleniyor...`,
+        );
 
-      // Dosyayı yükle
-      const task = reference.putFile(pathToFile);
-      await task;
+        for (let i = 0; i < localImageUris.length; i++) {
+          const imageUri = localImageUris[i];
 
-      // Download URL'ini al
-      const storageUrl = await reference.getDownloadURL();
-      console.log("✅ generateImage - storage yükleme tamamlandı:", storageUrl);
+          // Dosya adını oluştur
+          const rawName = imageUri.split("/").pop() || `file-${Date.now()}`;
+          const ext = rawName.includes(".") ? rawName.split(".").pop() : "jpg";
+          const fileName = `${Date.now()}-${i}.${ext}`;
 
-      // 2. ADIM: Firebase Functions aiToolRequest servisine görseli gönder
+          // Firebase Storage referansı oluştur
+          const reference = storage().ref(
+            `${initialState.pathPrefix}/${currentUser.uid}/${fileName}`,
+          );
+
+          // Dosya yolunu düzenle (file:// scheme'ini kaldır)
+          const pathToFile = imageUri.startsWith("file://")
+            ? imageUri.replace("file://", "")
+            : imageUri;
+
+          // Dosyayı yükle
+          const task = reference.putFile(pathToFile);
+          await task;
+
+          // Download URL'ini al
+          const storageUrl = await reference.getDownloadURL();
+          storageUrls.push(storageUrl);
+          console.log(
+            `✅ generateImage - görsel ${i + 1}/${localImageUris.length} yüklendi:`,
+            storageUrl,
+          );
+        }
+      } else if (hasSingleImage && localImageUri) {
+        // Tek görsel yükleme
+        console.log("📤 generateImage - tek görsel yükleniyor...");
+
+        // Dosya adını oluştur
+        const rawName = localImageUri.split("/").pop() || `file-${Date.now()}`;
+        const ext = rawName.includes(".") ? rawName.split(".").pop() : "jpg";
+        const fileName = `${Date.now()}.${ext}`;
+
+        // Firebase Storage referansı oluştur
+        const reference = storage().ref(
+          `${initialState.pathPrefix}/${currentUser.uid}/${fileName}`,
+        );
+
+        // Dosya yolunu düzenle (file:// scheme'ini kaldır)
+        const pathToFile = localImageUri.startsWith("file://")
+          ? localImageUri.replace("file://", "")
+          : localImageUri;
+
+        // Dosyayı yükle
+        const task = reference.putFile(pathToFile);
+        await task;
+
+        // Download URL'ini al
+        const storageUrl = await reference.getDownloadURL();
+        storageUrls.push(storageUrl);
+        console.log(
+          "✅ generateImage - storage yükleme tamamlandı:",
+          storageUrl,
+        );
+      }
+
+      // 2. ADIM: Firebase Functions aiToolRequest servisine görsel(ler)i gönder
       console.log(
-        "🤖 generateImage - Firebase Functions aiToolRequest'e görsel yükleniyor...",
+        "🤖 generateImage - Firebase Functions aiToolRequest'e görsel(ler) yükleniyor...",
       );
 
       // Firebase token'ını al
@@ -142,7 +209,7 @@ export const generateImage = createAsyncThunk<
       const RequestUrl = "https://aitoolrequest-br4qccjs7a-ew.a.run.app";
       const requestBody = {
         prompt: servicePrompt,
-        imageUrl: storageUrl,
+        imageUrl: storageUrls.length === 1 ? storageUrls[0] : storageUrls, // Tek görsel ise string, çoklu ise array
         serviceUrl: aiRequestUrl, // FAL API endpoint
         extra: {
           strength: 0.8,
@@ -337,6 +404,9 @@ const contentCreationSlice = createSlice({
     setImageStorageUrl: (state, action: PayloadAction<string | null>) => {
       state.imageStorageUrl = action.payload;
     },
+    setImageStorageUrls: (state, action: PayloadAction<string[]>) => {
+      state.imageStorageUrls = action.payload;
+    },
 
     // UI durumlarını yönet
     setActivityIndicatorColor: (state, action: PayloadAction<string>) => {
@@ -366,11 +436,17 @@ const contentCreationSlice = createSlice({
     setLocalImageUri: (state, action: PayloadAction<string | null>) => {
       state.localImageUri = action.payload;
     },
+    setLocalImageUris: (state, action: PayloadAction<string[]>) => {
+      state.localImageUris = action.payload;
+    },
     setOriginalImageForResult: (
       state,
       action: PayloadAction<string | null>,
     ) => {
       state.originalImageForResult = action.payload;
+    },
+    setOriginalImagesForResult: (state, action: PayloadAction<string[]>) => {
+      state.originalImagesForResult = action.payload;
     },
     setErrorMessage: (state, action: PayloadAction<string | null>) => {
       state.errorMessage = action.payload;
@@ -386,7 +462,9 @@ const contentCreationSlice = createSlice({
     },
     resetUIState: (state) => {
       state.localImageUri = null;
+      state.localImageUris = [];
       state.originalImageForResult = null;
+      state.originalImagesForResult = [];
       state.errorMessage = null;
       state.isImageViewerVisible = false;
     },
@@ -394,10 +472,13 @@ const contentCreationSlice = createSlice({
     // Tüm verileri temizle
     clearAllImages: (state) => {
       state.imageStorageUrl = null;
+      state.imageStorageUrls = [];
       state.createdImageUrl = null;
       state.error = null;
       state.localImageUri = null;
+      state.localImageUris = [];
       state.originalImageForResult = null;
+      state.originalImagesForResult = [];
       state.errorMessage = null;
       state.isImageViewerVisible = false;
       state.storageUploadProcessingStatus = "idle";
@@ -416,6 +497,7 @@ const contentCreationSlice = createSlice({
         state.error = null;
         state.errorMessage = null;
         state.originalImageForResult = state.localImageUri;
+        state.originalImagesForResult = state.localImageUris;
       })
       .addCase(generateImage.fulfilled, (state, action) => {
         state.status = "fulfilled";
@@ -434,8 +516,10 @@ const contentCreationSlice = createSlice({
         state.error = action.payload as string;
         state.errorMessage = action.payload as string;
         state.originalImageForResult = null;
+        state.originalImagesForResult = [];
         state.createdImageUrl = null;
         state.imageStorageUrl = null;
+        state.imageStorageUrls = [];
       })
 
       // DOWNLOAD IMAGE REDUCERS
@@ -456,6 +540,7 @@ const contentCreationSlice = createSlice({
 export const {
   setCreatedImageUrl,
   setImageStorageUrl,
+  setImageStorageUrls,
   setActivityIndicatorColor,
   setStorageUploadProcessingStatus,
   setAiToolProcessingStatus,
@@ -463,7 +548,9 @@ export const {
   clearAllImages,
   // UI State Management
   setLocalImageUri,
+  setLocalImageUris,
   setOriginalImageForResult,
+  setOriginalImagesForResult,
   setErrorMessage,
   setImageViewerVisible,
   setExamplesModalVisible,
