@@ -30,17 +30,17 @@ import {
 } from "react-native";
 
 const ImageGeneratorScreen = () => {
-  const { servicePrompt, aiToolRequest, aiToolStatus, aiToolResult } =
+  const { servicePrompt, aiRequestUrl, aiStatusUrl, aiResultUrl } =
     useLocalSearchParams<{
       servicePrompt: string;
-      aiToolRequest: string;
-      aiToolStatus: string;
-      aiToolResult: string;
+      aiRequestUrl: string;
+      aiStatusUrl: string;
+      aiResultUrl: string;
     }>();
   console.log("🔍 CreationPage - servicePrompt:", servicePrompt);
-  console.log("🔍 CreationPage - aiToolRequest:", aiToolRequest);
-  console.log("🔍 CreationPage - aiToolStatus:", aiToolStatus);
-  console.log("🔍 CreationPage - aiToolResult:", aiToolResult);
+  console.log("🔍 CreationPage - aiRequestUrl:", aiRequestUrl);
+  console.log("🔍 CreationPage - aiStatusUrl:", aiStatusUrl);
+  console.log("🔍 CreationPage - aiResultUrl:", aiResultUrl);
 
   const { colors } = useTheme();
   const {
@@ -63,9 +63,6 @@ const ImageGeneratorScreen = () => {
     generateImage,
     downloadImage,
   } = useContentCreation();
-
-  console.log("🔍 CreationPage - current status:", status);
-  console.log("🔍 CreationPage - createdImageUrl:", createdImageUrl);
 
   // Local state'ler artık slice'da yönetiliyor
 
@@ -122,20 +119,37 @@ const ImageGeneratorScreen = () => {
   };
 
   const handleGenerateImage = async () => {
-    console.log("✨ handleGenerateImage - başladı");
+    // console.log("✨ handleGenerateImage - başladı");
+    // console.log("✨ handleGenerateImage - localImageUri:", localImageUri);
+    // console.log("✨ handleGenerateImage - servicePrompt:", servicePrompt);
+    console.log("✨ handleGenerateImage - aiRequestUrl:", aiRequestUrl);
+    console.log("✨ handleGenerateImage - aiStatusUrl:", aiStatusUrl);
+    console.log("✨ handleGenerateImage - aiResultUrl:", aiResultUrl);
     console.log("✨ handleGenerateImage - localImageUri:", localImageUri);
-    console.log("✨ handleGenerateImage - servicePrompt:", servicePrompt);
-
     if (!localImageUri) {
-      console.log("❌ handleGenerateImage - görsel seçilmemiş");
       setErrorMessage("Devam etmek için önce bir görsel seçin.");
       return;
     }
 
     if (!servicePrompt) {
-      console.log("❌ handleGenerateImage - prompt yazılmamış");
       setErrorMessage(
         "Talimat bulunamadı. Lütfen ana ekrandan tekrar deneyin.",
+      );
+      return;
+    }
+    if (!aiRequestUrl) {
+      setErrorMessage("Araç bulunamadı. Lütfen ana ekrandan tekrar deneyin.");
+      return;
+    }
+    if (!aiStatusUrl) {
+      setErrorMessage(
+        "Durum URL'i bulunamadı. Lütfen ana ekrandan tekrar deneyin.",
+      );
+      return;
+    }
+    if (!aiResultUrl) {
+      setErrorMessage(
+        "Sonuç URL'i bulunamadı. Lütfen ana ekrandan tekrar deneyin.",
       );
       return;
     }
@@ -146,9 +160,9 @@ const ImageGeneratorScreen = () => {
     try {
       await generateImage(
         servicePrompt,
-        aiToolRequest || "",
-        aiToolStatus || "",
-        aiToolResult || "",
+        aiRequestUrl,
+        aiStatusUrl,
+        aiResultUrl,
       );
       console.log("✅ handleGenerateImage - işlem başarıyla tamamlandı");
     } catch (err: any) {
@@ -264,7 +278,7 @@ const ImageGeneratorScreen = () => {
               {promptDetails}
             </Text>
           </View>
-          {aiToolRequest ? (
+          {aiRequestUrl ? (
             <View style={[styles.heroMetaItem, { borderColor: colors.border }]}>
               <Text
                 style={[styles.heroMetaLabel, { color: colors.textTertiary }]}
@@ -274,7 +288,7 @@ const ImageGeneratorScreen = () => {
               <Text
                 style={[styles.heroMetaValue, { color: colors.textPrimary }]}
               >
-                {aiToolRequest}
+                {aiRequestUrl}
               </Text>
             </View>
           ) : null}
@@ -371,7 +385,7 @@ const ImageGeneratorScreen = () => {
         <Text
           style={[styles.examplesDescription, { color: colors.textSecondary }]}
         >
-          Studio AI&apos;nin farklı servisleriyle neler elde edebileceğinizi
+          Studio AI&apos;nin farklı araçlarıyla neler elde edebileceğinizi
           keşfedin.
         </Text>
 
@@ -503,7 +517,7 @@ const ImageGeneratorScreen = () => {
             >
               {servicePrompt}
             </Text>
-            {aiToolRequest ? (
+            {aiRequestUrl ? (
               <View
                 style={[
                   styles.chip,
@@ -514,7 +528,7 @@ const ImageGeneratorScreen = () => {
                 ]}
               >
                 <Text style={[styles.chipText, { color: colors.primary }]}>
-                  {aiToolRequest}
+                  {aiRequestUrl}
                 </Text>
               </View>
             ) : null}

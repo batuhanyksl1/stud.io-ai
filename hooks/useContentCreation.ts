@@ -4,7 +4,6 @@ import {
   clearError as clearErrorAction,
   downloadImage as downloadImageAction,
   generateImage as generateImageAction,
-  pollAiToolStatus as pollAiToolStatusAction,
   resetUIState as resetUIStateAction,
   setActiveExampleIndex as setActiveExampleIndexAction,
   setActivityIndicatorColor as setActivityIndicatorColorAction,
@@ -13,8 +12,6 @@ import {
   setImageViewerVisible as setImageViewerVisibleAction,
   setLocalImageUri as setLocalImageUriAction,
   setOriginalImageForResult as setOriginalImageForResultAction,
-  uploadImageToAITool as uploadImageToAIToolAction,
-  uploadImageToStorage as uploadImageToStorageAction,
 } from "@/store/slices/contentCreationSlice";
 
 export function useContentCreation() {
@@ -38,66 +35,21 @@ export function useContentCreation() {
     activeExampleIndex,
   } = useAppSelector((state) => state.contentCreation);
 
-  console.log("🔧 useContentCreation - state güncellendi:");
-  console.log("🔧 useContentCreation - status:", status);
-  console.log("🔧 useContentCreation - createdImageUrl:", createdImageUrl);
-  console.log("🔧 useContentCreation - imageStorageUrl:", imageStorageUrl);
-  console.log(
-    "🔧 useContentCreation - storageUploadProcessingStatus:",
-    storageUploadProcessingStatus,
-  );
-  console.log(
-    "🔧 useContentCreation - aiToolProcessingStatus:",
-    aiToolProcessingStatus,
-  );
-  console.log("🔧 useContentCreation - error:", error);
+  // console.log("🔧 useContentCreation - state güncellendi:");
+  // console.log("🔧 useContentCreation - status:", status);
+  // console.log("🔧 useContentCreation - createdImageUrl:", createdImageUrl);
+  // console.log("🔧 useContentCreation - imageStorageUrl:", imageStorageUrl);
+  // console.log(
+  //   "🔧 useContentCreation - storageUploadProcessingStatus:",
+  //   storageUploadProcessingStatus,
+  // );
+  // console.log(
+  //   "🔧 useContentCreation - aiToolProcessingStatus:",
+  //   aiToolProcessingStatus,
+  // );
+  // console.log("🔧 useContentCreation - error:", error);
 
   // Actions
-  const uploadImageToStorage = async (fileUri: string) => {
-    console.log(
-      "🔧 useContentCreation - uploadImageToStorage çağrıldı:",
-      fileUri,
-    );
-    const result = await dispatch(uploadImageToStorageAction({ fileUri }));
-    console.log("🔧 useContentCreation - uploadImageToStorage sonucu:", result);
-    return result.payload;
-  };
-
-  const uploadImageToAITool = async (
-    imageUrl: string,
-    prompt: string,
-    aiToolRequest: string,
-    requestId: string,
-  ) => {
-    console.log("🔧 useContentCreation - uploadImageToAITool çağrıldı:");
-    console.log("🔧 useContentCreation - imageUrl:", imageUrl);
-    console.log("🔧 useContentCreation - prompt:", prompt);
-    console.log("🔧 useContentCreation - aiToolRequest:", aiToolRequest);
-    console.log("🔧 useContentCreation - requestId:", requestId);
-
-    const result = await dispatch(
-      uploadImageToAIToolAction({ imageUrl, prompt, aiToolRequest, requestId }),
-    );
-    console.log("🔧 useContentCreation - uploadImageToAITool sonucu:", result);
-    return result.payload;
-  };
-
-  const pollAiToolStatus = async (
-    requestId: string,
-    aiToolStatus: string,
-    aiToolResult: string,
-  ) => {
-    console.log("🔧 useContentCreation - pollAiToolStatus çağrıldı:");
-    console.log("🔧 useContentCreation - requestId:", requestId);
-    console.log("🔧 useContentCreation - aiToolStatus:", aiToolStatus);
-    console.log("🔧 useContentCreation - aiToolResult:", aiToolResult);
-
-    const result = await dispatch(
-      pollAiToolStatusAction({ requestId, aiToolStatus, aiToolResult }),
-    );
-    console.log("🔧 useContentCreation - pollAiToolStatus sonucu:", result);
-    return result.payload;
-  };
 
   const clearError = () => {
     console.log("🔧 useContentCreation - clearError çağrıldı");
@@ -149,9 +101,9 @@ export function useContentCreation() {
   // New Actions
   const generateImage = async (
     servicePrompt: string,
-    aiToolRequest: string,
-    aiToolStatus: string,
-    aiToolResult: string,
+    aiRequestUrl: string,
+    aiStatusUrl: string,
+    aiResultUrl: string,
   ) => {
     if (!localImageUri) {
       throw new Error("Görsel seçilmemiş");
@@ -161,9 +113,9 @@ export function useContentCreation() {
       generateImageAction({
         localImageUri,
         servicePrompt,
-        aiToolRequest,
-        aiToolStatus,
-        aiToolResult,
+        aiRequestUrl,
+        aiStatusUrl,
+        aiResultUrl,
       }),
     );
   };
@@ -193,11 +145,8 @@ export function useContentCreation() {
     isExamplesModalVisible,
     activeExampleIndex,
     // Actions
-    uploadImageToStorage,
-    uploadImageToAITool,
     clearError,
     clearAllImages,
-    pollAiToolStatus,
     setActivityIndicatorColor,
     // UI Actions
     setLocalImageUri,

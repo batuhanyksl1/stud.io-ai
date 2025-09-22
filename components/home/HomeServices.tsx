@@ -12,20 +12,20 @@ export const HomeServices: React.FC = () => {
 
   const handleServicePress = (
     servicePrompt: string,
-    aiToolRequest: string,
-    aiToolStatus: string,
-    aiToolResult: string,
+    aiRequestUrl: string,
+    aiStatusUrl: string,
+    aiResultUrl: string,
   ) => {
     router.push({
       pathname: "/(tabs)/creationPage",
       params: {
         servicePrompt: servicePrompt,
-        aiToolRequest: aiToolRequest,
-        aiToolStatus: aiToolStatus,
-        aiToolResult: aiToolResult,
+        aiRequestUrl: aiRequestUrl,
+        aiStatusUrl: aiStatusUrl,
+        aiResultUrl: aiResultUrl,
       },
     });
-    console.log(aiToolRequest, aiToolStatus, aiToolResult);
+    console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
   };
 
   const renderServiceCard = (service: (typeof editingServices)[0]) => {
@@ -35,9 +35,9 @@ export const HomeServices: React.FC = () => {
         onPress={() =>
           handleServicePress(
             service.prompt,
-            service.aiToolRequest as string,
-            service.aiToolStatus as string,
-            service.aiToolResult as string,
+            service.aiRequestUrl as string,
+            service.aiStatusUrl as string,
+            service.aiResultUrl as string,
           )
         }
         activeOpacity={0.8}

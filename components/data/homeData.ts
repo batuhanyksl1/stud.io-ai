@@ -20,10 +20,10 @@ export const editingServices = [
     usageCount: "2.5K+",
     isPopular: true,
     badge: "En Popüler",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -47,10 +47,10 @@ export const editingServices = [
     usageCount: "1.8K+",
     isPopular: false,
     badge: "Hızlı",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -74,10 +74,10 @@ export const editingServices = [
     usageCount: "1.2K+",
     isPopular: false,
     badge: "Kaliteli",
-    aiToolRequest: "https://queue.fal.run/fal-ai/ccsr",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/ccsr",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}/status",
-    aiToolResult: "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}",
+    aiResultUrl: "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
   },
@@ -101,10 +101,10 @@ export const editingServices = [
     usageCount: "3.1K+",
     isPopular: true,
     badge: "Yaratıcı",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -133,10 +133,10 @@ export const editingServices = [
     usageCount: "1.1K+",
     isPopular: true,
     badge: "Favori",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -157,10 +157,10 @@ export const editingServices = [
     usageCount: "2.0K+",
     isPopular: true,
     badge: "Pro",
-    aiToolRequest: "https://queue.fal.run/fal-ai/ccsr",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/ccsr",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}/status",
-    aiToolResult: "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}",
+    aiResultUrl: "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
   },
@@ -180,10 +180,10 @@ export const editingServices = [
     usageCount: "980+",
     isPopular: false,
     badge: "Estetik",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -204,10 +204,10 @@ export const editingServices = [
     usageCount: "640+",
     isPopular: false,
     badge: "Hassas",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -228,10 +228,10 @@ export const editingServices = [
     usageCount: "1.0K+",
     isPopular: true,
     badge: "Popüler",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -252,10 +252,10 @@ export const editingServices = [
     usageCount: "720+",
     isPopular: false,
     badge: "Yaratıcı",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -276,10 +276,10 @@ export const editingServices = [
     usageCount: "1.4K+",
     isPopular: true,
     badge: "Portre",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -300,10 +300,10 @@ export const editingServices = [
     usageCount: "1.6K+",
     isPopular: false,
     badge: "Profesyonel",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -324,10 +324,10 @@ export const editingServices = [
     usageCount: "1.3K+",
     isPopular: true,
     badge: "Sihirli",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -348,10 +348,10 @@ export const editingServices = [
     usageCount: "870+",
     isPopular: false,
     badge: "Sinematik",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -372,10 +372,10 @@ export const editingServices = [
     usageCount: "520+",
     isPopular: false,
     badge: "Tematik",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -396,10 +396,10 @@ export const editingServices = [
     usageCount: "690+",
     isPopular: true,
     badge: "Nostalji",
-    aiToolRequest: "https://queue.fal.run/fal-ai/ccsr",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/ccsr",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}/status",
-    aiToolResult: "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}",
+    aiResultUrl: "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
   },
@@ -419,10 +419,10 @@ export const editingServices = [
     usageCount: "1.1K+",
     isPopular: true,
     badge: "Eğlenceli",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
@@ -443,10 +443,10 @@ export const editingServices = [
     usageCount: "430+",
     isPopular: false,
     badge: "Deneysel",
-    aiToolRequest: "https://queue.fal.run/fal-ai/nano-banana/edit",
-    aiToolStatus:
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
-    aiToolResult:
+    aiResultUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),

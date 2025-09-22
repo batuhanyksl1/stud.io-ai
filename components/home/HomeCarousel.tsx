@@ -59,20 +59,20 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
   const handleServicePress = (
     servicePrompt: string,
-    aiToolRequest: string,
-    aiToolStatus: string,
-    aiToolResult: string,
+    aiRequestUrl: string,
+    aiStatusUrl: string,
+    aiResultUrl: string,
   ) => {
     router.push({
       pathname: "/(tabs)/creationPage",
       params: {
         servicePrompt: servicePrompt,
-        aiToolRequest: aiToolRequest,
-        aiToolStatus: aiToolStatus,
-        aiToolResult: aiToolResult,
+        aiRequestUrl: aiRequestUrl,
+        aiStatusUrl: aiStatusUrl,
+        aiResultUrl: aiResultUrl,
       },
     });
-    console.log(aiToolRequest, aiToolStatus, aiToolResult);
+    console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
   };
 
   const viewabilityConfig = {
@@ -113,9 +113,9 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
             onPress={() =>
               handleServicePress(
                 item.prompt,
-                item.aiToolRequest as string,
-                item.aiToolStatus as string,
-                item.aiToolResult as string,
+                item.aiRequestUrl as string,
+                item.aiStatusUrl as string,
+                item.aiResultUrl as string,
               )
             }
           >
