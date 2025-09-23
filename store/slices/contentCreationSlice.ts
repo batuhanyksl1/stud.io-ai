@@ -227,7 +227,7 @@ export const generateImage = createAsyncThunk<
         },
         body: JSON.stringify(requestBody),
       });
-
+      console.log("🔍 generateImage - aiToolRequest response:", requestRes);
       if (!requestRes.ok) {
         const text = await requestRes.text();
         console.error("❌ generateImage - aiToolRequest error:", text);
@@ -241,7 +241,10 @@ export const generateImage = createAsyncThunk<
       if (!requestId) {
         throw new Error("aiToolRequest'den request_id alınamadı");
       }
-
+      const documentId = requestData?.documentId?.toString();
+      if (!documentId) {
+        throw new Error("aiToolRequest'den document_id alınamadı");
+      }
       // 3. ADIM: aiToolStatus ile işlemin tamamlanmasını bekle
       console.log(
         "⏳ generateImage - aiToolStatus ile durum kontrol ediliyor...",
@@ -291,6 +294,7 @@ export const generateImage = createAsyncThunk<
           const ResultUrl = "https://aitoolresult-br4qccjs7a-ew.a.run.app";
           const resultBody = {
             requestId: requestId,
+            documentId: documentId,
             serviceUrl: aiResultUrl.replace("${requestId}", requestId), // FAL API endpoint
             extra: {},
           };

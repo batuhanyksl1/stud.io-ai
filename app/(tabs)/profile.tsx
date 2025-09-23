@@ -6,13 +6,15 @@ import {
   ThemedView,
 } from "@/components";
 import { Typography } from "@/constants/DesignTokens";
-import { useAuth, useTheme } from "@/hooks";
+import { useAuth, useTheme, useUserImages } from "@/hooks";
+import { UserImage } from "@/hooks/useUserImages";
 import auth from "@react-native-firebase/auth";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   Button,
   Dimensions,
   FlatList,
@@ -26,14 +28,7 @@ import {
 
 const { width } = Dimensions.get("window");
 
-interface CreatedImage {
-  id: string;
-  uri: string;
-  timestamp: number;
-  filterName: string;
-  isFavorite: boolean;
-  downloads: number;
-}
+// CreatedImage interface'i artık UserImage ile değiştirildi
 
 interface UserProfile {
   name: string;
@@ -53,56 +48,7 @@ const mockUserProfile: UserProfile = {
   totalCreations: 12,
 };
 
-const mockCreatedImages: CreatedImage[] = [
-  {
-    id: "1",
-    uri: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400",
-    timestamp: Date.now() - 86400000,
-    filterName: "Profesyonel",
-    isFavorite: true,
-    downloads: 24,
-  },
-  {
-    id: "2",
-    uri: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=400",
-    timestamp: Date.now() - 172800000,
-    filterName: "Kurumsal",
-    isFavorite: false,
-    downloads: 18,
-  },
-  {
-    id: "3",
-    uri: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=400",
-    timestamp: Date.now() - 259200000,
-    filterName: "Yaratıcı",
-    isFavorite: true,
-    downloads: 31,
-  },
-  {
-    id: "4",
-    uri: "https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400",
-    timestamp: Date.now() - 345600000,
-    filterName: "Modern",
-    isFavorite: false,
-    downloads: 15,
-  },
-  {
-    id: "5",
-    uri: "https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=400",
-    timestamp: Date.now() - 432000000,
-    filterName: "Klasik",
-    isFavorite: true,
-    downloads: 22,
-  },
-  {
-    id: "6",
-    uri: "https://images.pexels.com/photos/1040882/pexels-photo-1040882.jpeg?auto=compress&cs=tinysrgb&w=400",
-    timestamp: Date.now() - 518400000,
-    filterName: "Minimalist",
-    isFavorite: false,
-    downloads: 19,
-  },
-];
+// Mock veriler kaldırıldı, artık Firestore'dan gerçek veriler kullanılıyor
 
 // Components
 const UserProfileCard = React.memo(
@@ -165,9 +111,9 @@ const ImageCard = React.memo(
     onShare,
     onDelete,
   }: {
-    image: CreatedImage;
+    image: UserImage;
     onToggleFavorite: (_id: string) => void;
-    onShare: (_image: CreatedImage) => void;
+    onShare: (_image: UserImage) => void;
     onDelete: (_id: string) => void;
   }) => {
     const { colors } = useTheme();
@@ -183,7 +129,7 @@ const ImageCard = React.memo(
     return (
       <ThemedCard style={styles.imageCard} padding="sm" elevation="sm">
         <View style={styles.imageContainer}>
-          <Image source={{ uri: image.uri }} style={styles.image} />
+          <Image source={{ uri: image.url }} style={styles.image} />
           <TouchableOpacity
             style={[
               styles.favoriteButton,
@@ -241,12 +187,23 @@ ImageCard.displayName = "ImageCard";
 
 export default function ProfileTab() {
   const { colors, colorScheme } = useTheme();
-  const [createdImages, setCreatedImages] = useState<CreatedImage[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>(mockUserProfile);
-  const { logout } = useAuth();
-  useEffect(() => {
-    setCreatedImages(mockCreatedImages);
-  }, []);
+  const { logout, user } = useAuth();
+  console.log("Profile'da user bilgisi:", user);
+  const {
+    images: createdImages,
+    loading: imagesLoading,
+    error: imagesError,
+    toggleFavorite,
+    deleteImage,
+  } = useUserImages();
+
+  console.log("Profile'da hook sonuçları:", {
+    createdImages,
+    imagesLoading,
+    imagesError,
+    createdImagesLength: createdImages.length,
+  });
 
   const createNewImage = useCallback(() => {
     if (Platform.OS !== "web") {
@@ -255,45 +212,47 @@ export default function ProfileTab() {
     router.push("/");
   }, []);
 
-  const toggleFavorite = useCallback((id: string) => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setCreatedImages((prev) =>
-      prev.map((img) =>
-        img.id === id ? { ...img, isFavorite: !img.isFavorite } : img,
-      ),
-    );
-  }, []);
+  const handleToggleFavorite = useCallback(
+    (id: string) => {
+      if (Platform.OS !== "web") {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+      toggleFavorite(id);
+    },
+    [toggleFavorite],
+  );
 
-  const shareImage = useCallback((_image: CreatedImage) => {
+  const shareImage = useCallback((_image: UserImage) => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     // Share functionality would be implemented here
   }, []);
 
-  const deleteImage = useCallback((id: string) => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    setCreatedImages((prev) => prev.filter((img) => img.id !== id));
-    setUserProfile((prev) => ({
-      ...prev,
-      totalCreations: prev.totalCreations - 1,
-    }));
-  }, []);
+  const handleDeleteImage = useCallback(
+    (id: string) => {
+      if (Platform.OS !== "web") {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      }
+      deleteImage(id);
+      setUserProfile((prev) => ({
+        ...prev,
+        totalCreations: prev.totalCreations - 1,
+      }));
+    },
+    [deleteImage],
+  );
 
   const renderImageCard = useCallback(
-    ({ item }: { item: CreatedImage }) => (
+    ({ item }: { item: UserImage }) => (
       <ImageCard
         image={item}
-        onToggleFavorite={toggleFavorite}
+        onToggleFavorite={handleToggleFavorite}
         onShare={shareImage}
-        onDelete={deleteImage}
+        onDelete={handleDeleteImage}
       />
     ),
-    [toggleFavorite, shareImage, deleteImage],
+    [handleToggleFavorite, shareImage, handleDeleteImage],
   );
 
   return (
@@ -357,7 +316,38 @@ export default function ProfileTab() {
             </ThemedText>
           </View>
 
-          {createdImages.length > 0 ? (
+          {imagesLoading ? (
+            <View style={styles.loadingState}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <ThemedText
+                variant="body"
+                color="secondary"
+                style={styles.loadingText}
+              >
+                Görseller yükleniyor...
+              </ThemedText>
+            </View>
+          ) : imagesError ? (
+            <View style={styles.errorState}>
+              <Text style={styles.errorIcon}>⚠️</Text>
+              <ThemedText
+                variant="bodyLarge"
+                weight="semiBold"
+                align="center"
+                style={styles.errorTitle}
+              >
+                Hata Oluştu
+              </ThemedText>
+              <ThemedText
+                variant="body"
+                color="secondary"
+                align="center"
+                style={styles.errorDescription}
+              >
+                {imagesError}
+              </ThemedText>
+            </View>
+          ) : createdImages.length > 0 ? (
             <FlatList
               data={createdImages}
               renderItem={renderImageCard}
@@ -563,6 +553,34 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.lg,
   },
   emptyStateDescription: {
+    lineHeight: Typography.lineHeight.normal * Typography.fontSize.md,
+    textAlign: "center",
+  },
+  loadingState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 64,
+    paddingHorizontal: 32,
+  },
+  loadingText: {
+    marginTop: 16,
+    textAlign: "center",
+  },
+  errorState: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 64,
+    paddingHorizontal: 32,
+  },
+  errorIcon: {
+    fontSize: Typography.fontSize.xxxxxl,
+    marginBottom: 16,
+  },
+  errorTitle: {
+    marginBottom: 8,
+    fontSize: Typography.fontSize.lg,
+  },
+  errorDescription: {
     lineHeight: Typography.lineHeight.normal * Typography.fontSize.md,
     textAlign: "center",
   },
