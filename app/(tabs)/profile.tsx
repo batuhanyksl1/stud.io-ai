@@ -5,6 +5,7 @@ import {
   ThemedText,
   ThemedView,
 } from "@/components";
+import { Typography } from "@/constants/DesignTokens";
 import { useAuth, useTheme } from "@/hooks";
 import auth from "@react-native-firebase/auth";
 import * as Haptics from "expo-haptics";
@@ -105,9 +106,10 @@ const mockCreatedImages: CreatedImage[] = [
 
 // Components
 const UserProfileCard = React.memo(
-  ({ userProfile }: { userProfile: UserProfile }) => {
-    const formatJoinDate = useCallback((date: Date) => {
-      return date.toLocaleDateString("tr-TR", {
+  ({ userProfile: _userProfile }: { userProfile: UserProfile }) => {
+    const { colors: _colors } = useTheme();
+    const _formatJoinDate = useCallback((_date: Date) => {
+      return _date.toLocaleDateString("tr-TR", {
         month: "long",
         year: "numeric",
       });
@@ -115,7 +117,7 @@ const UserProfileCard = React.memo(
 
     return (
       <ThemedCard style={styles.userProfileCard} padding="lg" elevation="sm">
-        <View style={styles.userInfo}>
+        {/* <View style={styles.userInfo}>
           <View style={styles.avatarContainer}>
             <Image source={{ uri: userProfile.avatar }} style={styles.avatar} />
           </View>
@@ -140,7 +142,15 @@ const UserProfileCard = React.memo(
               Yaratılan Görsel
             </ThemedText>
           </View>
-        </View>
+        </View> */}
+        <ThemedText
+          variant="body"
+          weight="bold"
+          align="center"
+          style={styles.userProfileCardText}
+        >
+          GELİŞTİRME BEKLİYOR
+        </ThemedText>
       </ThemedCard>
     );
   },
@@ -411,7 +421,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   settingsIcon: {
-    fontSize: 20,
+    fontSize: Typography.fontSize.xl,
   },
   userProfileCard: {
     margin: 16,
@@ -421,6 +431,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  userProfileCardText: {
+    fontSize: Typography.fontSize.md,
+    fontFamily: Typography.fontFamily.bold,
+    textAlign: "center",
   },
   userInfo: {
     flexDirection: "row",
@@ -460,12 +475,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   createButtonIcon: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: Typography.fontSize.xxl,
+    fontFamily: Typography.fontFamily.bold,
   },
   createButtonText: {
     marginLeft: 8,
-    fontSize: 16,
+    fontSize: Typography.fontSize.md,
   },
   imagesSection: {
     paddingHorizontal: 16,
@@ -513,7 +528,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   favoriteIcon: {
-    fontSize: 14,
+    fontSize: Typography.fontSize.sm,
   },
   imageInfo: {
     paddingHorizontal: 4,
@@ -531,7 +546,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   actionIcon: {
-    fontSize: 12,
+    fontSize: Typography.fontSize.xs,
   },
   emptyState: {
     alignItems: "center",
@@ -540,15 +555,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   emptyStateIcon: {
-    fontSize: 64,
+    fontSize: Typography.fontSize.xxxxxl,
     marginBottom: 16,
   },
   emptyStateTitle: {
     marginBottom: 8,
-    fontSize: 18,
+    fontSize: Typography.fontSize.lg,
   },
   emptyStateDescription: {
-    lineHeight: 24,
+    lineHeight: Typography.lineHeight.normal * Typography.fontSize.md,
     textAlign: "center",
   },
 });

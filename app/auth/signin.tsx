@@ -40,6 +40,7 @@ export default function SignInScreen() {
 
   const {
     login,
+    loginAsGuest,
     isLoading,
     needsDisplayName,
     updateUserName,
@@ -122,6 +123,21 @@ export default function SignInScreen() {
 
   const handleGoToSignUp = () => {
     router.push("/auth/signup");
+  };
+
+  const handleGuestLogin = async () => {
+    try {
+      const result = await loginAsGuest();
+      if (result.meta.requestStatus === "fulfilled") {
+        // Misafir girişi başarılı, display name modal'ı gösterilecek
+      } else {
+        Alert.alert("Hata", result.payload as string);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Misafir girişi yapılamadı";
+      Alert.alert("Hata", errorMessage);
+    }
   };
 
   return (
@@ -240,6 +256,18 @@ export default function SignInScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
+
+            {/* Guest login button */}
+            <TouchableOpacity
+              style={styles.guestButton}
+              onPress={handleGuestLogin}
+              disabled={isLoading}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.guestButtonText}>
+                {isLoading ? t("common.loading") : "Misafir Olarak Devam Et"}
+              </Text>
+            </TouchableOpacity>
 
             {/* Sign up link */}
             <View style={styles.signUpContainer}>
@@ -411,5 +439,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#ffffff",
     textDecorationLine: "underline",
+  },
+  guestButton: {
+    height: 56,
+    backgroundColor: "transparent",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+  guestButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#ffffff",
   },
 });

@@ -3,6 +3,7 @@ import auth, {
   FirebaseAuthTypes,
   sendEmailVerification,
   sendPasswordResetEmail,
+  signInAnonymously,
   signInWithEmailAndPassword,
   signOut as signOutFirebase,
 } from "@react-native-firebase/auth";
@@ -211,6 +212,40 @@ export const resendEmailVerification = createAsyncThunk(
           errorMessage =
             error.message ||
             "Doğrulama e-postası gönderilirken bir hata oluştu";
+      }
+
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
+
+export const signInAsGuest = createAsyncThunk(
+  "auth/signInAsGuest",
+  async (_, { rejectWithValue }) => {
+    try {
+      const userCredential = await signInAnonymously(auth());
+
+      // Misafir kullanıcı için display name kontrolü
+      const needsDisplayName = true; // Misafir kullanıcılar her zaman display name girmeli
+
+      console.log("Guest SignIn - User:", userCredential.user);
+      console.log("Guest SignIn - Needs Display Name:", needsDisplayName);
+
+      return {
+        user: userCredential.user,
+        needsDisplayName,
+      };
+    } catch (error: any) {
+      let errorMessage = "Misafir girişi yapılamadı";
+
+      switch (error.code) {
+        case "auth/operation-not-allowed":
+          errorMessage =
+            "Misafir girişi Firebase Console'da etkinleştirilmemiş";
+          break;
+        default:
+          errorMessage =
+            error.message || "Misafir girişi yapılırken bir hata oluştu";
       }
 
       return rejectWithValue(errorMessage);
@@ -464,6 +499,25 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(resendEmailVerification.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Sign In As Guest
+    builder
+      .addCase(signInAsGuest.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(signInAsGuest.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.isVerified = action.payload.user.emailVerified;
+        state.needsDisplayName = action.payload.needsDisplayName;
+        state.error = null;
+      })
+      .addCase(signInAsGuest.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

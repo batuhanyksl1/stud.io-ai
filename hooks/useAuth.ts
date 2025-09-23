@@ -9,6 +9,7 @@ import {
   // initializeAuth,
   setLoading,
   signIn,
+  signInAsGuest,
   signOut,
   signUp,
   updateDisplayName,
@@ -37,6 +38,10 @@ export function useAuth() {
 
   const register = async (credentials: SignUpCredentials) => {
     return await dispatch(signUp(credentials));
+  };
+
+  const loginAsGuest = async () => {
+    return await dispatch(signInAsGuest());
   };
 
   const logout = async () => {
@@ -88,6 +93,7 @@ export function useAuth() {
     needsDisplayName,
     login,
     register,
+    loginAsGuest,
     logout,
     resetPassword,
     updateDisplayName,
