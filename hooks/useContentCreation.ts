@@ -2,10 +2,19 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   clearAllImages as clearAllImagesAction,
   clearError as clearErrorAction,
-  pollAiToolStatus as pollAiToolStatusAction,
+  downloadImage as downloadImageAction,
+  generateImage as generateImageAction,
+  removeLocalImageUri as removeLocalImageUriAction,
+  resetUIState as resetUIStateAction,
+  setActiveExampleIndex as setActiveExampleIndexAction,
   setActivityIndicatorColor as setActivityIndicatorColorAction,
-  uploadImageToAITool as uploadImageToAIToolAction,
-  uploadImageToStorage as uploadImageToStorageAction,
+  setErrorMessage as setErrorMessageAction,
+  setExamplesModalVisible as setExamplesModalVisibleAction,
+  setImageViewerVisible as setImageViewerVisibleAction,
+  setLocalImageUri as setLocalImageUriAction,
+  setLocalImageUris as setLocalImageUrisAction,
+  setOriginalImageForResult as setOriginalImageForResultAction,
+  setOriginalImagesForResult as setOriginalImagesForResultAction,
 } from "@/store/slices/contentCreationSlice";
 
 export function useContentCreation() {
@@ -16,72 +25,21 @@ export function useContentCreation() {
     status,
     createdImageUrl,
     imageStorageUrl,
+    imageStorageUrls,
     storageUploadProcessingStatus,
     aiToolProcessingStatus,
     error,
     activityIndicatorColor,
+    // UI State
+    localImageUri,
+    localImageUris,
+    originalImageForResult,
+    originalImagesForResult,
+    errorMessage,
+    isImageViewerVisible,
+    isExamplesModalVisible,
+    activeExampleIndex,
   } = useAppSelector((state) => state.contentCreation);
-
-  console.log("🔧 useContentCreation - state güncellendi:");
-  console.log("🔧 useContentCreation - status:", status);
-  console.log("🔧 useContentCreation - createdImageUrl:", createdImageUrl);
-  console.log("🔧 useContentCreation - imageStorageUrl:", imageStorageUrl);
-  console.log(
-    "🔧 useContentCreation - storageUploadProcessingStatus:",
-    storageUploadProcessingStatus,
-  );
-  console.log(
-    "🔧 useContentCreation - aiToolProcessingStatus:",
-    aiToolProcessingStatus,
-  );
-  console.log("🔧 useContentCreation - error:", error);
-
-  // Actions
-  const uploadImageToStorage = async (fileUri: string) => {
-    console.log(
-      "🔧 useContentCreation - uploadImageToStorage çağrıldı:",
-      fileUri,
-    );
-    const result = await dispatch(uploadImageToStorageAction({ fileUri }));
-    console.log("🔧 useContentCreation - uploadImageToStorage sonucu:", result);
-    return result.payload;
-  };
-
-  const uploadImageToAITool = async (
-    imageUrl: string,
-    prompt: string,
-    aiToolRequest: string,
-    requestId: string,
-  ) => {
-    console.log("🔧 useContentCreation - uploadImageToAITool çağrıldı:");
-    console.log("🔧 useContentCreation - imageUrl:", imageUrl);
-    console.log("🔧 useContentCreation - prompt:", prompt);
-    console.log("🔧 useContentCreation - aiToolRequest:", aiToolRequest);
-    console.log("🔧 useContentCreation - requestId:", requestId);
-
-    const result = await dispatch(
-      uploadImageToAIToolAction({ imageUrl, prompt, aiToolRequest, requestId }),
-    );
-    console.log("🔧 useContentCreation - uploadImageToAITool sonucu:", result);
-    return result.payload;
-  };
-
-  const pollAiToolStatus = async (
-    requestId: string,
-    aiToolStatus: string,
-    aiToolResult: string,
-  ) => {
-    console.log("🔧 useContentCreation - pollAiToolStatus çağrıldı:");
-    console.log("🔧 useContentCreation - requestId:", requestId);
-    console.log("🔧 useContentCreation - aiToolStatus:", aiToolStatus);
-    console.log("🔧 useContentCreation - aiToolResult:", aiToolResult);
-
-    const result = await dispatch(
-      pollAiToolStatusAction({ requestId, aiToolStatus, aiToolResult }),
-    );
-    console.log("🔧 useContentCreation - pollAiToolStatus sonucu:", result);
-    return result.payload;
-  };
 
   const clearError = () => {
     console.log("🔧 useContentCreation - clearError çağrıldı");
@@ -101,21 +59,114 @@ export function useContentCreation() {
     dispatch(setActivityIndicatorColorAction(color));
   };
 
+  // UI State Actions
+  const setLocalImageUri = (uri: string | null) => {
+    dispatch(setLocalImageUriAction(uri));
+  };
+
+  const setLocalImageUris = (uris: string[]) => {
+    dispatch(setLocalImageUrisAction(uris));
+  };
+
+  const removeLocalImageUri = (index: number) => {
+    dispatch(removeLocalImageUriAction(index));
+  };
+
+  const setOriginalImageForResult = (uri: string | null) => {
+    dispatch(setOriginalImageForResultAction(uri));
+  };
+
+  const setOriginalImagesForResult = (uris: string[]) => {
+    dispatch(setOriginalImagesForResultAction(uris));
+  };
+
+  const setErrorMessage = (message: string | null) => {
+    dispatch(setErrorMessageAction(message));
+  };
+
+  const setImageViewerVisible = (visible: boolean) => {
+    dispatch(setImageViewerVisibleAction(visible));
+  };
+
+  const setExamplesModalVisible = (visible: boolean) => {
+    dispatch(setExamplesModalVisibleAction(visible));
+  };
+
+  const setActiveExampleIndex = (index: number) => {
+    dispatch(setActiveExampleIndexAction(index));
+  };
+
+  const resetUIState = () => {
+    dispatch(resetUIStateAction());
+  };
+
+  // New Actions
+  const generateImage = async (
+    servicePrompt: string,
+    aiRequestUrl: string,
+    aiStatusUrl: string,
+    aiResultUrl: string,
+  ) => {
+    if (!localImageUri && (!localImageUris || localImageUris.length === 0)) {
+      throw new Error("Görsel seçilmemiş");
+    }
+
+    return await dispatch(
+      generateImageAction({
+        localImageUri: localImageUri || undefined,
+        localImageUris: localImageUris || undefined,
+        servicePrompt,
+        aiRequestUrl,
+        aiStatusUrl,
+        aiResultUrl,
+      }),
+    );
+  };
+
+  const downloadImage = async () => {
+    if (!createdImageUrl) {
+      throw new Error("İndirilecek görsel bulunamadı");
+    }
+
+    return await dispatch(downloadImageAction({ imageUrl: createdImageUrl }));
+  };
+
   return {
     // State
     imageStorageUrl,
+    imageStorageUrls,
     createdImageUrl,
     storageUploadProcessingStatus,
     aiToolProcessingStatus,
     error,
     status,
     activityIndicatorColor,
-    setActivityIndicatorColor,
+    // UI State
+    localImageUri,
+    localImageUris,
+    originalImageForResult,
+    originalImagesForResult,
+    errorMessage,
+    isImageViewerVisible,
+    isExamplesModalVisible,
+    activeExampleIndex,
     // Actions
-    uploadImageToStorage,
-    uploadImageToAITool,
     clearError,
     clearAllImages,
-    pollAiToolStatus,
+    setActivityIndicatorColor,
+    // UI Actions
+    setLocalImageUri,
+    setLocalImageUris,
+    removeLocalImageUri,
+    setOriginalImageForResult,
+    setOriginalImagesForResult,
+    setErrorMessage,
+    setImageViewerVisible,
+    setExamplesModalVisible,
+    setActiveExampleIndex,
+    resetUIState,
+    // New Actions
+    generateImage,
+    downloadImage,
   };
 }

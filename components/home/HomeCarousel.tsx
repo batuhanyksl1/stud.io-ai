@@ -1,7 +1,7 @@
 import ThemedText from "@/components/ThemedText";
 import ThemedView from "@/components/ThemedView";
 import { editingServices } from "@/components/data";
-import { useTheme } from "@/hooks";
+import { useContentCreation, useTheme } from "@/hooks";
 import Ionicon from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -10,10 +10,10 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Platform,
   StyleSheet,
   TouchableOpacity,
   View,
-  Platform,
 } from "react-native";
 import { Badge } from "../ui/Badge";
 
@@ -26,6 +26,7 @@ interface HomeCarouselProps {
 export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
   const router = useRouter();
   const { colors } = useTheme();
+  const { clearAllImages, resetUIState } = useContentCreation();
   const [currentPage, setCurrentPage] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const autoScrollInterval = useRef<number | null>(null);
@@ -59,20 +60,24 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
   const handleServicePress = (
     servicePrompt: string,
-    aiToolRequest: string,
-    aiToolStatus: string,
-    aiToolResult: string,
+    aiRequestUrl: string,
+    aiStatusUrl: string,
+    aiResultUrl: string,
   ) => {
+    // Yeni servis seçildiğinde tüm görselleri ve UI state'ini temizle
+    clearAllImages();
+    resetUIState();
+
     router.push({
       pathname: "/(tabs)/creationPage",
       params: {
         servicePrompt: servicePrompt,
-        aiToolRequest: aiToolRequest,
-        aiToolStatus: aiToolStatus,
-        aiToolResult: aiToolResult,
+        aiRequestUrl: aiRequestUrl,
+        aiStatusUrl: aiStatusUrl,
+        aiResultUrl: aiResultUrl,
       },
     });
-    console.log(aiToolRequest, aiToolStatus, aiToolResult);
+    console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
   };
 
   const viewabilityConfig = {
@@ -113,9 +118,9 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
             onPress={() =>
               handleServicePress(
                 item.prompt,
-                item.aiToolRequest as string,
-                item.aiToolStatus as string,
-                item.aiToolResult as string,
+                item.aiRequestUrl as string,
+                item.aiStatusUrl as string,
+                item.aiResultUrl as string,
               )
             }
           >

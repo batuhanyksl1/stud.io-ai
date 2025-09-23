@@ -15,7 +15,7 @@ type HeaderProps = {
   rightIconType?: RightIconType;
 };
 
-type LeftIconType = "home" | "back" | "information";
+type LeftIconType = "home" | "arrow-back" | "information";
 type RightIconType = "settings" | "home";
 
 export const Header: React.FC<HeaderProps> = ({
@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
   const { colors } = useTheme();
 
   switch (leftIconType) {
-    case "back":
+    case "arrow-back":
       leftIconPath = "/(tabs)";
       break;
     case "home":

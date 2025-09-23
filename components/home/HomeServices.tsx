@@ -1,6 +1,7 @@
 import ThemedText from "@/components/ThemedText";
 import ThemedView from "@/components/ThemedView";
 import { editingServices } from "@/components/data";
+import { useContentCreation } from "@/hooks";
 import Ionicon from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -9,23 +10,36 @@ import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 
 export const HomeServices: React.FC = () => {
   const router = useRouter();
+  const { clearAllImages, resetUIState } = useContentCreation();
 
   const handleServicePress = (
     servicePrompt: string,
-    aiToolRequest: string,
-    aiToolStatus: string,
-    aiToolResult: string,
+    aiRequestUrl: string,
+    aiStatusUrl: string,
+    aiResultUrl: string,
+    hasMultipleInputImage: boolean,
+    hasPreSelectedImage: boolean,
+    gradient: string[],
+    title: string,
   ) => {
+    // Yeni servis seçildiğinde tüm görselleri ve UI state'ini temizle
+    clearAllImages();
+    resetUIState();
+
     router.push({
       pathname: "/(tabs)/creationPage",
       params: {
         servicePrompt: servicePrompt,
-        aiToolRequest: aiToolRequest,
-        aiToolStatus: aiToolStatus,
-        aiToolResult: aiToolResult,
+        aiRequestUrl: aiRequestUrl,
+        aiStatusUrl: aiStatusUrl,
+        aiResultUrl: aiResultUrl,
+        hasMultipleInputImage: hasMultipleInputImage ? "true" : "false",
+        hasPreSelectedImage: hasPreSelectedImage ? "true" : "false",
+        gradient: JSON.stringify(gradient),
+        title: title,
       },
     });
-    console.log(aiToolRequest, aiToolStatus, aiToolResult);
+    console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
   };
 
   const renderServiceCard = (service: (typeof editingServices)[0]) => {
@@ -35,9 +49,13 @@ export const HomeServices: React.FC = () => {
         onPress={() =>
           handleServicePress(
             service.prompt,
-            service.aiToolRequest as string,
-            service.aiToolStatus as string,
-            service.aiToolResult as string,
+            service.aiRequestUrl as string,
+            service.aiStatusUrl as string,
+            service.aiResultUrl as string,
+            service.hasMultipleInputImage as boolean,
+            service.hasPreSelectedImage as boolean,
+            service.gradient as string[],
+            service.title as string,
           )
         }
         activeOpacity={0.8}
@@ -52,7 +70,7 @@ export const HomeServices: React.FC = () => {
           <View style={styles.serviceCardContent}>
             <View style={styles.serviceHeader}>
               <View style={styles.serviceIconWrapper}>
-                <Ionicon name={service.icon as any} size={28} color="#FFFFFF" />
+                <Ionicon name={service.icon as any} size={20} color="#FFFFFF" />
               </View>
               {service.isPopular && (
                 <View
@@ -61,7 +79,7 @@ export const HomeServices: React.FC = () => {
                     { backgroundColor: "rgba(255,255,255,0.2)" },
                   ]}
                 >
-                  <Ionicon name="star" size={10} color="#FFD700" />
+                  <Ionicon name="star" size={8} color="#FFD700" />
                   <ThemedText variant="caption" style={styles.popularText}>
                     {service.badge}
                   </ThemedText>
@@ -87,7 +105,7 @@ export const HomeServices: React.FC = () => {
 
             <View style={styles.serviceFooter}>
               <View style={styles.serviceStats}>
-                <Ionicon name="star" size={12} color="#FFD700" />
+                <Ionicon name="star" size={10} color="#FFD700" />
                 <ThemedText variant="caption" style={styles.rating}>
                   {service.rating}
                 </ThemedText>
@@ -97,7 +115,7 @@ export const HomeServices: React.FC = () => {
               </View>
               <Ionicon
                 name="arrow-forward"
-                size={16}
+                size={14}
                 color="rgba(255,255,255,0.8)"
               />
             </View>
@@ -141,15 +159,19 @@ const styles = StyleSheet.create({
   //   marginBottom: 16,
   // },
   servicesGrid: {
-    gap: 16,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    justifyContent: "space-between",
   },
   serviceCardContainer: {
+    width: "48%",
     marginBottom: 0,
   },
   serviceGradient: {
-    borderRadius: 20,
-    padding: 20,
-    minHeight: 160,
+    borderRadius: 16,
+    padding: 12,
+    minHeight: 100,
   },
   serviceCardContent: {
     flex: 1,
@@ -161,9 +183,9 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   serviceIconWrapper: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -171,10 +193,10 @@ const styles = StyleSheet.create({
   popularBadge: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    gap: 2,
   },
   popularText: {
     color: "#FFFFFF",
@@ -182,22 +204,23 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   serviceContent: {
-    marginTop: 16,
-    marginBottom: 16,
+    marginTop: 8,
+    marginBottom: 8,
   },
   serviceSubtitle: {
     color: "rgba(255,255,255,0.8)",
-    marginBottom: 4,
+    marginBottom: 2,
     fontSize: 12,
     fontWeight: "500",
   },
   serviceTitle: {
     color: "#FFFFFF",
-    marginBottom: 8,
+    marginBottom: 4,
+    fontSize: 16,
   },
   serviceDescription: {
     color: "rgba(255,255,255,0.9)",
-    lineHeight: 18,
+    lineHeight: 16,
     fontSize: 13,
   },
   serviceFooter: {
