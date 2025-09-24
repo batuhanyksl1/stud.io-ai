@@ -23,6 +23,7 @@ interface ResultViewProps {
   localImageUri?: string;
   localImageUris?: string[];
   hasMultipleInputImage: string;
+  autoSave?: boolean;
   onDownloadImage: () => void;
   onStartNew: () => void;
   onOpenImageViewer: (_imageUrl: string) => void;
@@ -36,6 +37,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
   localImageUri,
   localImageUris,
   hasMultipleInputImage,
+  autoSave = true,
   onDownloadImage,
   onStartNew,
   onOpenImageViewer,
@@ -159,24 +161,26 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </View>
 
           <View style={styles.resultActions}>
-            <Pressable
-              style={[
-                styles.buttonPrimary,
-                styles.fullWidthButton,
-                styles.resultPrimaryAction,
-                { backgroundColor: colors.primary },
-              ]}
-              onPress={onDownloadImage}
-            >
-              <Text
+            {!autoSave && (
+              <Pressable
                 style={[
-                  styles.buttonTextPrimary,
-                  { color: colors.textOnPrimary },
+                  styles.buttonPrimary,
+                  styles.fullWidthButton,
+                  styles.resultPrimaryAction,
+                  { backgroundColor: colors.primary },
                 ]}
+                onPress={onDownloadImage}
               >
-                Cihaza indir
-              </Text>
-            </Pressable>
+                <Text
+                  style={[
+                    styles.buttonTextPrimary,
+                    { color: colors.textOnPrimary },
+                  ]}
+                >
+                  Cihaza indir
+                </Text>
+              </Pressable>
+            )}
 
             <Pressable
               style={[

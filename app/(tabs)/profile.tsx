@@ -1,10 +1,4 @@
-import {
-  Header,
-  ScrollContainer,
-  ThemedCard,
-  ThemedText,
-  ThemedView,
-} from "@/components";
+import { Header, ThemedCard, ThemedText, ThemedView } from "@/components";
 import {
   BorderRadius,
   Shadows,
@@ -20,10 +14,11 @@ import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Button,
   Dimensions,
   Image,
   Platform,
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -219,6 +214,7 @@ export default function ProfileTab() {
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Firebase sorgusu - firebase-test.tsx'deki gibi
   const fetchUserDocuments = async () => {
@@ -287,6 +283,18 @@ export default function ProfileTab() {
     }
   }, [user]);
 
+  // Refresh fonksiyonu
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    try {
+      await fetchUserDocuments();
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
   // Component mount olduğunda veriyi çek
   useEffect(() => {
     fetchUserDocuments();
@@ -324,7 +332,20 @@ export default function ProfileTab() {
       <Header leftIconType="home" rightIconType="settings" />
       <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
 
-      <ScrollContainer>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+            progressBackgroundColor={colors.surface}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      >
         {/* Profile Header Section */}
         <View style={styles.profileHeaderSection}>
           <UserProfileCard userProfile={userProfile} />
@@ -513,8 +534,7 @@ export default function ProfileTab() {
             </View>
           )}
         </View>
-        <Button title="Logout" onPress={logout} />
-      </ScrollContainer>
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -522,6 +542,12 @@ export default function ProfileTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 20,
   },
   header: {
     flexDirection: "row",

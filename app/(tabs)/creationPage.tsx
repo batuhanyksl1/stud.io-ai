@@ -17,6 +17,7 @@ import {
 import { useContentCreation } from "@/hooks";
 import { useTheme } from "@/hooks/useTheme";
 import { pickImage } from "@/utils/pickImage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
@@ -95,6 +96,7 @@ const ImageGeneratorScreen = () => {
   const [scaleAnim] = useState(new Animated.Value(0.95));
   const [currentPrompt, setCurrentPrompt] = useState(servicePrompt);
   const [currentViewingImage, setCurrentViewingImage] = useState<string>("");
+  const [autoSave, setAutoSave] = useState<boolean>(true);
 
   const isGenerating = status === "pending";
   const hasImages =
@@ -108,6 +110,29 @@ const ImageGeneratorScreen = () => {
   const resetState = useCallback(() => {
     resetUIState();
   }, [resetUIState]);
+
+  // Otomatik kaydet ayarını yükle
+  React.useEffect(() => {
+    const loadAutoSaveSetting = async () => {
+      try {
+        const savedAutoSave = await AsyncStorage.getItem("autoSave");
+        if (savedAutoSave !== null) {
+          setAutoSave(JSON.parse(savedAutoSave));
+        }
+      } catch (error) {
+        console.error("Otomatik kaydet ayarı yüklenirken hata:", error);
+      }
+    };
+    loadAutoSaveSetting();
+  }, []);
+
+  // Sonuç geldiğinde otomatik kaydet
+  React.useEffect(() => {
+    if (createdImageUrl && autoSave) {
+      console.log("🔄 Otomatik kaydet başlatılıyor...");
+      handleDownloadImage();
+    }
+  }, [createdImageUrl, autoSave]);
 
   React.useEffect(() => {
     Animated.parallel([
@@ -293,6 +318,7 @@ const ImageGeneratorScreen = () => {
       localImageUri={localImageUri || undefined}
       localImageUris={localImageUris}
       hasMultipleInputImage={hasMultipleInputImage}
+      autoSave={autoSave}
       onDownloadImage={handleDownloadImage}
       onStartNew={handleStartNew}
       onOpenImageViewer={(imageUrl) => {

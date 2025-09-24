@@ -48,8 +48,15 @@
         }
       ],
       "expo-localization",
-      ["expo-build-properties", { "ios": { "useFrameworks": "static" } }]
-
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      "expo-mail-composer"
     ],
     "experiments": {
       "typedRoutes": true

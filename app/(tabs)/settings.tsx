@@ -1,7 +1,9 @@
 import { Header, ThemedCard, ThemedText, ThemedView } from "@/components";
 import { useAuth, useTheme } from "@/hooks";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
@@ -33,10 +35,35 @@ interface SettingSection {
 }
 
 export default function SettingsScreen() {
-  const { colors, colorScheme, toggleDarkMode } = useTheme();
+  const { colors, colorScheme, setTheme } = useTheme();
   const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
+
+  // Otomatik kaydet ayarını yükle
+  React.useEffect(() => {
+    const loadAutoSaveSetting = async () => {
+      try {
+        const savedAutoSave = await AsyncStorage.getItem("autoSave");
+        if (savedAutoSave !== null) {
+          setAutoSave(JSON.parse(savedAutoSave));
+        }
+      } catch (error) {
+        console.error("Otomatik kaydet ayarı yüklenirken hata:", error);
+      }
+    };
+    loadAutoSaveSetting();
+  }, []);
+
+  // Otomatik kaydet ayarını kaydet
+  const handleAutoSaveToggle = async (value: boolean) => {
+    setAutoSave(value);
+    try {
+      await AsyncStorage.setItem("autoSave", JSON.stringify(value));
+    } catch (error) {
+      console.error("Otomatik kaydet ayarı kaydedilirken hata:", error);
+    }
+  };
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -84,6 +111,24 @@ export default function SettingsScreen() {
     );
   };
 
+  const handleThemeSelection = () => {
+    Alert.alert("Tema Seçin", "Uygulamanızın görünümünü seçin", [
+      { text: "İptal", style: "cancel" },
+      {
+        text: "Açık",
+        onPress: () => setTheme("light"),
+      },
+      {
+        text: "Koyu",
+        onPress: () => setTheme("dark"),
+      },
+      {
+        text: "Sistem",
+        onPress: () => setTheme("system"),
+      },
+    ]);
+  };
+
   const settingSections: SettingSection[] = [
     {
       title: "Hesap",
@@ -95,7 +140,8 @@ export default function SettingsScreen() {
           icon: <Ionicons name="person" size={20} color={colors.textPrimary} />,
           type: "navigation",
           onPress: () => {
-            // Profile sayfasına git
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/profile-settings");
           },
         },
         {
@@ -121,16 +167,27 @@ export default function SettingsScreen() {
         {
           id: "theme",
           title: "Tema",
-          subtitle: colorScheme === "dark" ? "Koyu" : "Açık",
+          subtitle:
+            colorScheme === "dark"
+              ? "Koyu"
+              : colorScheme === "light"
+                ? "Açık"
+                : "Sistem",
           icon: (
             <Ionicons
-              name={colorScheme === "dark" ? "moon" : "sunny"}
+              name={
+                colorScheme === "dark"
+                  ? "moon"
+                  : colorScheme === "light"
+                    ? "sunny"
+                    : "phone-portrait"
+              }
               size={20}
               color={colors.textPrimary}
             />
           ),
           type: "theme",
-          onPress: toggleDarkMode,
+          onPress: handleThemeSelection,
         },
         {
           id: "auto-save",
@@ -141,7 +198,7 @@ export default function SettingsScreen() {
           ),
           type: "toggle",
           value: autoSave,
-          onToggle: setAutoSave,
+          onToggle: handleAutoSaveToggle,
         },
       ],
     },
@@ -175,7 +232,8 @@ export default function SettingsScreen() {
           ),
           type: "navigation",
           onPress: () => {
-            // Help sayfasına git
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.push("/help-support");
           },
         },
       ],
