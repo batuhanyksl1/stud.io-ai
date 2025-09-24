@@ -146,14 +146,14 @@ export const HomeServices: React.FC = () => {
 
 const styles = StyleSheet.create({
   servicesSection: {
-    paddingHorizontal: 24,
-    paddingTop: Platform.OS === "ios" ? 10 : 0,
+    paddingHorizontal: 12,
+    paddingTop: Platform.OS === "ios" ? 5 : 0,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   // sectionTitle: {
   //   marginBottom: 16,
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   servicesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    gap: 8,
     justifyContent: "space-between",
   },
   serviceCardContainer: {
@@ -169,9 +169,9 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   serviceGradient: {
-    borderRadius: 16,
-    padding: 12,
-    minHeight: 100,
+    borderRadius: 12,
+    padding: 10,
+    minHeight: 90,
   },
   serviceCardContent: {
     flex: 1,
@@ -183,9 +183,9 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   serviceIconWrapper: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -204,8 +204,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   serviceContent: {
-    marginTop: 8,
-    marginBottom: 8,
+    marginTop: 6,
+    marginBottom: 6,
   },
   serviceSubtitle: {
     color: "rgba(255,255,255,0.8)",

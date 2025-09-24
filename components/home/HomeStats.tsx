@@ -53,40 +53,40 @@ export const HomeStats: React.FC = () => {
 
 const styles = StyleSheet.create({
   todayStatsSection: {
-    paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingHorizontal: 12,
+    paddingTop: 16,
   },
   statsGrid: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 16,
+    gap: 8,
+    marginTop: 12,
   },
   statCard: {
     flex: 1,
-    borderRadius: 12,
-    minHeight: 80,
+    borderRadius: 10,
+    minHeight: 70,
   },
   statHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 8,
+    gap: 6,
+    marginBottom: 6,
   },
   statIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },
   statValue: {
-    marginBottom: 4,
+    marginBottom: 2,
   },
   statChange: {
     fontSize: 12,
     fontWeight: "600",
   },
   sectionTitle: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
 });

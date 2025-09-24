@@ -7,20 +7,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Dimensions,
-  FlatList,
   Image,
   Platform,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
+import PagerView from "react-native-pager-view";
 import { Badge } from "../ui/Badge";
 
-const { width } = Dimensions.get("window");
-
 interface HomeCarouselProps {
-  onPageChange?: (page: number) => void;
+  onPageChange?: (_page: number) => void;
 }
 
 export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
@@ -28,7 +25,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
   const { colors } = useTheme();
   const { clearAllImages, resetUIState } = useContentCreation();
   const [currentPage, setCurrentPage] = useState(0);
-  const flatListRef = useRef<FlatList>(null);
+  const pagerRef = useRef<PagerView>(null);
   const autoScrollInterval = useRef<number | null>(null);
 
   // Otomatik kaydırma
@@ -36,10 +33,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
     autoScrollInterval.current = setInterval(() => {
       const nextPage = (currentPage + 1) % editingServices.length;
       setCurrentPage(nextPage);
-      flatListRef.current?.scrollToIndex({
-        index: nextPage,
-        animated: true,
-      });
+      pagerRef.current?.setPage(nextPage);
     }, 4000); // 4 saniyede bir değişir
 
     return () => {
@@ -50,12 +44,10 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
   }, [currentPage]);
 
   // Sayfa değiştiğinde
-  const onViewableItemsChanged = ({ viewableItems }: any) => {
-    if (viewableItems.length > 0) {
-      const newPage = viewableItems[0].index;
-      setCurrentPage(newPage);
-      onPageChange?.(newPage);
-    }
+  const onPageSelected = (e: any) => {
+    const newPage = e.nativeEvent.position;
+    setCurrentPage(newPage);
+    onPageChange?.(newPage);
   };
 
   const handleServicePress = (
@@ -80,15 +72,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
     console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
   };
 
-  const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50,
-  };
-
-  const renderCarouselItem = ({
-    item,
-  }: {
-    item: (typeof editingServices)[0];
-  }) => (
+  const renderCarouselItem = (item: (typeof editingServices)[0]) => (
     <View style={styles.carouselPage}>
       <LinearGradient
         colors={item.gradient as any}
@@ -145,28 +129,30 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
       </ThemedText>
 
       <View style={[styles.carouselContainer]}>
-        <FlatList
-          ref={flatListRef}
-          data={editingServices}
-          renderItem={renderCarouselItem}
-          keyExtractor={(item) => item.id.toString()}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onViewableItemsChanged={onViewableItemsChanged}
-          viewabilityConfig={viewabilityConfig}
-          getItemLayout={(data, index) => ({
-            length: width - 32,
-            offset: (width - 32) * index,
-            index,
-          })}
-        />
+        <PagerView
+          ref={pagerRef}
+          style={styles.pagerView}
+          initialPage={0}
+          onPageSelected={onPageSelected}
+        >
+          {editingServices.map((item) => (
+            <View key={item.id} style={styles.pageContainer}>
+              {renderCarouselItem(item)}
+            </View>
+          ))}
+        </PagerView>
 
         {/* Sayfa göstergeleri */}
         <View
           style={[
             styles.pagination,
-            { position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 0 },
+            {
+              position: "absolute",
+              bottom: -25,
+              left: 0,
+              right: 0,
+              zIndex: 10,
+            },
           ]}
         >
           {editingServices.map((_, index) => (
@@ -176,7 +162,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
                 styles.paginationDot,
                 {
                   backgroundColor:
-                    index === currentPage ? colors.primary : colors.border,
+                    index !== currentPage ? colors.primary : colors.border,
                   width: index === currentPage ? 24 : 8,
                 },
               ]}
@@ -190,24 +176,39 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
 const styles = StyleSheet.create({
   carouselSection: {
-    paddingHorizontal: 24,
-    paddingVertical: Platform.OS === "ios" ? 0 : 10,
-    marginBottom: Platform.OS === "ios" ? 10 : 0,
+    paddingVertical: Platform.OS === "ios" ? 0 : 5,
+    marginBottom: Platform.OS === "ios" ? 5 : 0,
   },
   carouselContainer: {
-    height: 240,
+    height: 300,
+    overflow: "visible",
+  },
+  pagerView: {
+    flex: 1,
+  },
+  pageContainer: {
+    flex: 1,
+    paddingHorizontal: 1,
   },
   carouselPage: {
-    width: width - 32,
-    paddingHorizontal: 0,
+    flex: 1,
   },
   carouselCard: {
-    borderRadius: 16,
-    padding: 24,
-    height: 240,
+    borderRadius: 12,
+    padding: 16,
+    height: 280,
     justifyContent: "center",
     position: "relative",
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+    marginBottom: 10,
   },
   carouselBadge: {
     position: "absolute",
@@ -226,9 +227,9 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   carouselImage: {
-    width: 200 * (Platform.OS === "ios" ? 1 : 1.06),
-    height: 235,
-    borderRadius: 16,
+    width: 180 * (Platform.OS === "ios" ? 1.15 : 1.06),
+    height: 275,
+    borderRadius: 12,
     opacity: 0.7,
   },
   carouselContent: {
@@ -239,26 +240,26 @@ const styles = StyleSheet.create({
   carouselTitle: {
     color: "white",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 4,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 10,
+    shadowRadius: 8,
   },
   carouselSubtitle: {
     color: "white",
     textAlign: "center",
     opacity: 0.9,
-    marginBottom: 20,
+    marginBottom: 12,
   },
   carouselButton: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
   },
   carouselButtonText: {
     color: "white",
@@ -267,7 +268,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 16,
+    marginBottom: 20,
     gap: 8,
   },
   paginationDot: {
@@ -275,6 +276,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   sectionTitle: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
 });

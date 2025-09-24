@@ -5,19 +5,23 @@ import {
   ThemedText,
   ThemedView,
 } from "@/components";
-import { Typography } from "@/constants/DesignTokens";
-import { useAuth, useTheme, useUserImages } from "@/hooks";
-import { UserImage } from "@/hooks/useUserImages";
-import auth from "@react-native-firebase/auth";
+import {
+  BorderRadius,
+  Shadows,
+  Spacing,
+  Typography,
+} from "@/constants/DesignTokens";
+import { useAuth, useTheme } from "@/hooks";
+import auth, { getAuth } from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Button,
   Dimensions,
-  FlatList,
   Image,
   Platform,
   StyleSheet,
@@ -28,7 +32,17 @@ import {
 
 const { width } = Dimensions.get("window");
 
-// CreatedImage interface'i artık UserImage ile değiştirildi
+interface UserImage {
+  id: string;
+  url: string;
+  timestamp: number;
+  filterName: string;
+  isFavorite: boolean;
+  downloads: number;
+  fileName?: string;
+  contentType?: string;
+  fileSize?: number;
+}
 
 interface UserProfile {
   name: string;
@@ -36,67 +50,67 @@ interface UserProfile {
   avatar?: string;
   joinDate: Date;
   totalCreations: number;
+  remainingTokens: number;
 }
-
-// Mock Data
-const mockUserProfile: UserProfile = {
-  name: auth().currentUser?.displayName || "",
-  email: auth().currentUser?.email || "",
-  avatar:
-    "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400",
-  joinDate: new Date("2024-01-15"),
-  totalCreations: 12,
-};
 
 // Mock veriler kaldırıldı, artık Firestore'dan gerçek veriler kullanılıyor
 
 // Components
 const UserProfileCard = React.memo(
   ({ userProfile: _userProfile }: { userProfile: UserProfile }) => {
-    const { colors: _colors } = useTheme();
-    const _formatJoinDate = useCallback((_date: Date) => {
-      return _date.toLocaleDateString("tr-TR", {
+    const currentUser = getAuth().currentUser;
+
+    const { colors } = useTheme();
+
+    const formatJoinDate = useCallback((date: Date) => {
+      return date.toLocaleDateString("tr-TR", {
         month: "long",
         year: "numeric",
       });
     }, []);
 
     return (
-      <ThemedCard style={styles.userProfileCard} padding="lg" elevation="sm">
-        {/* <View style={styles.userInfo}>
-          <View style={styles.avatarContainer}>
-            <Image source={{ uri: userProfile.avatar }} style={styles.avatar} />
+      <ThemedCard style={styles.userProfileCard} padding="lg" elevation="md">
+        <View style={styles.userProfileContent}>
+          {/* User Info */}
+          <View style={styles.userInfo}>
+            <ThemedText variant="h3" weight="bold" style={styles.userName}>
+              {currentUser?.displayName || "Kullanıcı"}
+            </ThemedText>
+            <ThemedText
+              variant="body"
+              color="secondary"
+              style={styles.userEmail}
+            >
+              {currentUser?.email || "Kullanıcı"}
+            </ThemedText>
+            <ThemedText
+              variant="caption"
+              color="tertiary"
+              style={styles.joinDate}
+            >
+              {formatJoinDate(
+                currentUser?.metadata?.creationTime
+                  ? new Date(currentUser.metadata.creationTime)
+                  : new Date(),
+              )}{" "}
+              tarihinde katıldı
+            </ThemedText>
           </View>
-          <View style={styles.userDetails}>
-            <ThemedText variant="h3" weight="bold">
-              {userProfile.name}
+
+          {/* Edit Profile Button */}
+          <TouchableOpacity
+            style={[
+              styles.editButton,
+              { backgroundColor: colors.primarySubtle },
+            ]}
+            activeOpacity={0.8}
+          >
+            <ThemedText variant="caption" weight="semiBold" color="primary">
+              Profili Düzenle
             </ThemedText>
-            <ThemedText variant="body" color="secondary">
-              {userProfile.email}
-            </ThemedText>
-            <ThemedText variant="caption" color="tertiary">
-              {formatJoinDate(userProfile.joinDate)} tarihinde katıldı
-            </ThemedText>
-          </View>
+          </TouchableOpacity>
         </View>
-        <View style={styles.userStats}>
-          <View style={styles.statItem}>
-            <ThemedText variant="h4" weight="bold" color="primary">
-              {userProfile.totalCreations}
-            </ThemedText>
-            <ThemedText variant="caption" color="secondary">
-              Yaratılan Görsel
-            </ThemedText>
-          </View>
-        </View> */}
-        <ThemedText
-          variant="body"
-          weight="bold"
-          align="center"
-          style={styles.userProfileCardText}
-        >
-          GELİŞTİRME BEKLİYOR
-        </ThemedText>
       </ThemedCard>
     );
   },
@@ -187,73 +201,103 @@ ImageCard.displayName = "ImageCard";
 
 export default function ProfileTab() {
   const { colors, colorScheme } = useTheme();
-  const [userProfile, setUserProfile] = useState<UserProfile>(mockUserProfile);
   const { logout, user } = useAuth();
-  console.log("Profile'da user bilgisi:", user);
-  const {
-    images: createdImages,
-    loading: imagesLoading,
-    error: imagesError,
-    toggleFavorite,
-    deleteImage,
-  } = useUserImages();
 
-  console.log("Profile'da hook sonuçları:", {
-    createdImages,
-    imagesLoading,
-    imagesError,
-    createdImagesLength: createdImages.length,
+  // Kullanıcı profil bilgilerini currentUser'dan al
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    name: user?.displayName || "",
+    email: user?.email || "",
+    avatar: user?.photoURL || undefined,
+    joinDate: user?.metadata?.creationTime
+      ? new Date(user.metadata.creationTime)
+      : new Date(),
+    totalCreations: 0,
+    remainingTokens: 100, // Varsayılan token sayısı
   });
 
-  const createNewImage = useCallback(() => {
+  // Firebase verileri için state'ler
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Firebase sorgusu - firebase-test.tsx'deki gibi
+  const fetchUserDocuments = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      console.log("🔄 Kullanıcı dokümanları çekiliyor...");
+
+      // Kullanıcı giriş yapmış mı kontrol et
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        setError("Kullanıcı giriş yapmamış!");
+        setDocuments([]);
+        return;
+      }
+
+      console.log("👤 Kullanıcı UID:", currentUser.uid);
+
+      // aiToolRequests koleksiyonundan kullanıcının dokümanlarını çek
+      const querySnapshot = await firestore()
+        .collection("aiToolRequests")
+        .where("userId", "==", currentUser.uid)
+        .get();
+
+      console.log("📊 Sorgu sonucu:", querySnapshot.docs.length, "doküman");
+
+      if (querySnapshot.docs.length === 0) {
+        setError("Bu kullanıcı için doküman bulunamadı!");
+        setDocuments([]);
+      } else {
+        const docs = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setDocuments(docs);
+        console.log("✅ Kullanıcı dokümanları yüklendi:", docs.length);
+        console.log("📋 TÜM DOKÜMANLAR:");
+        docs.forEach((doc, index) => {
+          console.log(`📄 Doküman #${index + 1}:`, doc);
+        });
+      }
+    } catch (err: any) {
+      console.error("❌ Veri çekme hatası:", err);
+      setError(`Hata: ${err.message}`);
+      setDocuments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Kullanıcı bilgilerini güncelle
+  useEffect(() => {
+    if (user) {
+      setUserProfile({
+        name: user.displayName || "",
+        email: user.email || "",
+        avatar: user.photoURL || undefined,
+        joinDate: user.metadata?.creationTime
+          ? new Date(user.metadata.creationTime)
+          : new Date(),
+        totalCreations: 0,
+        remainingTokens: 100, // Bu değer daha sonra Firestore'dan çekilebilir
+      });
+    }
+  }, [user]);
+
+  // Component mount olduğunda veriyi çek
+  useEffect(() => {
+    fetchUserDocuments();
+  }, [user?.uid]);
+
+  const _createNewImage = useCallback(() => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     router.push("/");
   }, []);
-
-  const handleToggleFavorite = useCallback(
-    (id: string) => {
-      if (Platform.OS !== "web") {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      toggleFavorite(id);
-    },
-    [toggleFavorite],
-  );
-
-  const shareImage = useCallback((_image: UserImage) => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    // Share functionality would be implemented here
-  }, []);
-
-  const handleDeleteImage = useCallback(
-    (id: string) => {
-      if (Platform.OS !== "web") {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      }
-      deleteImage(id);
-      setUserProfile((prev) => ({
-        ...prev,
-        totalCreations: prev.totalCreations - 1,
-      }));
-    },
-    [deleteImage],
-  );
-
-  const renderImageCard = useCallback(
-    ({ item }: { item: UserImage }) => (
-      <ImageCard
-        image={item}
-        onToggleFavorite={handleToggleFavorite}
-        onShare={shareImage}
-        onDelete={handleDeleteImage}
-      />
-    ),
-    [handleToggleFavorite, shareImage, handleDeleteImage],
-  );
 
   return (
     <ThemedView style={styles.container}>
@@ -281,42 +325,95 @@ export default function ProfileTab() {
       <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
 
       <ScrollContainer>
-        {/* User Profile Card */}
-        <UserProfileCard userProfile={userProfile} />
+        {/* Profile Header Section */}
+        <View style={styles.profileHeaderSection}>
+          <UserProfileCard userProfile={userProfile} />
+        </View>
 
-        {/* Create New Button */}
-        <TouchableOpacity
-          style={[styles.createButton, { backgroundColor: colors.primary }]}
-          onPress={createNewImage}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[styles.createButtonIcon, { color: colors.textOnPrimary }]}
-          >
-            +
-          </Text>
-          <ThemedText
-            variant="body"
-            weight="semiBold"
-            color="onPrimary"
-            style={styles.createButtonText}
-          >
-            Yeni Görsel Oluştur
-          </ThemedText>
-        </TouchableOpacity>
+        {/* Stats Section */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statsSection}>
+            <View
+              style={[styles.statCard, { backgroundColor: colors.surface }]}
+            >
+              <ThemedText
+                weight="bold"
+                color="primary"
+                style={styles.statNumber}
+              >
+                {
+                  documents.filter(
+                    (doc) => doc.result?.data?.images?.length > 0,
+                  ).length
+                }
+              </ThemedText>
+              <ThemedText
+                variant="caption"
+                color="secondary"
+                style={styles.statLabel}
+              >
+                Yaratım
+              </ThemedText>
+            </View>
 
-        {/* Images Section */}
+            <View
+              style={[styles.statCard, { backgroundColor: colors.surface }]}
+            >
+              <ThemedText
+                weight="bold"
+                color="primary"
+                style={styles.statNumber}
+              >
+                {documents.reduce((total, doc) => {
+                  return total + (doc.result?.data?.images?.length || 0);
+                }, 0)}
+              </ThemedText>
+              <ThemedText
+                variant="caption"
+                color="secondary"
+                style={styles.statLabel}
+              >
+                Toplam Görsel
+              </ThemedText>
+            </View>
+
+            <View
+              style={[styles.statCard, { backgroundColor: colors.surface }]}
+            >
+              <ThemedText
+                variant="body"
+                weight="bold"
+                color="primary"
+                style={styles.statNumber}
+              >
+                {userProfile.remainingTokens}
+              </ThemedText>
+              <ThemedText
+                variant="caption"
+                color="secondary"
+                style={styles.statLabel}
+              >
+                Kalan Token
+              </ThemedText>
+            </View>
+          </View>
+        </View>
+        {/* Gallery Section */}
         <View style={styles.imagesSection}>
           <View style={styles.sectionHeader}>
             <ThemedText variant="h4" weight="semiBold">
-              Yaratılan Görseller
+              Galerim
             </ThemedText>
             <ThemedText variant="caption" color="secondary">
-              {createdImages.length} görsel
+              {
+                documents.filter((doc) => doc.result?.data?.images?.length > 0)
+                  .length
+              }{" "}
+              yaratım
             </ThemedText>
           </View>
 
-          {imagesLoading ? (
+          {loading ? (
             <View style={styles.loadingState}>
               <ActivityIndicator size="large" color={colors.primary} />
               <ThemedText
@@ -324,19 +421,18 @@ export default function ProfileTab() {
                 color="secondary"
                 style={styles.loadingText}
               >
-                Görseller yükleniyor...
+                Galeri yükleniyor...
               </ThemedText>
             </View>
-          ) : imagesError ? (
+          ) : error ? (
             <View style={styles.errorState}>
-              <Text style={styles.errorIcon}>⚠️</Text>
               <ThemedText
                 variant="bodyLarge"
                 weight="semiBold"
                 align="center"
                 style={styles.errorTitle}
               >
-                Hata Oluştu
+                Galeri Yüklenemedi
               </ThemedText>
               <ThemedText
                 variant="body"
@@ -344,23 +440,60 @@ export default function ProfileTab() {
                 align="center"
                 style={styles.errorDescription}
               >
-                {imagesError}
+                {error}
               </ThemedText>
+              <TouchableOpacity
+                style={[
+                  styles.retryButton,
+                  { backgroundColor: colors.primary },
+                ]}
+                onPress={fetchUserDocuments}
+                activeOpacity={0.7}
+              >
+                <ThemedText
+                  variant="body"
+                  weight="semiBold"
+                  color="onPrimary"
+                  style={styles.retryButtonText}
+                >
+                  Tekrar Dene
+                </ThemedText>
+              </TouchableOpacity>
             </View>
-          ) : createdImages.length > 0 ? (
-            <FlatList
-              data={createdImages}
-              renderItem={renderImageCard}
-              keyExtractor={(item) => item.id}
-              numColumns={2}
-              columnWrapperStyle={styles.row}
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={false}
-              contentContainerStyle={styles.imagesGrid}
-            />
+          ) : documents.length > 0 ? (
+            <View style={styles.galleryGrid}>
+              {documents
+                .filter((doc) => doc.result?.data?.images?.length > 0)
+                .map((doc, index) => {
+                  // Sadece result.data.images'den ilk görseli kapak fotoğrafı olarak kullan
+                  const coverImageUrl = doc.result?.data?.images?.[0]?.url;
+
+                  return (
+                    <TouchableOpacity
+                      key={doc.id}
+                      style={styles.galleryItem}
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        // Görsel detayına git
+                        console.log("Görsel tıklandı:", doc.id);
+                      }}
+                    >
+                      <View style={styles.galleryImageContainer}>
+                        <Image
+                          source={{ uri: coverImageUrl }}
+                          style={styles.galleryImage}
+                          resizeMode="cover"
+                        />
+
+                        {/* Gradient Overlay */}
+                        <View style={styles.galleryGradient} />
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+            </View>
           ) : (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyStateIcon}>🎨</Text>
               <ThemedText
                 variant="bodyLarge"
                 weight="semiBold"
@@ -413,56 +546,66 @@ const styles = StyleSheet.create({
   settingsIcon: {
     fontSize: Typography.fontSize.xl,
   },
+  // Yeni profil kartı stilleri
   userProfileCard: {
-    margin: 16,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderRadius: BorderRadius.xl,
+    ...Shadows.lg,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backdropFilter: "blur(10px)",
   },
-  userProfileCardText: {
-    fontSize: Typography.fontSize.md,
-    fontFamily: Typography.fontFamily.bold,
-    textAlign: "center",
-  },
-  userInfo: {
-    flexDirection: "row",
+  userProfileContent: {
     alignItems: "center",
-    marginBottom: 16,
+    paddingVertical: Spacing.xs,
   },
   avatarContainer: {
-    marginRight: 16,
+    marginBottom: Spacing.md,
   },
   avatar: {
     width: 60,
     height: 60,
     borderRadius: 30,
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  userDetails: {
-    flex: 1,
-  },
-  userStats: {
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  statItem: {
+  userInfo: {
     alignItems: "center",
+    marginBottom: Spacing.sm,
+  },
+  userName: {
+    marginBottom: 4,
+  },
+  userEmail: {
+    marginBottom: 2,
+  },
+  joinDate: {
+    marginBottom: Spacing.xs,
+  },
+  editButton: {
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.md,
+    ...Shadows.sm,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   createButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginHorizontal: 16,
-    marginBottom: 24,
-    paddingVertical: 16,
-    borderRadius: 16,
-    shadowColor: "#0077B5",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    marginHorizontal: Spacing.md,
+    marginBottom: Spacing.lg,
+    paddingVertical: Spacing.xl,
+    borderRadius: BorderRadius.xl,
+    ...Shadows.xl,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   createButtonIcon: {
     fontSize: Typography.fontSize.xxl,
@@ -473,14 +616,15 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.md,
   },
   imagesSection: {
-    paddingHorizontal: 16,
-    paddingBottom: 32,
+    paddingHorizontal: Spacing.sm,
+    paddingBottom: Spacing.md,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: Spacing.sm,
+    paddingHorizontal: 0,
   },
   imagesGrid: {
     paddingBottom: 16,
@@ -541,15 +685,17 @@ const styles = StyleSheet.create({
   emptyState: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 64,
-    paddingHorizontal: 32,
-  },
-  emptyStateIcon: {
-    fontSize: Typography.fontSize.xxxxxl,
-    marginBottom: 16,
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    marginHorizontal: 0,
+    ...Shadows.sm,
   },
   emptyStateTitle: {
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
     fontSize: Typography.fontSize.lg,
   },
   emptyStateDescription: {
@@ -559,29 +705,156 @@ const styles = StyleSheet.create({
   loadingState: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 64,
-    paddingHorizontal: 32,
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    marginHorizontal: 0,
+    ...Shadows.sm,
   },
   loadingText: {
-    marginTop: 16,
+    marginTop: Spacing.lg,
     textAlign: "center",
   },
   errorState: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 64,
-    paddingHorizontal: 32,
-  },
-  errorIcon: {
-    fontSize: Typography.fontSize.xxxxxl,
-    marginBottom: 16,
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.md,
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    marginHorizontal: 0,
+    ...Shadows.sm,
   },
   errorTitle: {
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
     fontSize: Typography.fontSize.lg,
   },
   errorDescription: {
     lineHeight: Typography.lineHeight.normal * Typography.fontSize.md,
     textAlign: "center",
+  },
+  retryButton: {
+    marginTop: Spacing.lg,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: BorderRadius.lg,
+    alignSelf: "center",
+    ...Shadows.md,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  retryButtonText: {
+    fontSize: Typography.fontSize.md,
+  },
+  profileHeaderSection: {
+    paddingHorizontal: Spacing.sm,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xs,
+  },
+  statsContainer: {
+    paddingHorizontal: Spacing.sm,
+    paddingBottom: Spacing.sm,
+  },
+  statsSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: Spacing.xs,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
+    borderRadius: BorderRadius.md,
+    ...Shadows.sm,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backdropFilter: "blur(10px)",
+  },
+  statNumber: {
+    marginBottom: 2,
+  },
+  statLabel: {
+    textAlign: "center",
+  },
+  galleryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 0,
+  },
+  galleryItem: {
+    width: (width - Spacing.sm * 2 - Spacing.xs) / 2,
+    marginBottom: Spacing.sm,
+    borderRadius: BorderRadius.md,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
+  },
+  galleryImageContainer: {
+    position: "relative",
+    width: "100%",
+    height: 120,
+  },
+  galleryImage: {
+    width: "100%",
+    height: "100%",
+  },
+  galleryGradient: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  galleryOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 8,
+  },
+  galleryInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+  },
+  galleryTitle: {
+    fontSize: Typography.fontSize.sm,
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  galleryStats: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  galleryStatItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backdropFilter: "blur(15px)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  galleryStatText: {
+    fontSize: Typography.fontSize.xs,
+    fontWeight: "600",
   },
 });

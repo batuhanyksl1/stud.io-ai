@@ -26,7 +26,7 @@ export default function HomeScreen() {
           <HomeCarousel />
           <HomeServices />
           <HomeStats />
-          <View style={{ height: 32 }} />
+          <View style={{ height: 16 }} />
         </ScrollView>
       </View>
     </ThemedView>
@@ -40,9 +40,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     // Platform spesifik margin - iOS'te gerekli, Android'de sorun yaratıyor
-    marginHorizontal: Platform.OS === "ios" ? 16 : -8,
+    marginHorizontal: Platform.OS === "ios" ? 8 : -4,
   },
   scrollContent: {
-    paddingBottom: 34,
+    paddingBottom: 20,
   },
 });
