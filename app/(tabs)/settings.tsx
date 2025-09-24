@@ -1,39 +1,13 @@
-import {
-  ScrollContainer,
-  ThemedCard,
-  ThemedText,
-  ThemedView,
-} from "@/components";
-import { BorderRadius, Spacing } from "@/constants";
+import { Header, ThemedCard, ThemedText, ThemedView } from "@/components";
 import { useAuth, useTheme } from "@/hooks";
-import { authService } from "@/services";
-
+import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import {
-  Bell,
-  Camera,
-  ChevronRight,
-  Download,
-  ExternalLink,
-  CircleHelp as HelpCircle,
-  Monitor,
-  Moon,
-  RefreshCw,
-  Settings as SettingsIcon,
-  Share2,
-  Shield,
-  Smartphone,
-  Star,
-  Sun,
-  Trash2,
-  User,
-} from "lucide-react-native";
+import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
   Alert,
   Platform,
+  ScrollView,
   Share,
   StyleSheet,
   Switch,
@@ -49,407 +23,263 @@ interface SettingItem {
   type: "toggle" | "navigation" | "action" | "theme";
   value?: boolean;
   onPress?: () => void;
-  onToggle?: (value: boolean) => void;
+  onToggle?: (_value: boolean) => void;
   destructive?: boolean;
 }
 
-export default function SettingsTab() {
-  const { colors, mode, setTheme, isDark } = useTheme();
-  const { user } = useAuth();
+interface SettingSection {
+  title: string;
+  items: SettingItem[];
+}
+
+export default function SettingsScreen() {
+  const { colors, colorScheme, toggleDarkMode } = useTheme();
+  const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
-  const [highQuality, setHighQuality] = useState(true);
-  const [hapticFeedback, setHapticFeedback] = useState(true);
-
-  const handleToggle = (
-    setter: (value: boolean) => void,
-    currentValue: boolean,
-  ) => {
-    if (Platform.OS !== "web" && hapticFeedback) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setter(!currentValue);
-  };
-
-  const handleThemeChange = (newMode: ThemeMode) => {
-    if (Platform.OS !== "web" && hapticFeedback) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    setTheme(newMode);
-  };
-
-  const handleShare = async () => {
-    if (Platform.OS !== "web" && hapticFeedback) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-
-    try {
-      await Share.share({
-        message:
-          "Check out LinkedIn Profile Creator - the best app for creating professional profile pictures!",
-        url: "https://linkedinprofilecreator.app",
-      });
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
-  };
-
-  const handleRateApp = () => {
-    if (Platform.OS !== "web" && hapticFeedback) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    Alert.alert(
-      "Rate Our App",
-      "Thank you for using LinkedIn Profile Creator! Would you like to rate us on the App Store?",
-      [
-        { text: "Later", style: "cancel" },
-        {
-          text: "Rate Now",
-          onPress: () => console.log("Navigate to app store"),
-        },
-      ],
-    );
-  };
-
-  const handleClearCache = () => {
-    if (Platform.OS !== "web" && hapticFeedback) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    }
-    Alert.alert(
-      "Clear Cache",
-      "This will clear all cached images and temporary files. Are you sure?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Clear",
-          style: "destructive",
-          onPress: () => {
-            Alert.alert("Success", "Cache cleared successfully!");
-          },
-        },
-      ],
-    );
-  };
-
-  const handleResetSettings = () => {
-    if (Platform.OS !== "web" && hapticFeedback) {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    }
-    Alert.alert(
-      "Reset Settings",
-      "This will reset all settings to their default values. Are you sure?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Reset",
-          style: "destructive",
-          onPress: () => {
-            setTheme("system");
-            setNotifications(true);
-            setAutoSave(true);
-            setHighQuality(true);
-            setHapticFeedback(true);
-            Alert.alert("Success", "Settings reset to defaults!");
-          },
-        },
-      ],
-    );
-  };
 
   const handleSignOut = async () => {
     Alert.alert(
       "Çıkış Yap",
-      "Hesabınızdan çıkış yapmak istediğinizden emin misiniz?",
+      "Hesabınızdan çıkmak istediğinizden emin misiniz?",
       [
         { text: "İptal", style: "cancel" },
         {
           text: "Çıkış Yap",
           style: "destructive",
           onPress: async () => {
-            try {
-              await authService.signOut();
-              router.replace("/");
-            } catch (error) {
-              Alert.alert("Hata", "Çıkış yapılırken bir hata oluştu");
-            }
+            await logout();
           },
         },
       ],
     );
   };
 
-  const settingSections = [
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: "Stud.io AI uygulamasını keşfedin! 🚀",
+        url: "https://stud.io",
+      });
+    } catch (error) {
+      console.error("Share error:", error);
+    }
+  };
+
+  const handleClearCache = () => {
+    Alert.alert(
+      "Önbelleği Temizle",
+      "Tüm önbellek verileri silinecek. Bu işlem geri alınamaz.",
+      [
+        { text: "İptal", style: "cancel" },
+        {
+          text: "Temizle",
+          style: "destructive",
+          onPress: () => {
+            // Cache temizleme işlemi
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          },
+        },
+      ],
+    );
+  };
+
+  const settingSections: SettingSection[] = [
     {
-      title: "Account",
+      title: "Hesap",
       items: [
         {
           id: "profile",
-          title: user?.displayName || "Profil Ayarları",
-          subtitle: user?.email || "Hesap bilgilerinizi yönetin",
-          icon: <User size={22} color={colors.primary} strokeWidth={2} />,
-          type: "navigation" as const,
-          onPress: () => console.log("Navigate to profile"),
+          title: "Profil",
+          subtitle: user?.email || "Kullanıcı",
+          icon: <Ionicons name="person" size={20} color={colors.textPrimary} />,
+          type: "navigation",
+          onPress: () => {
+            // Profile sayfasına git
+          },
         },
         {
-          id: "signout",
-          title: "Çıkış Yap",
-          subtitle: "Hesabınızdan güvenli şekilde çıkış yapın",
-          icon: <ExternalLink size={22} color={colors.error} strokeWidth={2} />,
-          type: "action" as const,
-          onPress: handleSignOut,
-          destructive: true,
+          id: "notifications",
+          title: "Bildirimler",
+          subtitle: "Push bildirimleri",
+          icon: (
+            <Ionicons
+              name="notifications"
+              size={20}
+              color={colors.textPrimary}
+            />
+          ),
+          type: "toggle",
+          value: notifications,
+          onToggle: setNotifications,
         },
       ],
     },
     {
-      title: "Appearance",
+      title: "Görünüm",
       items: [
         {
           id: "theme",
-          title: "Theme",
-          subtitle: "Choose your preferred theme",
-          icon: isDark ? (
-            <Moon size={22} color={colors.primary} strokeWidth={2} />
-          ) : (
-            <Sun size={22} color={colors.primary} strokeWidth={2} />
+          title: "Tema",
+          subtitle: colorScheme === "dark" ? "Koyu" : "Açık",
+          icon: (
+            <Ionicons
+              name={colorScheme === "dark" ? "moon" : "sunny"}
+              size={20}
+              color={colors.textPrimary}
+            />
           ),
-          type: "theme" as const,
-        },
-      ],
-    },
-    {
-      title: "Camera & Photo",
-      items: [
-        {
-          id: "camera-quality",
-          title: "High Quality Photos",
-          subtitle: "Use maximum resolution for better results",
-          icon: <Camera size={22} color={colors.primary} strokeWidth={2} />,
-          type: "toggle" as const,
-          value: highQuality,
-          onToggle: (value: boolean) =>
-            handleToggle(setHighQuality, highQuality),
+          type: "theme",
+          onPress: toggleDarkMode,
         },
         {
           id: "auto-save",
-          title: "Auto-Save Originals",
-          subtitle: "Keep original photos when editing",
-          icon: <Download size={22} color={colors.primary} strokeWidth={2} />,
-          type: "toggle" as const,
+          title: "Otomatik Kaydet",
+          subtitle: "Çalışmalarınızı otomatik kaydedin",
+          icon: (
+            <Ionicons name="download" size={20} color={colors.textPrimary} />
+          ),
+          type: "toggle",
           value: autoSave,
-          onToggle: (value: boolean) => handleToggle(setAutoSave, autoSave),
+          onToggle: setAutoSave,
         },
       ],
     },
     {
-      title: "Notifications & Feedback",
+      title: "Uygulama",
       items: [
-        {
-          id: "notifications",
-          title: "Push Notifications",
-          subtitle: "Get updates about new features",
-          icon: <Bell size={22} color={colors.primary} strokeWidth={2} />,
-          type: "toggle" as const,
-          value: notifications,
-          onToggle: (value: boolean) =>
-            handleToggle(setNotifications, notifications),
-        },
-        {
-          id: "haptic",
-          title: "Haptic Feedback",
-          subtitle: "Feel vibrations for interactions",
-          icon: <Smartphone size={22} color={colors.primary} strokeWidth={2} />,
-          type: "toggle" as const,
-          value: hapticFeedback,
-          onToggle: (value: boolean) =>
-            handleToggle(setHapticFeedback, hapticFeedback),
-        },
-      ],
-    },
-    {
-      title: "Support & Feedback",
-      items: [
-        {
-          id: "rate",
-          title: "Rate Our App",
-          subtitle: "Help us improve with your feedback",
-          icon: <Star size={22} color={colors.primary} strokeWidth={2} />,
-          type: "action" as const,
-          onPress: handleRateApp,
-        },
         {
           id: "share",
-          title: "Share App",
-          subtitle: "Tell your friends about us",
-          icon: <Share2 size={22} color={colors.primary} strokeWidth={2} />,
-          type: "action" as const,
+          title: "Uygulamayı Paylaş",
+          subtitle: "Arkadaşlarınızla paylaşın",
+          icon: <Ionicons name="share" size={20} color={colors.textPrimary} />,
+          type: "action",
           onPress: handleShare,
         },
         {
-          id: "help",
-          title: "Help & Support",
-          subtitle: "Get help and contact support",
-          icon: <HelpCircle size={22} color={colors.primary} strokeWidth={2} />,
-          type: "navigation" as const,
-          onPress: () => console.log("Navigate to help"),
+          id: "rate",
+          title: "Uygulamayı Değerlendir",
+          subtitle: "App Store'da puan verin",
+          icon: <Ionicons name="star" size={20} color={colors.textPrimary} />,
+          type: "action",
+          onPress: () => {
+            // App Store'a yönlendir
+          },
         },
         {
-          id: "privacy",
-          title: "Privacy Policy",
-          subtitle: "Learn how we protect your data",
-          icon: <Shield size={22} color={colors.primary} strokeWidth={2} />,
-          type: "navigation" as const,
-          onPress: () => console.log("Navigate to privacy"),
+          id: "help",
+          title: "Yardım & Destek",
+          subtitle: "SSS ve iletişim",
+          icon: (
+            <Ionicons name="help-circle" size={20} color={colors.textPrimary} />
+          ),
+          type: "navigation",
+          onPress: () => {
+            // Help sayfasına git
+          },
         },
       ],
     },
     {
-      title: "Advanced",
+      title: "Gelişmiş",
       items: [
         {
           id: "clear-cache",
-          title: "Clear Cache",
-          subtitle: "Free up storage space",
-          icon: <Trash2 size={22} color={colors.error} strokeWidth={2} />,
-          type: "action" as const,
-          onPress: handleClearCache,
+          title: "Önbelleği Temizle",
+          subtitle: "Uygulama verilerini temizle",
+          icon: <Ionicons name="trash" size={20} color={colors.error} />,
+          type: "action",
           destructive: true,
+          onPress: handleClearCache,
         },
         {
-          id: "reset",
-          title: "Reset Settings",
-          subtitle: "Restore all settings to defaults",
-          icon: <RefreshCw size={22} color={colors.error} strokeWidth={2} />,
-          type: "action" as const,
-          onPress: handleResetSettings,
+          id: "sign-out",
+          title: "Çıkış Yap",
+          subtitle: "Hesabınızdan çıkın",
+          icon: <Ionicons name="log-out" size={20} color={colors.error} />,
+          type: "action",
           destructive: true,
+          onPress: handleSignOut,
         },
       ],
     },
   ];
 
-  const renderThemeSelector = () => {
-    const themeOptions = [
-      {
-        mode: "light" as ThemeMode,
-        label: "Light",
-        icon: <Sun size={18} color={colors.textSecondary} strokeWidth={2} />,
-      },
-      {
-        mode: "dark" as ThemeMode,
-        label: "Dark",
-        icon: <Moon size={18} color={colors.textSecondary} strokeWidth={2} />,
-      },
-      {
-        mode: "system" as ThemeMode,
-        label: "System",
-        icon: (
-          <Monitor size={18} color={colors.textSecondary} strokeWidth={2} />
-        ),
-      },
-    ];
-
-    return (
-      <View style={[styles.themeSelector, { backgroundColor: colors.surface }]}>
-        {themeOptions.map((option) => (
-          <TouchableOpacity
-            key={option.mode}
-            style={[
-              styles.themeOption,
-              {
-                backgroundColor:
-                  mode === option.mode ? colors.primary : "transparent",
-                borderColor: colors.border,
-              },
-            ]}
-            onPress={() => handleThemeChange(option.mode)}
-          >
-            {React.cloneElement(option.icon, {
-              color:
-                mode === option.mode
-                  ? colors.textOnPrimary
-                  : colors.textSecondary,
-            })}
-            <ThemedText
-              variant="caption"
-              weight="medium"
-              color={mode === option.mode ? "onPrimary" : "secondary"}
-              style={{ marginTop: 4 }}
-            >
-              {option.label}
-            </ThemedText>
-          </TouchableOpacity>
-        ))}
-      </View>
-    );
-  };
-
   const renderSettingItem = (item: SettingItem) => {
+    const handlePress = () => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      item.onPress?.();
+    };
+
     return (
       <TouchableOpacity
         key={item.id}
-        style={[
-          styles.settingItem,
-          { borderBottomColor: colors.borderSubtle },
-          item.destructive && { backgroundColor: colors.errorSubtle },
-        ]}
-        onPress={item.onPress}
-        disabled={item.type === "toggle" || item.type === "theme"}
+        style={[styles.settingItem, { borderBottomColor: colors.border }]}
+        onPress={handlePress}
+        disabled={item.type === "toggle"}
       >
-        <View
-          style={[
-            styles.settingIcon,
-            { backgroundColor: colors.secondarySubtle },
-          ]}
-        >
-          {item.icon}
-        </View>
-
-        <View style={styles.settingContent}>
-          <ThemedText
-            variant="body"
-            weight="semiBold"
-            color={item.destructive ? "error" : "primary"}
+        <View style={styles.settingItemLeft}>
+          <View
+            style={[styles.iconContainer, { backgroundColor: colors.surface }]}
           >
-            {item.title}
-          </ThemedText>
-          {item.subtitle && (
+            {item.icon}
+          </View>
+          <View style={styles.settingItemText}>
             <ThemedText
-              variant="caption"
-              color="secondary"
-              style={{ marginTop: 2 }}
+              variant="body"
+              weight="medium"
+              style={{
+                ...styles.settingTitle,
+                ...(item.destructive ? { color: colors.error } : {}),
+              }}
             >
-              {item.subtitle}
+              {item.title}
             </ThemedText>
-          )}
-
-          {item.type === "theme" && (
-            <View style={{ marginTop: 12 }}>{renderThemeSelector()}</View>
-          )}
+            {item.subtitle && (
+              <ThemedText
+                variant="caption"
+                style={{
+                  ...styles.settingSubtitle,
+                  ...(item.destructive ? { color: colors.error } : {}),
+                }}
+              >
+                {item.subtitle}
+              </ThemedText>
+            )}
+          </View>
         </View>
 
-        <View style={styles.settingAction}>
+        <View style={styles.settingItemRight}>
           {item.type === "toggle" && (
             <Switch
               value={item.value}
               onValueChange={item.onToggle}
-              trackColor={{ false: colors.border, true: colors.primary }}
+              trackColor={{
+                false: colors.border,
+                true: colors.primary,
+              }}
               thumbColor={colors.surface}
-              ios_backgroundColor={colors.border}
             />
           )}
           {item.type === "navigation" && (
-            <ChevronRight
+            <Ionicons
+              name="chevron-forward"
               size={20}
-              color={colors.textTertiary}
-              strokeWidth={2}
+              color={colors.textSecondary}
             />
           )}
           {item.type === "action" && (
-            <ExternalLink
-              size={18}
-              color={item.destructive ? colors.error : colors.textTertiary}
-              strokeWidth={2}
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.textSecondary}
+            />
+          )}
+          {item.type === "theme" && (
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.textSecondary}
             />
           )}
         </View>
@@ -458,103 +288,58 @@ export default function SettingsTab() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      {/* Header */}
-      <LinearGradient
-        colors={
-          isDark
-            ? [colors.surface, colors.surfaceElevated]
-            : ["#0077B5", "#004182"]
-        }
-        style={styles.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+    <ThemedView backgroundColor="background" style={styles.container}>
+      <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
+      <Header leftIconType="arrow-back" rightIconType="home" />
+
+      <ScrollView
+        style={[styles.scrollView, { backgroundColor: colors.background }]}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.headerContent}>
-          <View
-            style={[
-              styles.headerIcon,
-              { backgroundColor: "rgba(255, 255, 255, 0.15)" },
-            ]}
-          >
-            <SettingsIcon size={28} color="#FFFFFF" strokeWidth={2} />
-          </View>
-          <View style={styles.headerText}>
-            <ThemedText variant="h2" color="inverse">
-              Settings
-            </ThemedText>
-            <ThemedText variant="body" color="inverse" style={{ opacity: 0.8 }}>
-              Customize your experience
-            </ThemedText>
-          </View>
+        <View style={styles.header}>
+          <ThemedText variant="h2" weight="bold" style={styles.title}>
+            Ayarlar
+          </ThemedText>
+          <ThemedText variant="body" style={styles.subtitle}>
+            Uygulamanızı kişiselleştirin
+          </ThemedText>
         </View>
-      </LinearGradient>
 
-      {/* Settings List */}
-      <ScrollContainer style={styles.scrollView}>
-        {settingSections.map((section) => (
-          <View key={section.title} style={styles.section}>
+        {settingSections.map((section, sectionIndex) => (
+          <ThemedCard
+            key={section.title}
+            style={{
+              ...styles.sectionCard,
+              ...(sectionIndex === 0 ? styles.firstSection : {}),
+            }}
+            elevation="sm"
+          >
             <ThemedText
-              variant="bodyLarge"
+              variant="caption"
               weight="semiBold"
-              color="secondary"
-              style={styles.sectionTitle}
+              style={{ ...styles.sectionTitle, color: colors.textSecondary }}
             >
-              {section.title}
+              {section.title.toUpperCase()}
             </ThemedText>
-
-            <ThemedCard
-              style={styles.sectionContent}
-              padding="none"
-              elevation="sm"
-            >
-              {section.items.map((item, itemIndex) => (
-                <View key={item.id}>
-                  {renderSettingItem(item)}
-                  {itemIndex < section.items.length - 1 && (
-                    <View
-                      style={[
-                        styles.separator,
-                        { backgroundColor: colors.borderSubtle },
-                      ]}
-                    />
-                  )}
-                </View>
-              ))}
-            </ThemedCard>
-          </View>
+            {section.items.map((item, itemIndex) => (
+              <View key={item.id}>
+                {renderSettingItem(item)}
+                {itemIndex < section.items.length - 1 && (
+                  <View
+                    style={[
+                      styles.separator,
+                      { backgroundColor: colors.border },
+                    ]}
+                  />
+                )}
+              </View>
+            ))}
+          </ThemedCard>
         ))}
 
-        {/* App Info */}
-        <ThemedCard style={styles.appInfo} elevation="sm">
-          <View style={styles.appInfoContent}>
-            <ThemedText
-              variant="bodyLarge"
-              weight="semiBold"
-              color="primary"
-              align="center"
-            >
-              LinkedIn Profile Creator
-            </ThemedText>
-            <ThemedText
-              variant="caption"
-              color="secondary"
-              align="center"
-              style={{ marginTop: 4 }}
-            >
-              Version 1.0.0
-            </ThemedText>
-            <ThemedText
-              variant="caption"
-              color="tertiary"
-              align="center"
-              style={{ marginTop: 2 }}
-            >
-              © 2025 Professional Photos Inc.
-            </ThemedText>
-          </View>
-        </ThemedCard>
-      </ScrollContainer>
+        <View style={{ height: 20 }} />
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -563,90 +348,71 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
-    paddingBottom: 24,
-    paddingHorizontal: 24,
-  },
-  headerContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  headerIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-  },
-  headerText: {
-    flex: 1,
-  },
   scrollView: {
     flex: 1,
+    marginHorizontal: Platform.OS === "ios" ? 8 : -4,
   },
-  section: {
-    marginTop: Spacing.xl,
-    marginHorizontal: Spacing.lg,
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  title: {
+    marginBottom: 4,
+  },
+  subtitle: {
+    opacity: 0.7,
+  },
+  sectionCard: {
+    marginHorizontal: 16,
+    marginBottom: 16,
+    paddingVertical: 8,
+  },
+  firstSection: {
+    marginTop: 8,
   },
   sectionTitle: {
-    marginBottom: Spacing.md,
-    paddingHorizontal: Spacing.xs,
-  },
-  sectionContent: {
-    overflow: "hidden",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    letterSpacing: 0.5,
   },
   settingItem: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    minHeight: 64,
-  },
-  settingIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
     alignItems: "center",
-    marginRight: Spacing.md,
-    marginTop: 2,
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    minHeight: 56,
   },
-  settingContent: {
+  settingItemLeft: {
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
-    paddingRight: Spacing.sm,
   },
-  settingAction: {
-    marginLeft: Spacing.sm,
-    marginTop: 2,
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  settingItemText: {
+    flex: 1,
+  },
+  settingTitle: {
+    marginBottom: 2,
+  },
+  settingSubtitle: {
+    opacity: 0.7,
+  },
+  settingItemRight: {
+    marginLeft: 12,
   },
   separator: {
     height: 1,
-    marginLeft: 76,
-  },
-  themeSelector: {
-    flexDirection: "row",
-    borderRadius: BorderRadius.md,
-    padding: 4,
-    gap: 4,
-  },
-  themeOption: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-  },
-  appInfo: {
-    marginHorizontal: Spacing.lg,
-    marginTop: Spacing.xl,
-    marginBottom: Platform.OS === "ios" ? 100 : 80,
-  },
-  appInfoContent: {
-    alignItems: "center",
+    marginLeft: 60,
   },
 });
