@@ -85,8 +85,8 @@ function AppContent() {
           router.replace("/email-verification");
         }
       } else {
-        console.log("User not authenticated - showing onboarding");
-        router.replace("/");
+        console.log("User not authenticated - going to signin");
+        router.replace("/auth");
       }
     }
   }, [isInitializing, isAuthenticated, isEmailVerified]);

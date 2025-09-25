@@ -69,7 +69,20 @@ export default function SignUpScreen() {
       const { confirmPassword, ...signUpData } = data;
       const result = await register(signUpData);
       if (result.meta.requestStatus === "fulfilled") {
-        // Kayıt başarılı, display name modal'ı gösterilecek
+        // Kayıt başarılı, email doğrulama maili gönderildi
+        Alert.alert(
+          "Kayıt Başarılı!",
+          "Hesabınız oluşturuldu. E-posta adresinize doğrulama maili gönderildi. Lütfen e-postanızı kontrol edin ve bağlantıya tıklayarak hesabınızı doğrulayın.",
+          [
+            {
+              text: "Tamam",
+              onPress: () => {
+                // Email doğrulama sayfasına yönlendir
+                router.replace("/email-verification");
+              },
+            },
+          ],
+        );
       } else {
         Alert.alert("Hata", result.payload as string);
       }

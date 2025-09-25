@@ -9,12 +9,14 @@ interface ActionsSectionProps {
   onChangePassword: () => void;
   onDownloadData: () => void;
   onDeleteAccount: () => void;
+  onDeleteUser: () => void;
 }
 
 export const ActionsSection: React.FC<ActionsSectionProps> = ({
   onChangePassword,
   onDownloadData,
   onDeleteAccount,
+  onDeleteUser,
 }) => {
   const { colors } = useTheme();
 
@@ -31,6 +33,11 @@ export const ActionsSection: React.FC<ActionsSectionProps> = ({
   const handleDeleteAccount = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     onDeleteAccount();
+  };
+
+  const handleDeleteUser = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    onDeleteUser();
   };
 
   return (
@@ -97,7 +104,10 @@ export const ActionsSection: React.FC<ActionsSectionProps> = ({
         />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.actionItem} onPress={handleDeleteAccount}>
+      <TouchableOpacity
+        style={[styles.actionItem, { borderBottomColor: colors.border }]}
+        onPress={handleDeleteAccount}
+      >
         <View
           style={[styles.actionIcon, { backgroundColor: colors.errorSubtle }]}
         >
@@ -116,6 +126,34 @@ export const ActionsSection: React.FC<ActionsSectionProps> = ({
             style={{ ...styles.actionSubtitle, color: colors.textSecondary }}
           >
             Hesabınızı kalıcı olarak silin
+          </ThemedText>
+        </View>
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color={colors.textSecondary}
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.actionItem} onPress={handleDeleteUser}>
+        <View
+          style={[styles.actionIcon, { backgroundColor: colors.errorSubtle }]}
+        >
+          <Ionicons name="person-remove" size={20} color={colors.error} />
+        </View>
+        <View style={styles.actionContent}>
+          <ThemedText
+            variant="body"
+            weight="medium"
+            style={{ ...styles.actionTitle, color: colors.error }}
+          >
+            Kullanıcıyı Sil
+          </ThemedText>
+          <ThemedText
+            variant="caption"
+            style={{ ...styles.actionSubtitle, color: colors.textSecondary }}
+          >
+            Firebase'den kullanıcıyı kalıcı olarak sil
           </ThemedText>
         </View>
         <Ionicons

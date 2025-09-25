@@ -119,6 +119,10 @@ export const signUp = createAsyncThunk(
         await userCredential.user.updateProfile({
           displayName: credentials.displayName,
         });
+
+        // Send email verification
+        await sendEmailVerification(userCredential.user);
+        console.log("Email doğrulama maili gönderildi");
       }
 
       return userCredential.user;

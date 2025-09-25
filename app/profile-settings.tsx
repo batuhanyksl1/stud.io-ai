@@ -5,6 +5,7 @@ import {
   EditButtons,
 } from "@/components/profile";
 import { useAuth, useTheme } from "@/hooks";
+import { getAuth } from "@react-native-firebase/auth";
 import * as Haptics from "expo-haptics";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
@@ -117,6 +118,36 @@ export default function ProfileSettingsScreen() {
     );
   };
 
+  const handleDeleteUser = () => {
+    Alert.alert(
+      "Kullanıcıyı Sil",
+      "Bu işlem geri alınamaz. Firebase'den kullanıcıyı kalıcı olarak silmek istediğinizden emin misiniz?",
+      [
+        { text: "İptal", style: "cancel" },
+        {
+          text: "Sil",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const currentUser = getAuth().currentUser;
+              if (currentUser) {
+                await currentUser.delete();
+                console.log("Kullanıcı Firebase'den silindi");
+                // Auth state değişikliği otomatik olarak _layout.tsx'de handle edilecek
+              }
+            } catch (error: any) {
+              console.error("Kullanıcı silme hatası:", error);
+              Alert.alert(
+                "Hata",
+                "Kullanıcı silinirken bir hata oluştu: " + error.message,
+              );
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const renderHeader = () => (
     <View style={styles.header}>
       <ThemedText variant="h2" weight="bold" style={styles.title}>
@@ -182,6 +213,7 @@ export default function ProfileSettingsScreen() {
           onChangePassword={handleChangePassword}
           onDownloadData={handleDownloadData}
           onDeleteAccount={handleDeleteAccount}
+          onDeleteUser={handleDeleteUser}
         />
 
         <View style={{ height: 20 }} />

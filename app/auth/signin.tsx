@@ -126,18 +126,18 @@ export default function SignInScreen() {
   };
 
   const handleGuestLogin = async () => {
-    try {
-      const result = await loginAsGuest();
-      if (result.meta.requestStatus === "fulfilled") {
-        // Misafir girişi başarılı, display name modal'ı gösterilecek
-      } else {
-        Alert.alert("Hata", result.payload as string);
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Misafir girişi yapılamadı";
-      Alert.alert("Hata", errorMessage);
-    }
+    // try {
+    //   const result = await loginAsGuest();
+    //   if (result.meta.requestStatus === "fulfilled") {
+    //     // Misafir girişi başarılı, display name modal'ı gösterilecek
+    //   } else {
+    //     Alert.alert("Hata", result.payload as string);
+    //   }
+    // } catch (error) {
+    //   const errorMessage =
+    //     error instanceof Error ? error.message : "Misafir girişi yapılamadı";
+    //   Alert.alert("Hata", errorMessage);
+    // }
   };
 
   return (
