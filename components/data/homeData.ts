@@ -7,7 +7,7 @@ export const editingServices = [
     subtitle: "LinkedIn Ready",
     description: "LinkedIn için profesyonel profil fotoğrafları oluşturun",
     prompt:
-      "Use all provided reference images of the same person as identity anchors. Generate a single high-resolution professional magazine-style corporate headshot preserving the subject’s exact facial features, hair texture, and natural skin tone from the reference set. Target style: subtle, reassuring smile; soft, balanced three-point studio lighting with gentle key light and natural fill; modern office background rendered with tasteful shallow depth-of-field (soft blur); centered composition, direct eye contact, relaxed upright posture; 85 mm lens equivalent look, f/2.8 depth of field; natural color grading, ultra-high-resolution (4k+), editorial quality. Requirements: maintain the person’s real identity and proportions from the reference images; do not alter facial structure, eye color, or hairstyle beyond minor grooming adjustments; blend lighting and color so the final image looks like a cohesive professional studio shoot. Negative prompt: harsh shadows, cartoon or illustration style, text or watermarks, cluttered foreground, over-saturated colors, plastic skin smoothing, obvious digital artifacts. Aspect ratio: 3:4.",
+      "Use all provided reference images of the same person as identity anchors. Generate a single high-resolution professional magazine-style corporate headshot preserving the subject's exact facial features, hair texture, and natural skin tone from the reference set. Target style: subtle, reassuring smile; soft, balanced three-point studio lighting with gentle key light and natural fill; modern office background rendered with tasteful shallow depth-of-field (soft blur); centered composition, direct eye contact, relaxed upright posture; 85 mm lens equivalent look, f/2.8 depth of field; natural color grading, ultra-high-resolution (4k+), editorial quality. Requirements: maintain the person's real identity and proportions from the reference images; do not alter facial structure, eye color, or hairstyle beyond minor grooming adjustments; blend lighting and color so the final image looks like a cohesive professional studio shoot. Negative prompt: harsh shadows, cartoon or illustration style, text or watermarks, cluttered foreground, over-saturated colors, plastic skin smoothing, obvious digital artifacts. Aspect ratio: 3:4.",
     icon: "person",
     color: "#0077B5",
     gradient: ["#0077B5", "#005885"],
@@ -20,6 +20,7 @@ export const editingServices = [
     usageCount: "2.5K+",
     isPopular: true,
     badge: "En Popüler",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -49,6 +50,7 @@ export const editingServices = [
     usageCount: "1.8K+",
     isPopular: false,
     badge: "Hızlı",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -78,6 +80,7 @@ export const editingServices = [
     usageCount: "1.2K+",
     isPopular: false,
     badge: "Kaliteli",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/ccsr",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}/status",
@@ -107,6 +110,7 @@ export const editingServices = [
     usageCount: "3.1K+",
     isPopular: true,
     badge: "Yaratıcı",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -141,6 +145,7 @@ export const editingServices = [
     usageCount: "1.1K+",
     isPopular: true,
     badge: "Favori",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -167,6 +172,7 @@ export const editingServices = [
     usageCount: "2.0K+",
     isPopular: true,
     badge: "Pro",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/ccsr",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}/status",
@@ -192,6 +198,7 @@ export const editingServices = [
     usageCount: "980+",
     isPopular: false,
     badge: "Estetik",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -218,6 +225,7 @@ export const editingServices = [
     usageCount: "640+",
     isPopular: false,
     badge: "Hassas",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -244,6 +252,7 @@ export const editingServices = [
     usageCount: "1.0K+",
     isPopular: true,
     badge: "Popüler",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -270,6 +279,7 @@ export const editingServices = [
     usageCount: "720+",
     isPopular: false,
     badge: "Yaratıcı",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -296,6 +306,7 @@ export const editingServices = [
     usageCount: "1.4K+",
     isPopular: true,
     badge: "Portre",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -322,6 +333,7 @@ export const editingServices = [
     usageCount: "1.6K+",
     isPopular: false,
     badge: "Profesyonel",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -348,6 +360,7 @@ export const editingServices = [
     usageCount: "1.3K+",
     isPopular: true,
     badge: "Sihirli",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -374,6 +387,7 @@ export const editingServices = [
     usageCount: "870+",
     isPopular: false,
     badge: "Sinematik",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -400,6 +414,7 @@ export const editingServices = [
     usageCount: "520+",
     isPopular: false,
     badge: "Tematik",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -426,6 +441,7 @@ export const editingServices = [
     usageCount: "690+",
     isPopular: true,
     badge: "Nostalji",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/ccsr",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}/status",
@@ -451,6 +467,7 @@ export const editingServices = [
     usageCount: "1.1K+",
     isPopular: true,
     badge: "Eğlenceli",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
@@ -477,6 +494,7 @@ export const editingServices = [
     usageCount: "430+",
     isPopular: false,
     badge: "Deneysel",
+    token: 4,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",

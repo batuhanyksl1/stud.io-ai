@@ -196,7 +196,7 @@ ImageCard.displayName = "ImageCard";
 
 export default function ProfileTab() {
   const { colors, colorScheme } = useTheme();
-  const { logout, user } = useAuth();
+  const { user } = useAuth();
 
   // Kullanıcı profil bilgilerini currentUser'dan al
   const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -215,6 +215,38 @@ export default function ProfileTab() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [currentToken, setCurrentToken] = useState<number>(100);
+
+  // Token bilgisini Firestore'dan çek
+  const fetchUserToken = async () => {
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        console.log("Kullanıcı giriş yapmamış, token çekilemiyor");
+        return;
+      }
+
+      const userDoc = await firestore()
+        .collection("Account")
+        .doc(currentUser.uid)
+        .get();
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const token = userData?.currentToken || 100;
+        console.log("📊 Firestore'dan gelen token:", token);
+        console.log("📊 userData:", userData);
+        setCurrentToken(token);
+        console.log("✅ Token state güncellendi:", token);
+      } else {
+        console.log("❌ Kullanıcı dokümanı bulunamadı");
+        setCurrentToken(100); // Varsayılan değer
+      }
+    } catch (error) {
+      console.error("Token çekme hatası:", error);
+      setCurrentToken(100); // Hata durumunda varsayılan değer
+    }
+  };
 
   // Firebase sorgusu - firebase-test.tsx'deki gibi
   const fetchUserDocuments = async () => {
@@ -270,6 +302,7 @@ export default function ProfileTab() {
   // Kullanıcı bilgilerini güncelle
   useEffect(() => {
     if (user) {
+      console.log("🔄 userProfile güncelleniyor, currentToken:", currentToken);
       setUserProfile({
         name: user.displayName || "",
         email: user.email || "",
@@ -278,10 +311,10 @@ export default function ProfileTab() {
           ? new Date(user.metadata.creationTime)
           : new Date(),
         totalCreations: 0,
-        remainingTokens: 100, // Bu değer daha sonra Firestore'dan çekilebilir
+        remainingTokens: currentToken, // Firestore'dan gelen token değeri
       });
     }
-  }, [user]);
+  }, [user, currentToken]);
 
   // Refresh fonksiyonu
   const onRefresh = useCallback(async () => {
@@ -289,7 +322,7 @@ export default function ProfileTab() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     try {
-      await fetchUserDocuments();
+      await Promise.all([fetchUserDocuments(), fetchUserToken()]);
     } finally {
       setRefreshing(false);
     }
@@ -298,6 +331,7 @@ export default function ProfileTab() {
   // Component mount olduğunda veriyi çek
   useEffect(() => {
     fetchUserDocuments();
+    fetchUserToken();
   }, [user?.uid]);
 
   const _createNewImage = useCallback(() => {
@@ -407,7 +441,7 @@ export default function ProfileTab() {
                 color="primary"
                 style={styles.statNumber}
               >
-                {userProfile.remainingTokens}
+                {currentToken}
               </ThemedText>
               <ThemedText
                 variant="caption"
@@ -485,7 +519,7 @@ export default function ProfileTab() {
             <View style={styles.galleryGrid}>
               {documents
                 .filter((doc) => doc.result?.data?.images?.length > 0)
-                .map((doc, index) => {
+                .map((doc, _index) => {
                   // Sadece result.data.images'den ilk görseli kapak fotoğrafı olarak kullan
                   const coverImageUrl = doc.result?.data?.images?.[0]?.url;
 

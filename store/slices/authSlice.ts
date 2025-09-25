@@ -7,6 +7,7 @@ import auth, {
   signInWithEmailAndPassword,
   signOut as signOutFirebase,
 } from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // Types
@@ -123,6 +124,29 @@ export const signUp = createAsyncThunk(
         // Send email verification
         await sendEmailVerification(userCredential.user);
         console.log("Email doğrulama maili gönderildi");
+
+        // Create user document in Firestore Account collection
+        try {
+          await firestore()
+            .collection("Account")
+            .doc(userCredential.user.uid)
+            .set({
+              id: credentials.displayName, // Kullanıcı adı
+              email: credentials.email,
+              displayName: credentials.displayName,
+              createdAt: firestore.FieldValue.serverTimestamp(),
+              emailVerified: false,
+              lastLoginAt: null,
+              currentToken: 0, // Başlangıç token sayısı
+            });
+          console.log(
+            "Kullanıcı Firestore'da oluşturuldu:",
+            userCredential.user.uid,
+          );
+        } catch (firestoreError) {
+          console.error("Firestore'a kullanıcı kaydedilemedi:", firestoreError);
+          // Firestore hatası olsa bile kullanıcı oluşturma işlemini devam ettir
+        }
       }
 
       return userCredential.user;
