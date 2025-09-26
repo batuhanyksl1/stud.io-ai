@@ -40,6 +40,7 @@ const ImageGeneratorScreen = () => {
     hasPreSelectedImage: _hasPreSelectedImage,
     gradient,
     title,
+    token,
   } = useLocalSearchParams<{
     servicePrompt: string;
     aiRequestUrl: string;
@@ -49,6 +50,7 @@ const ImageGeneratorScreen = () => {
     hasPreSelectedImage: string;
     gradient: string;
     title: string;
+    token: string;
   }>();
 
   // Gradient renklerini parse et
@@ -227,11 +229,19 @@ const ImageGeneratorScreen = () => {
     console.log("✨ handleGenerateImage - işlem başlatılıyor...");
 
     try {
+      const numericToken = token ? Number(token) : undefined;
+      const validToken =
+        typeof numericToken === "number" &&
+        Number.isFinite(numericToken) &&
+        numericToken > 0
+          ? numericToken
+          : undefined;
       await generateImage(
         currentPrompt,
         aiRequestUrl,
         aiStatusUrl,
         aiResultUrl,
+        validToken,
       );
       console.log("✅ handleGenerateImage - işlem başarıyla tamamlandı");
     } catch (err: any) {

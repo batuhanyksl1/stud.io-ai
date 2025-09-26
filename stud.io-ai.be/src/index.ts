@@ -1,12 +1,12 @@
-import {onRequest, HttpsError} from "firebase-functions/v2/https";
-import {setGlobalOptions} from "firebase-functions/v2";
 import * as logger from "firebase-functions/logger";
-import {defineSecret} from "firebase-functions/params"; // ✅ Secrets API
+import { defineSecret } from "firebase-functions/params"; // ✅ Secrets API
+import { setGlobalOptions } from "firebase-functions/v2";
+import { HttpsError, onRequest } from "firebase-functions/v2/https";
 
 // ----------------------------------------------------------------------------
 // Global config
 // ----------------------------------------------------------------------------
-setGlobalOptions({maxInstances: 5, region: "europe-west1"});
+setGlobalOptions({ maxInstances: 5, region: "europe-west1" });
 
 // Keep your FAL key in Firebase Secrets Manager
 const FAL_SECRET = defineSecret("FAL_KEY");
@@ -30,26 +30,31 @@ function getFalKey(): string {
  * Builds request body for FAL AI API calls.
  * @param {object} params - Request parameters.
  * @param {string} params.prompt - The prompt text.
- * @param {string} params.imageUrl - The image URL.
+ * @param {string[]} params.imageUrls - The image URLs array.
  * @param {Record<string, unknown> | null} params.extra - Extra parameters.
+ * @param {number} params.token - Token count for the request.
  * @return {object} The request body.
  */
 function buildRequestBody({
   prompt,
-  imageUrl,
+  imageUrls,
   extra,
+  token,
 }: {
   prompt: string;
-  imageUrl: string;
+  imageUrls: string[];
   extra?: Record<string, unknown> | null;
+  token?: number;
 }) {
+  const hasValidToken = typeof token === "number" && Number.isFinite(token) && token > 0;
   return {
     prompt,
-    image_urls: [imageUrl],
+    image_urls: imageUrls,
     guidance_scale: 3.5,
     num_images: 1,
     output_format: "jpeg",
     safety_tolerance: "2",
+    ...(hasValidToken ? { token } : {}),
     ...(extra || {}),
   };
 }
@@ -125,17 +130,15 @@ async function makeHttpRequest({
 
     if (!response.ok) {
       const errorText = await response.text();
-      logger.error(
-        `Request failed: ${response.status} ${response.statusText}`,
-        {
-          url,
-          method,
-          error: errorText,
-        });
+      logger.error(`Request failed: ${response.status} ${response.statusText}`, {
+        url,
+        method,
+        error: errorText,
+      });
       throw new HttpsError(
         "internal",
         `Request failed: ${response.status} ${response.statusText}`,
-        {url, status: response.status, error: errorText},
+        { url, status: response.status, error: errorText },
       );
     }
 
@@ -143,9 +146,8 @@ async function makeHttpRequest({
     logger.info(`Request successful to: ${url}`);
     return data;
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    logger.error("HTTP request error:", {url, method, error: errorMessage});
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    logger.error("HTTP request error:", { url, method, error: errorMessage });
 
     if (error instanceof HttpsError) {
       throw error;
@@ -181,12 +183,12 @@ export const bffService = onRequest(
     }
 
     if (req.method !== "POST") {
-      res.status(405).json({error: "Method not allowed"});
+      res.status(405).json({ error: "Method not allowed" });
       return;
     }
 
     try {
-      const {url, method, headers, body, useAuth} = req.body as BffRequestData;
+      const { url, method, headers, body, useAuth } = req.body as BffRequestData;
 
       // URL validasyonu
       if (!url || typeof url !== "string") {
@@ -204,8 +206,8 @@ export const bffService = onRequest(
       ];
 
       const urlObj = new URL(url);
-      const isAllowed = allowedDomains.some((domain) =>
-        urlObj.hostname === domain || urlObj.hostname.endsWith(`.${domain}`),
+      const isAllowed = allowedDomains.some(
+        (domain) => urlObj.hostname === domain || urlObj.hostname.endsWith(`.${domain}`),
       );
 
       if (!isAllowed) {
@@ -263,21 +265,24 @@ export const aiToolRequest = onRequest(
     }
 
     if (req.method !== "POST") {
-      res.status(405).json({error: "Method not allowed"});
+      res.status(405).json({ error: "Method not allowed" });
       return;
     }
 
     try {
-      const {serviceUrl, prompt, imageUrl, extra} = req.body;
+      const { serviceUrl, prompt, imageUrl, image_urls, extra, token } = req.body;
 
-      if (!prompt || !imageUrl) {
+      if (!prompt || (!imageUrl && !image_urls)) {
         res.status(400).json({
-          error: "prompt ve imageUrl gereklidir",
+          error: "prompt ve imageUrl/image_urls gereklidir",
         });
         return;
       }
 
-      const body = buildRequestBody({prompt, imageUrl, extra});
+      // image_urls array varsa onu kullan, yoksa imageUrl'den array oluştur
+      const imageUrls = image_urls || [imageUrl];
+
+      const body = buildRequestBody({ prompt, imageUrls, extra, token });
 
       const result = await makeHttpRequest({
         url: serviceUrl,
@@ -321,12 +326,12 @@ export const aiToolStatus = onRequest(
     }
 
     if (req.method !== "POST") {
-      res.status(405).json({error: "Method not allowed"});
+      res.status(405).json({ error: "Method not allowed" });
       return;
     }
 
     try {
-      const {serviceUrl, requestId, extra} = req.body;
+      const { serviceUrl, requestId, extra } = req.body;
 
       if (!requestId) {
         res.status(400).json({
@@ -335,7 +340,7 @@ export const aiToolStatus = onRequest(
         return;
       }
 
-      const body = buildStatusBody({requestId, extra});
+      const body = buildStatusBody({ requestId, extra });
 
       const result = await makeHttpRequest({
         url: serviceUrl,
@@ -378,12 +383,12 @@ export const aiToolResult = onRequest(
     }
 
     if (req.method !== "POST") {
-      res.status(405).json({error: "Method not allowed"});
+      res.status(405).json({ error: "Method not allowed" });
       return;
     }
 
     try {
-      const {serviceUrl, requestId, extra} = req.body;
+      const { serviceUrl, requestId, extra } = req.body;
 
       if (!requestId) {
         res.status(400).json({
@@ -392,7 +397,7 @@ export const aiToolResult = onRequest(
         return;
       }
 
-      const body = buildStatusBody({requestId, extra});
+      const body = buildStatusBody({ requestId, extra });
 
       const result = await makeHttpRequest({
         url: serviceUrl,

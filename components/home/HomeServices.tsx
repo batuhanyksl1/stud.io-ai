@@ -21,6 +21,7 @@ export const HomeServices: React.FC = () => {
     hasPreSelectedImage: boolean,
     gradient: string[],
     title: string,
+    token: number,
   ) => {
     // Yeni servis seçildiğinde tüm görselleri ve UI state'ini temizle
     clearAllImages();
@@ -37,6 +38,7 @@ export const HomeServices: React.FC = () => {
         hasPreSelectedImage: hasPreSelectedImage ? "true" : "false",
         gradient: JSON.stringify(gradient),
         title: title,
+        token: token,
       },
     });
     console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
@@ -56,6 +58,7 @@ export const HomeServices: React.FC = () => {
             service.hasPreSelectedImage as boolean,
             service.gradient as string[],
             service.title as string,
+            service.token as number,
           )
         }
         activeOpacity={0.8}

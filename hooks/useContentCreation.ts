@@ -106,6 +106,7 @@ export function useContentCreation() {
     aiRequestUrl: string,
     aiStatusUrl: string,
     aiResultUrl: string,
+    token?: number,
   ) => {
     if (!localImageUri && (!localImageUris || localImageUris.length === 0)) {
       throw new Error("Görsel seçilmemiş");
@@ -119,6 +120,7 @@ export function useContentCreation() {
         aiRequestUrl,
         aiStatusUrl,
         aiResultUrl,
+        token,
       }),
     );
   };

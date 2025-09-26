@@ -75,6 +75,7 @@ export const generateImage = createAsyncThunk<
     aiRequestUrl: string;
     aiStatusUrl: string;
     aiResultUrl: string;
+    token?: number;
   },
   { rejectValue: string }
 >(
@@ -87,6 +88,7 @@ export const generateImage = createAsyncThunk<
       aiRequestUrl,
       aiStatusUrl,
       aiResultUrl,
+      token,
     },
     { rejectWithValue },
   ) => {
@@ -125,6 +127,10 @@ export const generateImage = createAsyncThunk<
       }
 
       let storageUrls: string[] = [];
+
+      // Token kontrolü: Geçerli değilse göndermeyeceğiz, hata fırlatma
+      const hasValidToken =
+        typeof token === "number" && Number.isFinite(token) && token > 0;
 
       if (hasMultipleImages && localImageUris) {
         // Çoklu görsel yükleme
@@ -211,6 +217,7 @@ export const generateImage = createAsyncThunk<
         prompt: servicePrompt,
         image_urls: storageUrls, // Her durumda array formatında gönder
         serviceUrl: aiRequestUrl, // FAL API endpoint
+        ...(hasValidToken ? { token } : {}), // Sadece geçerli ise ekle
         extra: {
           strength: 0.8,
         },
