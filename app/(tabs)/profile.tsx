@@ -529,8 +529,11 @@ export default function ProfileTab() {
                       style={styles.galleryItem}
                       activeOpacity={0.8}
                       onPress={() => {
-                        // Görsel detayına git
-                        console.log("Görsel tıklandı:", doc.id);
+                        // Detay sayfasına yönlen
+                        router.push({
+                          pathname: "/gallery/[id]",
+                          params: { id: doc.id },
+                        });
                       }}
                     >
                       <View style={styles.galleryImageContainer}>
