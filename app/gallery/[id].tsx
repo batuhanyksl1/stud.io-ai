@@ -8,7 +8,6 @@ import {
   Image,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
 
@@ -65,13 +64,53 @@ export default function GalleryItemDetailScreen() {
     };
   }, [id]);
 
-  const images: { url?: string }[] = useMemo(() => {
-    const resultImages = docData?.result?.data?.images;
-    if (Array.isArray(resultImages)) return resultImages;
-    const dataImages = docData?.data?.images;
-    if (Array.isArray(dataImages)) return dataImages;
-    return [];
+  // Alanlarin hazirlanmasi
+  const resultImages: { url?: string }[] = useMemo(() => {
+    const arr = docData?.result?.data?.images;
+    return Array.isArray(arr) ? arr : [];
   }, [docData]);
+
+  const referenceImageUrls: string[] = useMemo(() => {
+    const arr = docData?.imageUrls;
+    return Array.isArray(arr) ? arr : [];
+  }, [docData]);
+
+  const coverUrl: string | undefined = useMemo(() => {
+    // Sonuc gorselini once result.images[0].url'den, yoksa data.images[0].url'den al
+    const urlFromResult = resultImages?.[0]?.url;
+    if (urlFromResult) return urlFromResult;
+    const dataImages = docData?.data?.images;
+    if (Array.isArray(dataImages) && dataImages[0]?.url)
+      return dataImages[0].url;
+    return undefined;
+  }, [docData, resultImages]);
+
+  const createdAtText = useMemo(() => {
+    const ts = docData?.createdAt;
+    if (ts?.seconds) {
+      try {
+        const d = new Date(ts.seconds * 1000 + (ts.nanoseconds || 0) / 1e6);
+        return d.toLocaleString();
+      } catch {}
+    }
+    const updated = docData?.result?.updatedAt;
+    if (updated?._seconds) {
+      const d = new Date(updated._seconds * 1000);
+      return d.toLocaleString();
+    }
+    return undefined;
+  }, [docData]);
+
+  const hasCustomPrompt: boolean = useMemo(() => {
+    const val = docData?.hasCustomPrompt;
+    return Boolean(val);
+  }, [docData]);
+
+  const prompt: string | undefined = useMemo(() => {
+    if (!hasCustomPrompt) return undefined;
+    const p = docData?.prompt;
+    return typeof p === "string" ? p : undefined;
+  }, [docData, hasCustomPrompt]);
 
   return (
     <ThemedView style={styles.container}>
@@ -107,21 +146,42 @@ export default function GalleryItemDetailScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={{ gap: 12 }}>
-            {images.length > 0 && (
+            {/* Buyuk sonuc gorseli */}
+            {coverUrl && (
               <ThemedCard elevation="sm" style={{ padding: 8 }}>
                 <ThemedText
                   variant="body"
                   weight="semiBold"
                   style={{ marginBottom: 8 }}
                 >
-                  Üretilen Görseller
+                  Sonuç
+                </ThemedText>
+                <View style={styles.coverWrapper}>
+                  <Image
+                    source={{ uri: coverUrl }}
+                    style={styles.coverImage}
+                    resizeMode="cover"
+                  />
+                </View>
+              </ThemedCard>
+            )}
+
+            {/* Kucuk referans gorseller */}
+            {referenceImageUrls.length > 0 && (
+              <ThemedCard elevation="sm" style={{ padding: 8 }}>
+                <ThemedText
+                  variant="body"
+                  weight="semiBold"
+                  style={{ marginBottom: 8 }}
+                >
+                  Referans Görseller
                 </ThemedText>
                 <View style={styles.imageGrid}>
-                  {images.map((img, idx) => (
+                  {referenceImageUrls.map((url, idx) => (
                     <View key={idx} style={styles.imageItem}>
-                      {!!img?.url && (
+                      {!!url && (
                         <Image
-                          source={{ uri: img.url }}
+                          source={{ uri: url }}
                           style={styles.image}
                           resizeMode="cover"
                         />
@@ -132,26 +192,37 @@ export default function GalleryItemDetailScreen() {
               </ThemedCard>
             )}
 
+            {/* Prompt (sadece hasCustomPrompt true ise) */}
+            {hasCustomPrompt && !!prompt && (
+              <ThemedCard elevation="sm" style={{ padding: 12 }}>
+                <ThemedText
+                  variant="body"
+                  weight="semiBold"
+                  style={{ marginBottom: 8 }}
+                >
+                  Kullanılan Prompt
+                </ThemedText>
+                <ThemedText variant="body" color="secondary">
+                  {prompt}
+                </ThemedText>
+              </ThemedCard>
+            )}
+
+            {/* Meta bilgiler */}
             <ThemedCard elevation="sm" style={{ padding: 12 }}>
               <ThemedText
                 variant="body"
                 weight="semiBold"
                 style={{ marginBottom: 8 }}
               >
-                Kayıt Bilgileri (Tüm Alanlar)
+                Detaylar
               </ThemedText>
-              <View
-                style={[
-                  styles.jsonBox,
-                  {
-                    borderColor: colors.border,
-                    backgroundColor: colors.surface,
-                  },
-                ]}
-              >
-                <Text style={[styles.codeText, { color: colors.textPrimary }]}>
-                  {JSON.stringify(docData, null, 2)}
-                </Text>
+              <View style={{ gap: 6 }}>
+                {!!createdAtText && (
+                  <ThemedText variant="body" color="secondary">
+                    Oluşturma Tarihi: {createdAtText}
+                  </ThemedText>
+                )}
               </View>
             </ThemedCard>
           </View>
@@ -173,6 +244,16 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 12,
+  },
+  coverWrapper: {
+    width: "100%",
+    borderRadius: 12,
+    overflow: "hidden",
+    aspectRatio: 1,
+  },
+  coverImage: {
+    width: "100%",
+    height: "100%",
   },
   imageGrid: {
     flexDirection: "row",
