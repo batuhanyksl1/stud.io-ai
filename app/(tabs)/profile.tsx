@@ -215,7 +215,7 @@ export default function ProfileTab() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentToken, setCurrentToken] = useState<number>(100);
+  const [currentToken, setCurrentToken] = useState<number | null>(null);
 
   // Token bilgisini Firestore'dan çek
   const fetchUserToken = async () => {
@@ -233,18 +233,18 @@ export default function ProfileTab() {
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        const token = userData?.currentToken || 100;
+        const token = userData?.currentToken;
         console.log("📊 Firestore'dan gelen token:", token);
         console.log("📊 userData:", userData);
-        setCurrentToken(token);
+        setCurrentToken(typeof token === "number" ? token : null);
         console.log("✅ Token state güncellendi:", token);
       } else {
         console.log("❌ Kullanıcı dokümanı bulunamadı");
-        setCurrentToken(100); // Varsayılan değer
+        setCurrentToken(null); // Yüklenene kadar gösterme
       }
     } catch (error) {
       console.error("Token çekme hatası:", error);
-      setCurrentToken(100); // Hata durumunda varsayılan değer
+      setCurrentToken(null); // Hata durumunda gösterme
     }
   };
 
@@ -311,7 +311,7 @@ export default function ProfileTab() {
           ? new Date(user.metadata.creationTime)
           : new Date(),
         totalCreations: 0,
-        remainingTokens: currentToken, // Firestore'dan gelen token değeri
+        remainingTokens: typeof currentToken === "number" ? currentToken : 0, // UI'da kullanılmıyor
       });
     }
   }, [user, currentToken]);
@@ -441,7 +441,7 @@ export default function ProfileTab() {
                 color="primary"
                 style={styles.statNumber}
               >
-                {currentToken}
+                {currentToken ?? ""}
               </ThemedText>
               <ThemedText
                 variant="caption"
