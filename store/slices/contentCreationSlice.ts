@@ -1,5 +1,7 @@
 import { auth, storage } from "@/firebase.config";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 import { Alert } from "react-native";
 
 export type ProcessingStatus = "idle" | "pending" | "fulfilled" | "failed";
@@ -76,6 +78,7 @@ export const generateImage = createAsyncThunk<
     aiStatusUrl: string;
     aiResultUrl: string;
     token?: number;
+    hasCustomPrompt?: boolean;
   },
   { rejectValue: string }
 >(
@@ -89,6 +92,7 @@ export const generateImage = createAsyncThunk<
       aiStatusUrl,
       aiResultUrl,
       token,
+      hasCustomPrompt,
     },
     { rejectWithValue },
   ) => {
@@ -99,6 +103,7 @@ export const generateImage = createAsyncThunk<
     console.log("✨ generateImage - aiRequestUrl:", aiRequestUrl);
     console.log("✨ generateImage - aiStatusUrl:", aiStatusUrl);
     console.log("✨ generateImage - aiResultUrl:", aiResultUrl);
+    console.log("✨ generateImage - hasCustomPrompt:", hasCustomPrompt);
 
     // Tek veya çoklu görsel kontrolü
     const hasSingleImage = localImageUri && !localImageUris;
@@ -218,6 +223,7 @@ export const generateImage = createAsyncThunk<
         image_urls: storageUrls, // Her durumda array formatında gönder
         serviceUrl: aiRequestUrl, // FAL API endpoint
         ...(hasValidToken ? { token } : {}), // Sadece geçerli ise ekle
+        hasCustomPrompt: Boolean(hasCustomPrompt),
         extra: {
           strength: 0.8,
         },
@@ -379,11 +385,9 @@ export const downloadImage = createAsyncThunk<
     }
 
     try {
-      const MediaLibrary = await import("expo-media-library");
-
       console.log("🔐 downloadImage - izin isteniyor...");
-      const { status: permissionStatus } =
-        await MediaLibrary.requestPermissionsAsync();
+      const permission = await MediaLibrary.requestPermissionsAsync();
+      const permissionStatus = permission.status;
       console.log("🔐 downloadImage - izin durumu:", permissionStatus);
 
       if (permissionStatus !== "granted") {
@@ -395,8 +399,20 @@ export const downloadImage = createAsyncThunk<
         return rejectWithValue("İzin reddedildi");
       }
 
+      // Uzak URL'yi önce yerel dosyaya indir
+      console.log("⬇️ downloadImage - dosya indiriliyor...");
+      const urlWithoutQuery = imageUrl.split("?")[0];
+      const rawName =
+        urlWithoutQuery.split("/").pop() || `image-${Date.now()}.jpg`;
+      const hasExt = rawName.includes(".");
+      const fileName = hasExt ? rawName : `${rawName}.jpg`;
+      const downloadRes = await FileSystem.downloadAsync(
+        imageUrl,
+        `${FileSystem.cacheDirectory}${fileName}`,
+      );
+
       console.log("💾 downloadImage - görsel kaydediliyor...");
-      await MediaLibrary.saveToLibraryAsync(imageUrl);
+      await MediaLibrary.saveToLibraryAsync(downloadRes.uri);
       console.log("✅ downloadImage - görsel başarıyla kaydedildi");
       Alert.alert("Başarılı", "Görsel galerinize kaydedildi.");
     } catch (error) {

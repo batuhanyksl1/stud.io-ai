@@ -107,6 +107,7 @@ export function useContentCreation() {
     aiStatusUrl: string,
     aiResultUrl: string,
     token?: number,
+    hasCustomPrompt?: boolean,
   ) => {
     if (!localImageUri && (!localImageUris || localImageUris.length === 0)) {
       throw new Error("Görsel seçilmemiş");
@@ -121,6 +122,7 @@ export function useContentCreation() {
         aiStatusUrl,
         aiResultUrl,
         token,
+        hasCustomPrompt,
       }),
     );
   };
@@ -130,7 +132,9 @@ export function useContentCreation() {
       throw new Error("İndirilecek görsel bulunamadı");
     }
 
-    return await dispatch(downloadImageAction({ imageUrl: createdImageUrl }));
+    return await dispatch(
+      downloadImageAction({ imageUrl: createdImageUrl }),
+    ).unwrap();
   };
 
   return {

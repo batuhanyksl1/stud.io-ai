@@ -236,12 +236,17 @@ const ImageGeneratorScreen = () => {
         numericToken > 0
           ? numericToken
           : undefined;
+      const hasCustomPrompt =
+        typeof currentPrompt === "string" &&
+        typeof servicePrompt === "string" &&
+        currentPrompt.trim() !== (servicePrompt || "").trim();
       await generateImage(
         currentPrompt,
         aiRequestUrl,
         aiStatusUrl,
         aiResultUrl,
         validToken,
+        hasCustomPrompt,
       );
       console.log("✅ handleGenerateImage - işlem başarıyla tamamlandı");
     } catch (err: any) {
