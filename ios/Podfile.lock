@@ -1547,6 +1547,9 @@ PODS:
     - FirebaseAuth (~> 12.2.0)
   - Firebase/CoreOnly (12.2.0):
     - FirebaseCore (~> 12.2.0)
+  - Firebase/Crashlytics (12.2.0):
+    - Firebase/CoreOnly
+    - FirebaseCrashlytics (~> 12.2.0)
   - Firebase/Firestore (12.2.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 12.2.0)
@@ -1572,6 +1575,15 @@ PODS:
     - FirebaseCore (~> 12.2.0)
   - FirebaseCoreInternal (12.2.0):
     - "GoogleUtilities/NSData+zlib (~> 8.1)"
+  - FirebaseCrashlytics (12.2.0):
+    - FirebaseCore (~> 12.2.0)
+    - FirebaseInstallations (~> 12.2.0)
+    - FirebaseRemoteConfigInterop (~> 12.2.0)
+    - FirebaseSessions (~> 12.2.0)
+    - GoogleDataTransport (~> 10.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - nanopb (~> 3.30910.0)
+    - PromisesObjC (~> 2.4)
   - FirebaseFirestore (12.2.0):
     - FirebaseCore (~> 12.2.0)
     - FirebaseCoreExtension (~> 12.2.0)
@@ -1592,6 +1604,21 @@ PODS:
     - gRPC-Core (~> 1.69.0)
     - leveldb-library (~> 1.22)
     - nanopb (~> 3.30910.0)
+  - FirebaseInstallations (12.2.0):
+    - FirebaseCore (~> 12.2.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - PromisesObjC (~> 2.4)
+  - FirebaseRemoteConfigInterop (12.2.0)
+  - FirebaseSessions (12.2.0):
+    - FirebaseCore (~> 12.2.0)
+    - FirebaseCoreExtension (~> 12.2.0)
+    - FirebaseInstallations (~> 12.2.0)
+    - GoogleDataTransport (~> 10.1)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
+    - nanopb (~> 3.30910.0)
+    - PromisesSwift (~> 2.1)
   - FirebaseSharedSwift (12.2.0)
   - FirebaseStorage (12.2.0):
     - FirebaseAppCheckInterop (~> 12.2.0)
@@ -1602,6 +1629,9 @@ PODS:
     - GTMSessionFetcher/Core (< 6.0, >= 3.4)
   - fmt (11.0.2)
   - glog (0.3.5)
+  - GoogleDataTransport (10.1.0):
+    - nanopb (~> 3.30910.0)
+    - PromisesObjC (~> 2.4)
   - GoogleUtilities/AppDelegateSwizzler (8.1.0):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
@@ -1621,6 +1651,9 @@ PODS:
     - GoogleUtilities/Privacy
   - GoogleUtilities/Privacy (8.1.0)
   - GoogleUtilities/Reachability (8.1.0):
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
+  - GoogleUtilities/UserDefaults (8.1.0):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - "gRPC-C++ (1.69.0)":
@@ -1742,6 +1775,9 @@ PODS:
     - nanopb/encode (= 3.30910.0)
   - nanopb/decode (3.30910.0)
   - nanopb/encode (3.30910.0)
+  - PromisesObjC (2.4.0)
+  - PromisesSwift (2.4.0):
+    - PromisesObjC (= 2.4.0)
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -3567,6 +3603,11 @@ PODS:
     - Firebase/Auth (= 12.2.0)
     - React-Core
     - RNFBApp
+  - RNFBCrashlytics (23.3.1):
+    - Firebase/Crashlytics (= 12.2.0)
+    - FirebaseCoreExtension
+    - React-Core
+    - RNFBApp
   - RNFBFirestore (23.3.1):
     - Firebase/Firestore (= 12.2.0)
     - React-Core
@@ -3922,6 +3963,7 @@ DEPENDENCIES:
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBAuth (from `../node_modules/@react-native-firebase/auth`)"
+  - "RNFBCrashlytics (from `../node_modules/@react-native-firebase/crashlytics`)"
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
   - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
@@ -3941,10 +3983,15 @@ SPEC REPOS:
     - FirebaseCore
     - FirebaseCoreExtension
     - FirebaseCoreInternal
+    - FirebaseCrashlytics
     - FirebaseFirestore
     - FirebaseFirestoreInternal
+    - FirebaseInstallations
+    - FirebaseRemoteConfigInterop
+    - FirebaseSessions
     - FirebaseSharedSwift
     - FirebaseStorage
+    - GoogleDataTransport
     - GoogleUtilities
     - "gRPC-C++"
     - gRPC-Core
@@ -3954,6 +4001,8 @@ SPEC REPOS:
     - libdav1d
     - libwebp
     - nanopb
+    - PromisesObjC
+    - PromisesSwift
     - RecaptchaInterop
     - SDWebImage
     - SDWebImageAVIFCoder
@@ -4175,6 +4224,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/app"
   RNFBAuth:
     :path: "../node_modules/@react-native-firebase/auth"
+  RNFBCrashlytics:
+    :path: "../node_modules/@react-native-firebase/crashlytics"
   RNFBFirestore:
     :path: "../node_modules/@react-native-firebase/firestore"
   RNFBStorage:
@@ -4234,12 +4285,17 @@ SPEC CHECKSUMS:
   FirebaseCore: 311c48a147ad4a0ab7febbaed89e8025c67510cd
   FirebaseCoreExtension: 73af080c22a2f7b44cefa391dc08f7e4ee162cb5
   FirebaseCoreInternal: 56ea29f3dad2894f81b060f706f9d53509b6ed3b
+  FirebaseCrashlytics: f83cbf176d5c637ade108c0aacf1ccbd5ec499bf
   FirebaseFirestore: 2baa1360623e942007726627653d43a5bc618ba8
   FirebaseFirestoreInternal: 6506aef21ac270bf137c34cd7283723d930eddb0
+  FirebaseInstallations: 3e884b01feabdf67582a80f3250425a00979b4ed
+  FirebaseRemoteConfigInterop: 0896fd52ab72586a355c8f389ff85aaa9e5375e1
+  FirebaseSessions: f4692789e770bec66ce17d772c0e9561c4f11737
   FirebaseSharedSwift: 52d868d4c269fcb4e4e1310c548435a9c1f46e25
   FirebaseStorage: f1578d57e1fd3683fc05f5d4d7b24b7490b321ac
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
+  GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   "gRPC-C++": cc207623316fb041a7a3e774c252cf68a058b9e8
   gRPC-Core: 860978b7db482de8b4f5e10677216309b5ff6330
@@ -4250,6 +4306,8 @@ SPEC CHECKSUMS:
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
+  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
+  PromisesSwift: 9d77319bbe72ebf6d872900551f7eeba9bce2851
   RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
   RCTDeprecation: 5f638f65935e273753b1f31a365db6a8d6dc53b5
   RCTRequired: 8b46a520ea9071e2bc47d474aa9ca31b4a935bd8
@@ -4320,6 +4378,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 7389d6a3f23f10f39b523b68eda4088fa6b5eae9
   RNFBApp: 2cbcd7fd5063d8a521a09385915934e99295a79f
   RNFBAuth: a4a7364c9efdbbc36c3cb712347ef6531251c0a7
+  RNFBCrashlytics: 4796258386d0846fc534af8e2d122b980f8068a9
   RNFBFirestore: 008035225fcafacc524f30a12c8e0e36aa20e41a
   RNFBStorage: 84a822bbe2e84c43cac249b1fe5f5a24504763c4
   RNGestureHandler: 8ff2b1434b0ff8bab28c8242a656fb842990bbc8
