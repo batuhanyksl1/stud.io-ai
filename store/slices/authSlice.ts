@@ -54,6 +54,43 @@ const initialState: AuthState = {
 };
 
 // Async thunks
+export const deleteUserAccountBackend = createAsyncThunk(
+  "auth/deleteUserAccountBackend",
+  async (_, { rejectWithValue }) => {
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        throw new Error("Kullanıcı oturumu bulunamadı");
+      }
+
+      const idToken = await currentUser.getIdToken();
+      if (!idToken) {
+        throw new Error("Kimlik doğrulama tokenı alınamadı");
+      }
+
+      const endpoint =
+        "https://europe-west1-studioai-980a7.cloudfunctions.net/deleteUserAccount";
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || "Hesap silinemedi");
+      }
+
+      // Backend başarılıysa çıkış yap
+      await signOutFirebase(auth());
+      return null;
+    } catch (error: any) {
+      return rejectWithValue(error.message || "Hesap silme başarısız");
+    }
+  },
+);
 export const signIn = createAsyncThunk(
   "auth/signIn",
   async (credentials: SignInCredentials, { rejectWithValue }) => {
@@ -563,6 +600,24 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(updateDisplayName.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Delete Account via Backend
+    builder
+      .addCase(deleteUserAccountBackend.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteUserAccountBackend.fulfilled, (state) => {
+        state.isLoading = false;
+        state.user = null;
+        state.isAuthenticated = false;
+        state.isVerified = false;
+        state.error = null;
+      })
+      .addCase(deleteUserAccountBackend.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

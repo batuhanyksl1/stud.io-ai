@@ -5,8 +5,9 @@ import {
   EditButtons,
 } from "@/components/profile";
 import { useAuth, useTheme } from "@/hooks";
-import { getAuth } from "@react-native-firebase/auth";
+//
 import * as Haptics from "expo-haptics";
+import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import { Alert, Platform, ScrollView, StyleSheet, View } from "react-native";
@@ -21,7 +22,7 @@ interface ProfileData {
 
 export default function ProfileSettingsScreen() {
   const { colors, colorScheme } = useTheme();
-  const { user, updateUserName } = useAuth();
+  const { user, updateUserName, deleteUserAccount } = useAuth();
 
   const [profileData, setProfileData] = useState<ProfileData>({
     displayName: user?.displayName || "",
@@ -121,7 +122,7 @@ export default function ProfileSettingsScreen() {
   const handleDeleteUser = () => {
     Alert.alert(
       "Kullanıcıyı Sil",
-      "Bu işlem geri alınamaz. Firebase'den kullanıcıyı kalıcı olarak silmek istediğinizden emin misiniz?",
+      "Bu işlem geri alınamaz. Hesabınızı kalıcı olarak silmek istediğinizden emin misiniz?",
       [
         { text: "İptal", style: "cancel" },
         {
@@ -129,17 +130,18 @@ export default function ProfileSettingsScreen() {
           style: "destructive",
           onPress: async () => {
             try {
-              const currentUser = getAuth().currentUser;
-              if (currentUser) {
-                await currentUser.delete();
-                console.log("Kullanıcı Firebase'den silindi");
-                // Auth state değişikliği otomatik olarak _layout.tsx'de handle edilecek
-              }
+              await deleteUserAccount();
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
+              Alert.alert("Hesap Silindi", "Hesabınız başarıyla silindi.");
+              // Güvenli yönlendirme: auth ekranına dön
+              router.replace("/auth");
             } catch (error: any) {
               console.error("Kullanıcı silme hatası:", error);
               Alert.alert(
                 "Hata",
-                "Kullanıcı silinirken bir hata oluştu: " + error.message,
+                "Kullanıcı silinirken bir hata oluştu: " + error?.message,
               );
             }
           },

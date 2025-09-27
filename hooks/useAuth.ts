@@ -4,6 +4,7 @@ import {
   // cleanupAuth,
   clearAuth,
   clearError,
+  deleteUserAccountBackend,
   // deleteAccount,
   forgotPassword,
   // initializeAuth,
@@ -56,6 +57,10 @@ export function useAuth() {
     return await dispatch(updateDisplayName(displayName));
   };
 
+  const deleteUserAccount = async () => {
+    return await dispatch(deleteUserAccountBackend()).unwrap();
+  };
+
   // const updateUserProfile = async (profileData: UpdateProfileData) => {
   //   return await dispatch(updateProfile(profileData));
   // };
@@ -97,6 +102,7 @@ export function useAuth() {
     logout,
     resetPassword,
     updateDisplayName,
+    deleteUserAccount,
     // updateUserProfile,
     // deleteUserAccount,
     clearAuthData,

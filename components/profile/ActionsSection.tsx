@@ -54,9 +54,7 @@ export const ActionsSection: React.FC<ActionsSectionProps> = ({
         style={[styles.actionItem, { borderBottomColor: colors.border }]}
         onPress={handleChangePassword}
       >
-        <View
-          style={[styles.actionIcon, { backgroundColor: colors.primarySubtle }]}
-        >
+        <View style={[styles.actionIcon]}>
           <Ionicons name="lock-closed" size={20} color={colors.primary} />
         </View>
         <View style={styles.actionContent}>
@@ -81,9 +79,7 @@ export const ActionsSection: React.FC<ActionsSectionProps> = ({
         style={[styles.actionItem, { borderBottomColor: colors.border }]}
         onPress={handleDownloadData}
       >
-        <View
-          style={[styles.actionIcon, { backgroundColor: colors.primarySubtle }]}
-        >
+        <View style={[styles.actionIcon]}>
           <Ionicons name="download" size={20} color={colors.primary} />
         </View>
         <View style={styles.actionContent}>
@@ -108,9 +104,7 @@ export const ActionsSection: React.FC<ActionsSectionProps> = ({
         style={[styles.actionItem, { borderBottomColor: colors.border }]}
         onPress={handleDeleteAccount}
       >
-        <View
-          style={[styles.actionIcon, { backgroundColor: colors.errorSubtle }]}
-        >
+        <View style={[styles.actionIcon]}>
           <Ionicons name="trash" size={20} color={colors.error} />
         </View>
         <View style={styles.actionContent}>
@@ -136,9 +130,7 @@ export const ActionsSection: React.FC<ActionsSectionProps> = ({
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.actionItem} onPress={handleDeleteUser}>
-        <View
-          style={[styles.actionIcon, { backgroundColor: colors.errorSubtle }]}
-        >
+        <View style={styles.actionIcon}>
           <Ionicons name="person-remove" size={20} color={colors.error} />
         </View>
         <View style={styles.actionContent}>

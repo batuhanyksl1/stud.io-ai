@@ -134,11 +134,6 @@ export const HomeServices: React.FC = () => {
         <ThemedText variant="h3" weight="bold">
           Tüm Servisler
         </ThemedText>
-        <TouchableOpacity>
-          <ThemedText variant="body" color="primary" weight="semiBold">
-            Tümünü Gör
-          </ThemedText>
-        </TouchableOpacity>
       </View>
       <View style={styles.servicesGrid}>
         {editingServices.map(renderServiceCard)}
