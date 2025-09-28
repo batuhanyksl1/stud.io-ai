@@ -1,11 +1,7 @@
-import { ThemedView } from "@/components";
 import { useTheme } from "@/hooks";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
 import React, { useEffect } from "react";
 import { Dimensions, StatusBar, StyleSheet, View } from "react-native";
 import Animated, {
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -23,7 +19,8 @@ export default function SplashScreen() {
   const sunRotation = useSharedValue(0);
 
   const navigateToLanding = () => {
-    router.replace("/");
+    // Auth state kontrolü _layout.tsx'te yapılıyor, burada sadece splash'i kapat
+    // Navigation'ı _layout.tsx'teki auth state'e bırak
   };
 
   useEffect(() => {
@@ -36,12 +33,8 @@ export default function SplashScreen() {
       withRepeat(withTiming(360, { duration: 3000 }), -1, false),
     );
 
-    // Navigate after animations
-    const timer = setTimeout(() => {
-      runOnJS(navigateToLanding)();
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    // Navigation'ı _layout.tsx'teki auth state'e bırak
+    // Burada sadece animasyonları çalıştır
   }, []);
 
   const screenStyle = useAnimatedStyle(() => ({
