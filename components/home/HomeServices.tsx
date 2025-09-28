@@ -109,12 +109,12 @@ export const HomeServices: React.FC = () => {
                   variant="h4"
                   weight="bold"
                   style={[styles.serviceTitle, { fontSize: titleFontSize }]}
-                  numberOfLines={1}
+                  numberOfLines={2}
                   ellipsizeMode="tail"
                 >
                   {service.title}
                 </ThemedText>
-                <ThemedText
+                {/* <ThemedText
                   variant="caption"
                   style={[
                     styles.serviceDescription,
@@ -124,7 +124,7 @@ export const HomeServices: React.FC = () => {
                   ellipsizeMode="tail"
                 >
                   {service.description}
-                </ThemedText>
+                </ThemedText> */}
               </View>
             </View>
 
