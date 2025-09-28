@@ -1,10 +1,9 @@
 import Logo from "@/components/Logo";
-import { useTheme } from "@/hooks";
+import { useDeviceDimensions, useTheme } from "@/hooks";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { RelativePathString, router } from "expo-router";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { Platform } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 
 type HeaderProps = {
   leftIconExists?: boolean;
@@ -27,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   rightIconType = "settings",
 }) => {
   const { colors } = useTheme();
+  const { isTablet, isSmallDevice } = useDeviceDimensions();
 
   switch (leftIconType) {
     case "arrow-back":
@@ -48,19 +48,28 @@ export const Header: React.FC<HeaderProps> = ({
     router.push(p as RelativePathString);
   };
 
+  // Responsive boyutlar
+  const iconSize = isTablet ? 28 : isSmallDevice ? 20 : 24;
+  const iconPadding = isTablet ? 12 : isSmallDevice ? 8 : 10;
+  const horizontalPadding = isTablet ? 24 : isSmallDevice ? 12 : 16;
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingHorizontal: horizontalPadding }]}>
       {leftIconExists ? (
         <TouchableOpacity
           style={[
             styles.iconButton,
-            { backgroundColor: colors.surface, borderColor: colors.border },
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              padding: iconPadding,
+            },
           ]}
           onPress={leftIconExists ? () => routingPath(leftIconPath) : () => {}}
         >
           <Ionicons
             name={leftIconType as any}
-            size={24}
+            size={iconSize}
             color={colors.textPrimary}
           />
         </TouchableOpacity>
@@ -68,13 +77,17 @@ export const Header: React.FC<HeaderProps> = ({
         <View />
       )}
 
-      <Logo size="md" font="poppins" />
+      <Logo size={isTablet ? "lg" : "md"} font="poppins" />
 
       {rightIconExists ? (
         <TouchableOpacity
           style={[
             styles.iconButton,
-            { backgroundColor: colors.surface, borderColor: colors.border },
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              padding: iconPadding,
+            },
           ]}
           onPress={
             rightIconExists ? () => routingPath(rightIconPath) : () => {}
@@ -82,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Ionicons
             name={rightIconType as any}
-            size={24}
+            size={iconSize}
             color={colors.textPrimary}
           />
         </TouchableOpacity>
@@ -97,13 +110,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
     paddingTop: Platform.OS === "ios" ? 0 : 60,
   },
   iconButton: {
     borderRadius: 100,
     borderWidth: 2,
-    padding: 10,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",

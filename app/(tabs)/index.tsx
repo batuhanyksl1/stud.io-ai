@@ -5,12 +5,13 @@ import {
   HomeStats,
   ThemedView,
 } from "@/components";
-import { useTheme } from "@/hooks";
+import { useDeviceDimensions, useTheme } from "@/hooks";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import { Platform, ScrollView, StyleSheet, View } from "react-native";
 export default function HomeScreen() {
   const { colors, colorScheme } = useTheme();
+  const { isTablet, isSmallDevice } = useDeviceDimensions();
 
   return (
     <ThemedView backgroundColor="background" style={styles.container}>
@@ -19,9 +20,18 @@ export default function HomeScreen() {
 
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <ScrollView
-          style={[styles.scrollView, { backgroundColor: colors.background }]}
+          style={[
+            styles.scrollView,
+            {
+              backgroundColor: colors.background,
+              paddingHorizontal: isTablet ? 24 : isSmallDevice ? 8 : 16,
+            },
+          ]}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingHorizontal: isTablet ? 0 : 0 },
+          ]}
         >
           <HomeCarousel />
           <HomeServices />

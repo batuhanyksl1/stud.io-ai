@@ -1,7 +1,7 @@
 import ThemedText from "@/components/ThemedText";
 import ThemedView from "@/components/ThemedView";
 import { editingServices } from "@/components/data";
-import { useContentCreation } from "@/hooks";
+import { useContentCreation, useDeviceDimensions } from "@/hooks";
 import Ionicon from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -11,6 +11,7 @@ import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 export const HomeServices: React.FC = () => {
   const router = useRouter();
   const { clearAllImages, resetUIState } = useContentCreation();
+  const { isTablet, isSmallDevice } = useDeviceDimensions();
 
   const handleServicePress = (
     servicePrompt: string,
@@ -44,7 +45,10 @@ export const HomeServices: React.FC = () => {
     console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
   };
 
-  const renderServiceCard = (service: (typeof editingServices)[0]) => {
+  const renderServiceCard = (
+    service: (typeof editingServices)[0],
+    cardWidth: string,
+  ) => {
     return (
       <TouchableOpacity
         key={service.id}
@@ -62,11 +66,11 @@ export const HomeServices: React.FC = () => {
           )
         }
         activeOpacity={0.8}
-        style={styles.serviceCardContainer}
+        style={[styles.serviceCardContainer, { width: cardWidth }]}
       >
         <LinearGradient
           colors={service.gradient as [string, string, ...string[]]}
-          style={styles.serviceGradient}
+          style={[styles.serviceGradient, { height: cardHeight }]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
@@ -91,28 +95,52 @@ export const HomeServices: React.FC = () => {
             </View>
 
             <View style={styles.serviceContent}>
-              <ThemedText variant="caption" style={styles.serviceSubtitle}>
-                {service.subtitle}
-              </ThemedText>
-              <ThemedText
-                variant="h4"
-                weight="bold"
-                style={styles.serviceTitle}
-              >
-                {service.title}
-              </ThemedText>
-              <ThemedText variant="caption" style={styles.serviceDescription}>
-                {service.description}
-              </ThemedText>
+              <View style={styles.serviceTextContainer}>
+                <ThemedText
+                  variant="caption"
+                  style={[
+                    styles.serviceSubtitle,
+                    { fontSize: subtitleFontSize },
+                  ]}
+                >
+                  {service.subtitle}
+                </ThemedText>
+                <ThemedText
+                  variant="h4"
+                  weight="bold"
+                  style={[styles.serviceTitle, { fontSize: titleFontSize }]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {service.title}
+                </ThemedText>
+                <ThemedText
+                  variant="caption"
+                  style={[
+                    styles.serviceDescription,
+                    { fontSize: descriptionFontSize },
+                  ]}
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                >
+                  {service.description}
+                </ThemedText>
+              </View>
             </View>
 
             <View style={styles.serviceFooter}>
               <View style={styles.serviceStats}>
                 <Ionicon name="star" size={10} color="#FFD700" />
-                <ThemedText variant="caption" style={styles.rating}>
+                <ThemedText
+                  variant="caption"
+                  style={[styles.rating, { fontSize: ratingFontSize }]}
+                >
                   {service.rating}
                 </ThemedText>
-                <ThemedText variant="caption" style={styles.usageCount}>
+                <ThemedText
+                  variant="caption"
+                  style={[styles.usageCount, { fontSize: ratingFontSize }]}
+                >
                   • {service.usageCount}
                 </ThemedText>
               </View>
@@ -128,15 +156,41 @@ export const HomeServices: React.FC = () => {
     );
   };
 
+  // Responsive grid ayarları
+  const getGridColumns = () => {
+    if (isTablet) return 3;
+    if (isSmallDevice) return 2;
+    return 2;
+  };
+
+  const getCardWidth = () => {
+    if (isTablet) return "31%";
+    if (isSmallDevice) return "48%";
+    return "48%";
+  };
+
+  // Responsive font boyutları
+  const titleFontSize = isTablet ? 18 : isSmallDevice ? 14 : 16;
+  const subtitleFontSize = isTablet ? 14 : isSmallDevice ? 10 : 12;
+  const descriptionFontSize = isTablet ? 15 : isSmallDevice ? 11 : 13;
+  const ratingFontSize = isTablet ? 14 : isSmallDevice ? 10 : 12;
+
+  // Responsive kart yüksekliği - daha yüksek
+  const cardHeight = isTablet ? 200 : isSmallDevice ? 160 : 180;
+
   return (
-    <ThemedView style={styles.servicesSection}>
+    <ThemedView
+      style={[styles.servicesSection, { paddingHorizontal: isTablet ? 0 : 12 }]}
+    >
       <View style={styles.sectionHeader}>
         <ThemedText variant="h3" weight="bold">
           Tüm Servisler
         </ThemedText>
       </View>
-      <View style={styles.servicesGrid}>
-        {editingServices.map(renderServiceCard)}
+      <View style={[styles.servicesGrid, { gap: isTablet ? 12 : 8 }]}>
+        {editingServices.map((service) =>
+          renderServiceCard(service, getCardWidth()),
+        )}
       </View>
     </ThemedView>
   );
@@ -144,7 +198,6 @@ export const HomeServices: React.FC = () => {
 
 const styles = StyleSheet.create({
   servicesSection: {
-    paddingHorizontal: 12,
     paddingTop: Platform.OS === "ios" ? 5 : 0,
   },
   sectionHeader: {
@@ -163,13 +216,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   serviceCardContainer: {
-    width: "48%",
     marginBottom: 0,
   },
   serviceGradient: {
     borderRadius: 12,
     padding: 10,
-    minHeight: 90,
+    // Yükseklik dinamik olarak ayarlanacak
   },
   serviceCardContent: {
     flex: 1,
@@ -202,24 +254,38 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   serviceContent: {
-    marginTop: 6,
-    marginBottom: 6,
+    marginTop: 8,
+    marginBottom: 8,
+    flex: 1,
+    justifyContent: "center", // İçeriği ortala
+  },
+  serviceTextContainer: {
+    flex: 1,
+    justifyContent: "flex-start", // Metinleri üstten başlat
+    paddingVertical: 4, // Üst ve alt padding
   },
   serviceSubtitle: {
     color: "rgba(255,255,255,0.8)",
-    marginBottom: 2,
+    marginBottom: 6,
     fontSize: 12,
     fontWeight: "500",
+    lineHeight: 16,
   },
   serviceTitle: {
     color: "#FFFFFF",
-    marginBottom: 4,
+    marginBottom: 8,
     fontSize: 16,
+    lineHeight: 20,
+    numberOfLines: 1, // Tek satır
+    ellipsizeMode: "tail", // Sonuna ... ekle
   },
   serviceDescription: {
     color: "rgba(255,255,255,0.9)",
-    lineHeight: 16,
+    lineHeight: 18,
     fontSize: 13,
+    marginTop: 6,
+    numberOfLines: 2, // Maksimum 2 satır
+    ellipsizeMode: "tail", // Sonuna ... ekle
   },
   serviceFooter: {
     flexDirection: "row",

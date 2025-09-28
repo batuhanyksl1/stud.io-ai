@@ -1,5 +1,6 @@
 import { Typography } from "@/constants/DesignTokens";
-import { useTheme } from "@/hooks/useTheme";
+import { useDeviceDimensions, useTheme } from "@/hooks";
+import { getResponsiveFontSize, getResponsiveLineHeight } from "@/utils";
 import React, { ReactNode } from "react";
 import { Text, TextStyle } from "react-native";
 
@@ -27,6 +28,8 @@ interface ThemedTextProps {
   weight?: "regular" | "medium" | "semiBold" | "bold";
   align?: "left" | "center" | "right";
   fontFamily?: string;
+  numberOfLines?: number;
+  ellipsizeMode?: "head" | "middle" | "tail" | "clip";
 }
 
 /**
@@ -43,68 +46,143 @@ export default function ThemedText({
   weight = "regular",
   align = "left",
   fontFamily,
+  numberOfLines,
+  ellipsizeMode,
 }: ThemedTextProps) {
   const { colors } = useTheme();
+  const deviceDimensions = useDeviceDimensions();
 
   const getVariantStyle = (): TextStyle => {
     switch (variant) {
-      case "h1":
+      case "h1": {
+        const fontSize = getResponsiveFontSize(
+          Typography.fontSize.xxxxxxl,
+          deviceDimensions,
+        );
         return {
-          fontSize: Typography.fontSize.xxxxxxl,
-          lineHeight: Typography.fontSize.xxxxxxl * Typography.lineHeight.tight,
+          fontSize,
+          lineHeight: getResponsiveLineHeight(
+            fontSize,
+            Typography.lineHeight.tight,
+          ),
           fontFamily: Typography.fontFamily.bold,
         };
-      case "h2":
+      }
+      case "h2": {
+        const fontSize = getResponsiveFontSize(
+          Typography.fontSize.xxxxxl,
+          deviceDimensions,
+        );
         return {
-          fontSize: Typography.fontSize.xxxxxl,
-          lineHeight: Typography.fontSize.xxxxxl * Typography.lineHeight.tight,
+          fontSize,
+          lineHeight: getResponsiveLineHeight(
+            fontSize,
+            Typography.lineHeight.tight,
+          ),
           fontFamily: Typography.fontFamily.bold,
         };
-      case "h3":
+      }
+      case "h3": {
+        const fontSize = getResponsiveFontSize(
+          Typography.fontSize.xxxxl,
+          deviceDimensions,
+        );
         return {
-          fontSize: Typography.fontSize.xxxxl,
-          lineHeight: Typography.fontSize.xxxxl * Typography.lineHeight.tight,
+          fontSize,
+          lineHeight: getResponsiveLineHeight(
+            fontSize,
+            Typography.lineHeight.tight,
+          ),
           fontFamily: Typography.fontFamily.semiBold,
           marginTop: 16,
         };
-      case "h4":
+      }
+      case "h4": {
+        const fontSize = getResponsiveFontSize(
+          Typography.fontSize.xxxl,
+          deviceDimensions,
+        );
         return {
-          fontSize: Typography.fontSize.xxxl,
-          lineHeight: Typography.fontSize.xxxl * Typography.lineHeight.tight,
+          fontSize,
+          lineHeight: getResponsiveLineHeight(
+            fontSize,
+            Typography.lineHeight.tight,
+          ),
           fontFamily: Typography.fontFamily.semiBold,
         };
-      case "bodyLarge":
+      }
+      case "bodyLarge": {
+        const fontSize = getResponsiveFontSize(
+          Typography.fontSize.lg,
+          deviceDimensions,
+        );
         return {
-          fontSize: Typography.fontSize.lg,
-          lineHeight: Typography.fontSize.lg * Typography.lineHeight.normal,
+          fontSize,
+          lineHeight: getResponsiveLineHeight(
+            fontSize,
+            Typography.lineHeight.normal,
+          ),
           fontFamily: Typography.fontFamily.primary,
         };
-      case "body":
+      }
+      case "body": {
+        const fontSize = getResponsiveFontSize(
+          Typography.fontSize.md,
+          deviceDimensions,
+        );
         return {
-          fontSize: Typography.fontSize.md,
-          lineHeight: Typography.fontSize.md * Typography.lineHeight.normal,
+          fontSize,
+          lineHeight: getResponsiveLineHeight(
+            fontSize,
+            Typography.lineHeight.normal,
+          ),
           fontFamily: Typography.fontFamily.primary,
         };
-      case "caption":
+      }
+      case "caption": {
+        const fontSize = getResponsiveFontSize(
+          Typography.fontSize.sm,
+          deviceDimensions,
+        );
         return {
-          fontSize: Typography.fontSize.sm,
-          lineHeight: Typography.fontSize.sm * Typography.lineHeight.normal,
+          fontSize,
+          lineHeight: getResponsiveLineHeight(
+            fontSize,
+            Typography.lineHeight.normal,
+          ),
           fontFamily: Typography.fontFamily.primary,
         };
-      case "overline":
+      }
+      case "overline": {
+        const fontSize = getResponsiveFontSize(
+          Typography.fontSize.xs,
+          deviceDimensions,
+        );
         return {
-          fontSize: Typography.fontSize.xs,
-          lineHeight: Typography.fontSize.xs * Typography.lineHeight.normal,
+          fontSize,
+          lineHeight: getResponsiveLineHeight(
+            fontSize,
+            Typography.lineHeight.normal,
+          ),
           fontFamily: Typography.fontFamily.medium,
           letterSpacing: Typography.letterSpacing.wide,
           textTransform: "uppercase",
         };
-      default:
+      }
+      default: {
+        const fontSize = getResponsiveFontSize(
+          Typography.fontSize.md,
+          deviceDimensions,
+        );
         return {
-          fontSize: Typography.fontSize.md,
-          lineHeight: Typography.fontSize.md * Typography.lineHeight.normal,
+          fontSize,
+          lineHeight: getResponsiveLineHeight(
+            fontSize,
+            Typography.lineHeight.normal,
+          ),
           fontFamily: Typography.fontFamily.primary,
         };
+      }
     }
   };
 
@@ -155,5 +233,13 @@ export default function ThemedText({
     ...(style ? [style] : []),
   ];
 
-  return <Text style={textStyle}>{children}</Text>;
+  return (
+    <Text
+      style={textStyle}
+      numberOfLines={numberOfLines}
+      ellipsizeMode={ellipsizeMode}
+    >
+      {children}
+    </Text>
+  );
 }

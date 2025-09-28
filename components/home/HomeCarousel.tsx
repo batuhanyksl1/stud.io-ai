@@ -1,7 +1,7 @@
 import ThemedText from "@/components/ThemedText";
 import ThemedView from "@/components/ThemedView";
 import { editingServices } from "@/components/data";
-import { useContentCreation, useTheme } from "@/hooks";
+import { useContentCreation, useDeviceDimensions, useTheme } from "@/hooks";
 import Ionicon from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -24,6 +24,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
   const router = useRouter();
   const { colors } = useTheme();
   const { clearAllImages, resetUIState } = useContentCreation();
+  const { width, isTablet, isSmallDevice } = useDeviceDimensions();
   const [currentPage, setCurrentPage] = useState(0);
   const pagerRef = useRef<PagerView>(null);
   const autoScrollInterval = useRef<number | null>(null);
@@ -72,18 +73,35 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
     console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
   };
 
-  const renderCarouselItem = (item: (typeof editingServices)[0]) => (
+  const renderCarouselItem = (
+    item: (typeof editingServices)[0],
+    cardHeight: number,
+    imageWidth: number,
+    imageHeight: number,
+  ) => (
     <View style={styles.carouselPage}>
       <LinearGradient
         colors={item.gradient as any}
-        style={styles.carouselCard}
+        style={[styles.carouselCard, { height: cardHeight }]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
         {/* Görseller arka planda */}
         <View style={styles.carouselImagesContainer}>
-          <Image source={item.image1} style={styles.carouselImage} />
-          <Image source={item.image2} style={styles.carouselImage} />
+          <Image
+            source={item.image1}
+            style={[
+              styles.carouselImage,
+              { width: imageWidth, height: imageHeight },
+            ]}
+          />
+          <Image
+            source={item.image2}
+            style={[
+              styles.carouselImage,
+              { width: imageWidth, height: imageHeight },
+            ]}
+          />
         </View>
         <Badge style={styles.carouselBadge} variant="coming-soon">
           Yakında ✨
@@ -91,10 +109,17 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
         {/* Yazılar ön planda */}
         <View style={styles.carouselContent}>
-          <ThemedText variant="h4" weight="bold" style={styles.carouselTitle}>
+          <ThemedText
+            variant="h4"
+            weight="bold"
+            style={[styles.carouselTitle, { fontSize: titleFontSize }]}
+          >
             {item.title}
           </ThemedText>
-          <ThemedText variant="body" style={styles.carouselSubtitle}>
+          <ThemedText
+            variant="body"
+            style={[styles.carouselSubtitle, { fontSize: subtitleFontSize }]}
+          >
             {item.subtitle}
           </ThemedText>
           <TouchableOpacity
@@ -111,7 +136,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
             <ThemedText
               variant="body"
               weight="semiBold"
-              style={styles.carouselButtonText}
+              style={[styles.carouselButtonText, { fontSize: buttonFontSize }]}
             >
               Dene
             </ThemedText>
@@ -122,13 +147,26 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
     </View>
   );
 
+  // Responsive boyutlar
+  const carouselHeight = isTablet ? 350 : isSmallDevice ? 280 : 300;
+  const cardHeight = isTablet ? 320 : isSmallDevice ? 250 : 280;
+  const imageWidth = isTablet ? 200 : isSmallDevice ? 160 : 180;
+  const imageHeight = isTablet ? 300 : isSmallDevice ? 240 : 275;
+
+  // Responsive font boyutları
+  const titleFontSize = isTablet ? 28 : isSmallDevice ? 20 : 24;
+  const subtitleFontSize = isTablet ? 18 : isSmallDevice ? 14 : 16;
+  const buttonFontSize = isTablet ? 16 : isSmallDevice ? 12 : 14;
+
   return (
-    <ThemedView style={styles.carouselSection}>
+    <ThemedView
+      style={[styles.carouselSection, { paddingHorizontal: isTablet ? 0 : 12 }]}
+    >
       <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
         Öne Çıkanlar
       </ThemedText>
 
-      <View style={[styles.carouselContainer]}>
+      <View style={[styles.carouselContainer, { height: carouselHeight }]}>
         <PagerView
           ref={pagerRef}
           style={styles.pagerView}
@@ -137,7 +175,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
         >
           {editingServices.map((item) => (
             <View key={item.id} style={styles.pageContainer}>
-              {renderCarouselItem(item)}
+              {renderCarouselItem(item, cardHeight, imageWidth, imageHeight)}
             </View>
           ))}
         </PagerView>
@@ -180,7 +218,6 @@ const styles = StyleSheet.create({
     marginBottom: Platform.OS === "ios" ? 5 : 0,
   },
   carouselContainer: {
-    height: 300,
     overflow: "visible",
   },
   pagerView: {
@@ -196,7 +233,6 @@ const styles = StyleSheet.create({
   carouselCard: {
     borderRadius: 12,
     padding: 16,
-    height: 280,
     justifyContent: "center",
     position: "relative",
     overflow: "hidden",
@@ -227,8 +263,6 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   carouselImage: {
-    width: 180 * (Platform.OS === "ios" ? 1.15 : 1.06),
-    height: 275,
     borderRadius: 12,
     opacity: 0.7,
   },
