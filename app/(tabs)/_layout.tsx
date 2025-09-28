@@ -1,4 +1,4 @@
-import { useTheme } from "@/hooks";
+import { useDeviceDimensions, useTheme } from "@/hooks";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import React from "react";
@@ -25,10 +25,13 @@ export default function TabLayout() {
   }
 
   // colorScheme undefined ise varsayılan değer kullan
-  const safeColorScheme = colorScheme || "system";
+  const _safeColorScheme = colorScheme || "system";
 
   // colors undefined ise varsayılan değerler kullan
   const safeColors = colors || defaultColors;
+
+  // Responsive tasarım için cihaz boyutlarını al
+  const { isTablet, isSmallDevice } = useDeviceDimensions();
 
   return (
     <>
@@ -40,11 +43,30 @@ export default function TabLayout() {
             {
               backgroundColor: safeColors.surface,
               borderTopColor: safeColors.border,
+              // Sadece Android için yükseklik ve padding ayarları
+              ...(Platform.OS === "android" && {
+                height: isTablet ? 75 : isSmallDevice ? 50 : 65,
+                paddingBottom: isTablet ? 20 : isSmallDevice ? 8 : 10,
+                paddingTop: isTablet ? 8 : isSmallDevice ? 0 : 5,
+              }),
             },
           ],
           tabBarActiveTintColor: safeColors.primary,
           tabBarInactiveTintColor: safeColors.textSecondary,
-          tabBarLabelStyle: styles.tabLabel,
+          tabBarLabelStyle: [
+            styles.tabLabel,
+            // Sadece Android için font boyutu ve margin ayarları
+            Platform.OS === "android" && {
+              fontSize: isTablet ? 14 : isSmallDevice ? 9 : 12,
+              marginTop: isTablet ? 2 : isSmallDevice ? 0 : 1,
+            },
+          ].filter(Boolean),
+          tabBarIconStyle:
+            Platform.OS === "android"
+              ? {
+                  marginTop: isTablet ? 2 : isSmallDevice ? 0 : 1,
+                }
+              : {},
         }}
       >
         <Tabs.Screen
@@ -100,9 +122,6 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   tabBar: {
     borderTopWidth: 1,
-    //height: Platform.OS === "ios" ? 90 : 70,
-    paddingBottom: Platform.OS === "ios" ? 25 : 10,
-    paddingTop: 10,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -114,6 +133,6 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     fontFamily: "Inter-Medium",
-    fontSize: 12,
+    fontWeight: "500",
   },
 });
