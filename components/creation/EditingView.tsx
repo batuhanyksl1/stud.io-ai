@@ -5,7 +5,7 @@ import {
   Spacing,
   Typography,
 } from "@/constants/DesignTokens";
-import { useTheme } from "@/hooks/useTheme";
+import { useDeviceDimensions, useTheme } from "@/hooks";
 import React from "react";
 import {
   ActivityIndicator,
@@ -50,6 +50,7 @@ export const EditingView: React.FC<EditingViewProps> = ({
   scaleAnim,
 }) => {
   const { colors } = useTheme();
+  const { isTablet, isSmallDevice } = useDeviceDimensions();
 
   return (
     <KeyboardAvoidingView
@@ -57,7 +58,10 @@ export const EditingView: React.FC<EditingViewProps> = ({
       style={[styles.keyboardContainer, { backgroundColor: colors.background }]}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollArea}
+        contentContainerStyle={[
+          styles.scrollArea,
+          { paddingHorizontal: isTablet ? 24 : isSmallDevice ? 12 : 16 },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <Animated.View
@@ -93,7 +97,13 @@ export const EditingView: React.FC<EditingViewProps> = ({
               ]}
             >
               <Text
-                style={[styles.sectionLabel, { color: colors.textSecondary }]}
+                style={[
+                  styles.sectionLabel,
+                  {
+                    color: colors.textSecondary,
+                    fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                  },
+                ]}
               >
                 Referans görseller
               </Text>
@@ -188,7 +198,10 @@ export const EditingView: React.FC<EditingViewProps> = ({
                     style={[
                       styles.buttonTextPrimary,
                       styles.loadingInlineText,
-                      { color: colors.textOnPrimary },
+                      {
+                        color: colors.textOnPrimary,
+                        fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+                      },
                     ]}
                   >
                     Hazırlanıyor...
@@ -198,7 +211,10 @@ export const EditingView: React.FC<EditingViewProps> = ({
                 <Text
                   style={[
                     styles.buttonTextPrimary,
-                    { color: colors.textOnPrimary },
+                    {
+                      color: colors.textOnPrimary,
+                      fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+                    },
                   ]}
                 >
                   oluştur
@@ -217,7 +233,10 @@ export const EditingView: React.FC<EditingViewProps> = ({
               <Text
                 style={[
                   styles.buttonTextSecondary,
-                  { color: colors.textSecondary },
+                  {
+                    color: colors.textSecondary,
+                    fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                  },
                 ]}
               >
                 {hasMultipleInputImage === "true"
@@ -233,10 +252,26 @@ export const EditingView: React.FC<EditingViewProps> = ({
               { backgroundColor: colors.surface, borderColor: colors.border },
             ]}
           >
-            <Text style={[styles.infoTitle, { color: colors.textPrimary }]}>
+            <Text
+              style={[
+                styles.infoTitle,
+                {
+                  color: colors.textPrimary,
+                  fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+                },
+              ]}
+            >
               İpucu
             </Text>
-            <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+            <Text
+              style={[
+                styles.infoText,
+                {
+                  color: colors.textSecondary,
+                  fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                },
+              ]}
+            >
               Daha farklı sonuçlar için yeni bir görsel seçebilir veya promptu
               güncelleyerek yeniden deneyebilirsiniz.
             </Text>
@@ -252,7 +287,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollArea: {
-    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xxl,
   },
   sectionStack: {

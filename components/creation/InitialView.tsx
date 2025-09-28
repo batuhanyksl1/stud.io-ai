@@ -6,7 +6,7 @@ import {
   Spacing,
   Typography,
 } from "@/constants/DesignTokens";
-import { useTheme } from "@/hooks/useTheme";
+import { useDeviceDimensions, useTheme } from "@/hooks";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useMemo, useState } from "react";
 import {
@@ -42,6 +42,7 @@ export const InitialView: React.FC<InitialViewProps> = ({
   scaleAnim,
 }) => {
   const { colors } = useTheme();
+  const { isTablet, isSmallDevice } = useDeviceDimensions();
   const [showCustomPrompt, setShowCustomPrompt] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
 
@@ -64,7 +65,10 @@ export const InitialView: React.FC<InitialViewProps> = ({
 
   return (
     <ScrollView
-      contentContainerStyle={styles.scrollArea}
+      contentContainerStyle={[
+        styles.scrollArea,
+        { paddingHorizontal: isTablet ? 24 : isSmallDevice ? 12 : 16 },
+      ]}
       showsVerticalScrollIndicator={false}
     >
       <Animated.View
@@ -91,10 +95,26 @@ export const InitialView: React.FC<InitialViewProps> = ({
             </Text>
           </LinearGradient>
         </View>
-        <Text style={[styles.heroTitle, { color: colors.textPrimary }]}>
+        <Text
+          style={[
+            styles.heroTitle,
+            {
+              color: colors.textPrimary,
+              fontSize: isTablet ? 28 : isSmallDevice ? 20 : 24,
+            },
+          ]}
+        >
           Fotoğraflarınızı saniyeler içinde düzenleyin
         </Text>
-        <Text style={[styles.heroDescription, { color: colors.textSecondary }]}>
+        <Text
+          style={[
+            styles.heroDescription,
+            {
+              color: colors.textSecondary,
+              fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+            },
+          ]}
+        >
           Referans görselinizi ekleyin, talimatınızı paylaşın yada Studio
           AI&apos;ın sizin için düzenlesin.
         </Text>
@@ -107,7 +127,10 @@ export const InitialView: React.FC<InitialViewProps> = ({
             <Text
               style={[
                 styles.customPromptLabel,
-                { color: colors.textSecondary },
+                {
+                  color: colors.textSecondary,
+                  fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                },
               ]}
             >
               Kendi talimatınızı yazın
@@ -119,6 +142,7 @@ export const InitialView: React.FC<InitialViewProps> = ({
                   borderColor: colors.border,
                   backgroundColor: colors.surfaceElevated,
                   color: colors.textPrimary,
+                  fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
                 },
               ]}
               value={customPrompt}
@@ -143,7 +167,10 @@ export const InitialView: React.FC<InitialViewProps> = ({
               <Text
                 style={[
                   styles.customPromptCancelText,
-                  { color: colors.textSecondary },
+                  {
+                    color: colors.textSecondary,
+                    fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
+                  },
                 ]}
               >
                 Varsayılan talimatı kullan
@@ -158,7 +185,10 @@ export const InitialView: React.FC<InitialViewProps> = ({
             <Text
               style={[
                 styles.customPromptButtonText,
-                { color: colors.textTertiary },
+                {
+                  color: colors.textTertiary,
+                  fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
+                },
               ]}
             >
               Kendi talimatını ekle
@@ -171,7 +201,13 @@ export const InitialView: React.FC<InitialViewProps> = ({
           onPress={onSelectImage}
         >
           <Text
-            style={[styles.buttonTextPrimary, { color: colors.textOnPrimary }]}
+            style={[
+              styles.buttonTextPrimary,
+              {
+                color: colors.textOnPrimary,
+                fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+              },
+            ]}
           >
             {hasMultipleInputImage === "true"
               ? "Galeriden görseller seç"
@@ -186,7 +222,15 @@ export const InitialView: React.FC<InitialViewProps> = ({
           { backgroundColor: colors.surface, borderColor: colors.border },
         ]}
       >
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            {
+              color: colors.textPrimary,
+              fontSize: isTablet ? 24 : isSmallDevice ? 18 : 20,
+            },
+          ]}
+        >
           Nasıl çalışıyor?
         </Text>
 
@@ -197,11 +241,25 @@ export const InitialView: React.FC<InitialViewProps> = ({
             </Text>
           </View>
           <View style={styles.stepContent}>
-            <Text style={[styles.stepTitle, { color: colors.textPrimary }]}>
+            <Text
+              style={[
+                styles.stepTitle,
+                {
+                  color: colors.textPrimary,
+                  fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+                },
+              ]}
+            >
               Referans görselinizi yükleyin
             </Text>
             <Text
-              style={[styles.stepSubtitle, { color: colors.textSecondary }]}
+              style={[
+                styles.stepSubtitle,
+                {
+                  color: colors.textSecondary,
+                  fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                },
+              ]}
             >
               Yapay zekanın doğru bağlamı yakalaması için net bir görsel seçin.
             </Text>
@@ -215,11 +273,25 @@ export const InitialView: React.FC<InitialViewProps> = ({
             </Text>
           </View>
           <View style={styles.stepContent}>
-            <Text style={[styles.stepTitle, { color: colors.textPrimary }]}>
+            <Text
+              style={[
+                styles.stepTitle,
+                {
+                  color: colors.textPrimary,
+                  fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+                },
+              ]}
+            >
               Studio AI talimatınızı uygulasın
             </Text>
             <Text
-              style={[styles.stepSubtitle, { color: colors.textSecondary }]}
+              style={[
+                styles.stepSubtitle,
+                {
+                  color: colors.textSecondary,
+                  fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                },
+              ]}
             >
               Platform, varsayılan promptu kullanır veya özel talimatınızı
               uygulayarak yeni versiyonu üretir.
@@ -234,11 +306,25 @@ export const InitialView: React.FC<InitialViewProps> = ({
             </Text>
           </View>
           <View style={styles.stepContent}>
-            <Text style={[styles.stepTitle, { color: colors.textPrimary }]}>
+            <Text
+              style={[
+                styles.stepTitle,
+                {
+                  color: colors.textPrimary,
+                  fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+                },
+              ]}
+            >
               Sonucu gözden geçirip indirin
             </Text>
             <Text
-              style={[styles.stepSubtitle, { color: colors.textSecondary }]}
+              style={[
+                styles.stepSubtitle,
+                {
+                  color: colors.textSecondary,
+                  fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                },
+              ]}
             >
               Beğendiğiniz anda eseri kaydedebilir veya yeni bir deneme
               başlatabilirsiniz.
@@ -253,11 +339,25 @@ export const InitialView: React.FC<InitialViewProps> = ({
           { backgroundColor: colors.surface, borderColor: colors.border },
         ]}
       >
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            {
+              color: colors.textPrimary,
+              fontSize: isTablet ? 24 : isSmallDevice ? 18 : 20,
+            },
+          ]}
+        >
           Örnek çıktılar
         </Text>
         <Text
-          style={[styles.examplesDescription, { color: colors.textSecondary }]}
+          style={[
+            styles.examplesDescription,
+            {
+              color: colors.textSecondary,
+              fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+            },
+          ]}
         >
           Studio AI&apos;nin farklı araçlarıyla neler elde edebileceğinizi
           keşfedin.
@@ -281,14 +381,23 @@ export const InitialView: React.FC<InitialViewProps> = ({
               ]}
             >
               <Text
-                style={[styles.exampleTitle, { color: colors.textPrimary }]}
+                style={[
+                  styles.exampleTitle,
+                  {
+                    color: colors.textPrimary,
+                    fontSize: isTablet ? 20 : isSmallDevice ? 16 : 18,
+                  },
+                ]}
               >
                 {item.title}
               </Text>
               <Text
                 style={[
                   styles.exampleSubtitle,
-                  { color: colors.textSecondary },
+                  {
+                    color: colors.textSecondary,
+                    fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                  },
                 ]}
               >
                 {item.subtitle}
@@ -299,7 +408,10 @@ export const InitialView: React.FC<InitialViewProps> = ({
                   <Text
                     style={[
                       styles.exampleImageLabel,
-                      { color: colors.textTertiary },
+                      {
+                        color: colors.textTertiary,
+                        fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
+                      },
                     ]}
                   >
                     Önce
@@ -309,14 +421,25 @@ export const InitialView: React.FC<InitialViewProps> = ({
                     style={styles.exampleImage}
                   />
                 </View>
-                <Text style={[styles.exampleArrow, { color: colors.primary }]}>
+                <Text
+                  style={[
+                    styles.exampleArrow,
+                    {
+                      color: colors.primary,
+                      fontSize: isTablet ? 20 : isSmallDevice ? 16 : 18,
+                    },
+                  ]}
+                >
                   →
                 </Text>
                 <View style={styles.exampleImageWrapper}>
                   <Text
                     style={[
                       styles.exampleImageLabel,
-                      { color: colors.textTertiary },
+                      {
+                        color: colors.textTertiary,
+                        fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
+                      },
                     ]}
                   >
                     Sonra
@@ -334,7 +457,6 @@ export const InitialView: React.FC<InitialViewProps> = ({
 
 const styles = StyleSheet.create({
   scrollArea: {
-    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xxl,
   },
   heroCard: {

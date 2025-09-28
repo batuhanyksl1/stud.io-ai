@@ -5,7 +5,7 @@ import {
   Spacing,
   Typography,
 } from "@/constants/DesignTokens";
-import { useTheme } from "@/hooks/useTheme";
+import { useDeviceDimensions, useTheme } from "@/hooks";
 import React from "react";
 import {
   Animated,
@@ -45,10 +45,14 @@ export const ResultView: React.FC<ResultViewProps> = ({
   scaleAnim,
 }) => {
   const { colors } = useTheme();
+  const { isTablet, isSmallDevice } = useDeviceDimensions();
 
   return (
     <ScrollView
-      contentContainerStyle={styles.scrollArea}
+      contentContainerStyle={[
+        styles.scrollArea,
+        { paddingHorizontal: isTablet ? 24 : isSmallDevice ? 12 : 16 },
+      ]}
       showsVerticalScrollIndicator={false}
     >
       <Animated.View
@@ -66,13 +70,37 @@ export const ResultView: React.FC<ResultViewProps> = ({
             { backgroundColor: colors.surface, borderColor: colors.border },
           ]}
         >
-          <Text style={[styles.sectionLabel, { color: colors.success }]}>
+          <Text
+            style={[
+              styles.sectionLabel,
+              {
+                color: colors.success,
+                fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+              },
+            ]}
+          >
             Sonuç hazır
           </Text>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                color: colors.textPrimary,
+                fontSize: isTablet ? 24 : isSmallDevice ? 18 : 20,
+              },
+            ]}
+          >
             Studio AI talimatınızı tamamladı
           </Text>
-          <Text style={[styles.sectionHelper, { color: colors.textSecondary }]}>
+          <Text
+            style={[
+              styles.sectionHelper,
+              {
+                color: colors.textSecondary,
+                fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+              },
+            ]}
+          >
             Sonucu tam ekranda inceleyebilir, cihazınıza indirebilir veya yeni
             bir proje başlatabilirsiniz.
           </Text>
@@ -80,13 +108,29 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {/* Ana Sonuç Görseli - Ortada Büyük */}
           <View style={styles.mainResultContainer}>
             <View style={styles.mainResultLabelRow}>
-              <Text style={[styles.mainResultLabel, { color: colors.primary }]}>
+              <Text
+                style={[
+                  styles.mainResultLabel,
+                  {
+                    color: colors.primary,
+                    fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+                  },
+                ]}
+              >
                 Sonuç
               </Text>
               <Pressable
                 onPress={() => onOpenImageViewer(createdImageUrl || "")}
               >
-                <Text style={[styles.viewerLink, { color: colors.primary }]}>
+                <Text
+                  style={[
+                    styles.viewerLink,
+                    {
+                      color: colors.primary,
+                      fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                    },
+                  ]}
+                >
                   Tam ekran
                 </Text>
               </Pressable>
@@ -111,7 +155,13 @@ export const ResultView: React.FC<ResultViewProps> = ({
           {/* Referans Görseller - Alt Kısımda Küçük */}
           <View style={styles.referenceImagesContainer}>
             <Text
-              style={[styles.referenceLabel, { color: colors.textSecondary }]}
+              style={[
+                styles.referenceLabel,
+                {
+                  color: colors.textSecondary,
+                  fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                },
+              ]}
             >
               Referans görseller
             </Text>
@@ -174,7 +224,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
                 <Text
                   style={[
                     styles.buttonTextPrimary,
-                    { color: colors.textOnPrimary },
+                    {
+                      color: colors.textOnPrimary,
+                      fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+                    },
                   ]}
                 >
                   Cihaza indir
@@ -193,7 +246,10 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <Text
                 style={[
                   styles.buttonTextSecondary,
-                  { color: colors.textSecondary },
+                  {
+                    color: colors.textSecondary,
+                    fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                  },
                 ]}
               >
                 Yeni proje başlat
@@ -208,10 +264,26 @@ export const ResultView: React.FC<ResultViewProps> = ({
             { backgroundColor: colors.surface, borderColor: colors.border },
           ]}
         >
-          <Text style={[styles.infoTitle, { color: colors.textPrimary }]}>
+          <Text
+            style={[
+              styles.infoTitle,
+              {
+                color: colors.textPrimary,
+                fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+              },
+            ]}
+          >
             Sonuçtan memnun değil misiniz?
           </Text>
-          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
+          <Text
+            style={[
+              styles.infoText,
+              {
+                color: colors.textSecondary,
+                fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+              },
+            ]}
+          >
             Farklı bir görsel veya revize edilmiş bir prompt ile kısa sürede
             yepyeni bir versiyon elde edebilirsiniz.
           </Text>
@@ -223,7 +295,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
 
 const styles = StyleSheet.create({
   scrollArea: {
-    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xxl,
   },
   sectionStack: {

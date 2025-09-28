@@ -14,7 +14,7 @@ import {
   Spacing,
   Typography,
 } from "@/constants/DesignTokens";
-import { useContentCreation } from "@/hooks";
+import { useContentCreation, useDeviceDimensions } from "@/hooks";
 import { useTheme } from "@/hooks/useTheme";
 import { pickImage } from "@/utils/pickImage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -66,6 +66,7 @@ const ImageGeneratorScreen = () => {
   }, [gradient]);
 
   const { colors } = useTheme();
+  const { isTablet, isSmallDevice } = useDeviceDimensions();
   const {
     createdImageUrl,
     status,
@@ -127,14 +128,6 @@ const ImageGeneratorScreen = () => {
     };
     loadAutoSaveSetting();
   }, []);
-
-  // Sonuç geldiğinde otomatik kaydet
-  React.useEffect(() => {
-    if (createdImageUrl && autoSave) {
-      console.log("🔄 Otomatik kaydet başlatılıyor...");
-      handleDownloadImage();
-    }
-  }, [createdImageUrl, autoSave]);
 
   React.useEffect(() => {
     Animated.parallel([
@@ -257,7 +250,7 @@ const ImageGeneratorScreen = () => {
     }
   };
 
-  const handleDownloadImage = async () => {
+  const handleDownloadImage = useCallback(async () => {
     console.log("💾 handleDownloadImage - başladı");
     console.log("💾 handleDownloadImage - createdImageUrl:", createdImageUrl);
 
@@ -272,7 +265,15 @@ const ImageGeneratorScreen = () => {
     } catch (error) {
       console.error("❌ handleDownloadImage - hata:", error);
     }
-  };
+  }, [createdImageUrl, downloadImage]);
+
+  // Sonuç geldiğinde otomatik kaydet
+  React.useEffect(() => {
+    if (createdImageUrl && autoSave) {
+      console.log("🔄 Otomatik kaydet başlatılıyor...");
+      handleDownloadImage();
+    }
+  }, [createdImageUrl, autoSave, handleDownloadImage]);
 
   const handleStartNew = useCallback(() => {
     clearAllImages();
@@ -378,10 +379,23 @@ const ImageGeneratorScreen = () => {
         <View
           style={[
             styles.errorBanner,
-            { backgroundColor: colors.errorSubtle, borderColor: colors.error },
+            {
+              backgroundColor: colors.errorSubtle,
+              borderColor: colors.error,
+              marginHorizontal: isTablet ? 24 : isSmallDevice ? 12 : 16,
+              padding: isTablet ? 20 : isSmallDevice ? 12 : 16,
+            },
           ]}
         >
-          <Text style={[styles.errorText, { color: colors.error }]}>
+          <Text
+            style={[
+              styles.errorText,
+              {
+                color: colors.error,
+                fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+              },
+            ]}
+          >
             {errorMessage}
           </Text>
         </View>
@@ -397,15 +411,11 @@ const styles = StyleSheet.create({
   errorBanner: {
     position: "absolute",
     bottom: Spacing.lg,
-    left: Spacing.lg,
-    right: Spacing.lg,
-    padding: Spacing.md,
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     ...Shadows.md,
   },
   errorText: {
-    fontSize: Typography.fontSize.md,
     fontFamily: Typography.fontFamily.medium,
     textAlign: "center",
   },
