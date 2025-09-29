@@ -5,7 +5,7 @@ import {
   Spacing,
   Typography,
 } from "@/constants/DesignTokens";
-import { useTheme } from "@/hooks/useTheme";
+import { useDeviceDimensions, useTheme } from "@/hooks";
 import React, { useMemo } from "react";
 import {
   Dimensions,
@@ -22,7 +22,7 @@ interface ExamplesModalProps {
   visible: boolean;
   activeExampleIndex: number;
   onClose: () => void;
-  onMomentumEnd: (event: any) => void;
+  onMomentumEnd: (_event: any) => void;
 }
 
 export const ExamplesModal: React.FC<ExamplesModalProps> = ({
@@ -32,6 +32,7 @@ export const ExamplesModal: React.FC<ExamplesModalProps> = ({
   onMomentumEnd,
 }) => {
   const { colors } = useTheme();
+  const { isTablet, isSmallDevice } = useDeviceDimensions();
   const screenWidth = useMemo(() => Dimensions.get("window").width, []);
 
   const exampleItems = useMemo(
@@ -62,18 +63,39 @@ export const ExamplesModal: React.FC<ExamplesModalProps> = ({
         <View
           style={[
             styles.examplesModalContainer,
-            { backgroundColor: colors.surface },
+            {
+              backgroundColor: colors.surface,
+              paddingVertical: isTablet
+                ? Spacing.xxl
+                : isSmallDevice
+                  ? Spacing.lg
+                  : Spacing.xl,
+              paddingHorizontal: isTablet
+                ? Spacing.xl
+                : isSmallDevice
+                  ? Spacing.md
+                  : Spacing.lg,
+            },
           ]}
         >
           <Text
-            style={[styles.examplesModalTitle, { color: colors.textPrimary }]}
+            style={[
+              styles.examplesModalTitle,
+              {
+                color: colors.textPrimary,
+                fontSize: isTablet ? 28 : isSmallDevice ? 20 : 24,
+              },
+            ]}
           >
             Studio AI ile neler mümkün?
           </Text>
           <Text
             style={[
               styles.examplesModalSubtitle,
-              { color: colors.textSecondary },
+              {
+                color: colors.textSecondary,
+                fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+              },
             ]}
           >
             Örnekleri kaydırarak farklı senaryoları inceleyin.
@@ -102,7 +124,10 @@ export const ExamplesModal: React.FC<ExamplesModalProps> = ({
                   <Text
                     style={[
                       styles.examplesModalSlideTitle,
-                      { color: colors.textPrimary },
+                      {
+                        color: colors.textPrimary,
+                        fontSize: isTablet ? 24 : isSmallDevice ? 18 : 20,
+                      },
                     ]}
                   >
                     {item.title}
@@ -110,7 +135,10 @@ export const ExamplesModal: React.FC<ExamplesModalProps> = ({
                   <Text
                     style={[
                       styles.examplesModalSlideSubtitle,
-                      { color: colors.textSecondary },
+                      {
+                        color: colors.textSecondary,
+                        fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                      },
                     ]}
                   >
                     {item.subtitle}
@@ -121,20 +149,32 @@ export const ExamplesModal: React.FC<ExamplesModalProps> = ({
                       <Text
                         style={[
                           styles.examplesModalImageLabel,
-                          { color: colors.textTertiary },
+                          {
+                            color: colors.textTertiary,
+                            fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
+                          },
                         ]}
                       >
                         Önce
                       </Text>
                       <Image
                         source={item.beforeImage}
-                        style={styles.examplesModalImage}
+                        style={[
+                          styles.examplesModalImage,
+                          {
+                            width: isTablet ? 160 : isSmallDevice ? 100 : 120,
+                            height: isTablet ? 160 : isSmallDevice ? 100 : 120,
+                          },
+                        ]}
                       />
                     </View>
                     <Text
                       style={[
                         styles.examplesModalArrow,
-                        { color: colors.primary },
+                        {
+                          color: colors.primary,
+                          fontSize: isTablet ? 32 : isSmallDevice ? 24 : 28,
+                        },
                       ]}
                     >
                       →
@@ -143,14 +183,23 @@ export const ExamplesModal: React.FC<ExamplesModalProps> = ({
                       <Text
                         style={[
                           styles.examplesModalImageLabel,
-                          { color: colors.textTertiary },
+                          {
+                            color: colors.textTertiary,
+                            fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
+                          },
                         ]}
                       >
                         Sonra
                       </Text>
                       <Image
                         source={item.afterImage}
-                        style={styles.examplesModalImage}
+                        style={[
+                          styles.examplesModalImage,
+                          {
+                            width: isTablet ? 160 : isSmallDevice ? 100 : 120,
+                            height: isTablet ? 160 : isSmallDevice ? 100 : 120,
+                          },
+                        ]}
                       />
                     </View>
                   </View>
@@ -184,7 +233,10 @@ export const ExamplesModal: React.FC<ExamplesModalProps> = ({
             <Text
               style={[
                 styles.examplesModalSkipText,
-                { color: colors.textSecondary },
+                {
+                  color: colors.textSecondary,
+                  fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+                },
               ]}
             >
               Geç / Skip
@@ -206,18 +258,14 @@ const styles = StyleSheet.create({
   examplesModalContainer: {
     width: "100%",
     borderRadius: BorderRadius.xl,
-    paddingVertical: Spacing.xxl,
-    paddingHorizontal: Spacing.xl,
     ...Shadows.xl,
   },
   examplesModalTitle: {
-    fontSize: Typography.fontSize.xxxl,
     fontFamily: Typography.fontFamily.bold,
     textAlign: "center",
     marginBottom: Spacing.sm,
   },
   examplesModalSubtitle: {
-    fontSize: Typography.fontSize.md,
     fontFamily: Typography.fontFamily.medium,
     textAlign: "center",
     marginBottom: Spacing.xl,
@@ -235,13 +283,11 @@ const styles = StyleSheet.create({
     padding: Spacing.xxl,
   },
   examplesModalSlideTitle: {
-    fontSize: Typography.fontSize.xxl,
     fontFamily: Typography.fontFamily.bold,
     textAlign: "center",
     marginBottom: Spacing.xs,
   },
   examplesModalSlideSubtitle: {
-    fontSize: Typography.fontSize.md,
     fontFamily: Typography.fontFamily.medium,
     textAlign: "center",
     marginBottom: Spacing.xl,
@@ -256,19 +302,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   examplesModalImageLabel: {
-    fontSize: Typography.fontSize.xs,
     fontFamily: Typography.fontFamily.medium,
     textTransform: "uppercase",
     letterSpacing: Typography.letterSpacing.wide,
     marginBottom: Spacing.xs,
   },
   examplesModalImage: {
-    width: 140,
-    height: 140,
     borderRadius: BorderRadius.lg,
   },
   examplesModalArrow: {
-    fontSize: Typography.fontSize.xxxl,
     marginHorizontal: Spacing.lg,
     fontFamily: Typography.fontFamily.semiBold,
   },
@@ -293,7 +335,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   examplesModalSkipText: {
-    fontSize: Typography.fontSize.md,
     fontFamily: Typography.fontFamily.semiBold,
   },
 });

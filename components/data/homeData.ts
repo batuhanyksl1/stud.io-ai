@@ -91,6 +91,33 @@ export const editingServices = [
     hasPreSelectedImage: false,
   },
   {
+    id: "food-influencer",
+    disabled: false,
+    title: "Yemek Fotoğrafı",
+    subtitle: "Instagram Ready",
+    description: "LinkedIn için profesyonel yemek fotoğrafları oluşturun",
+    prompt:
+      "I want this to look like a high-end food influencer Instagram post: bright natural daylight with soft highlights and balanced shadows for vibrant appetizing colors, slightly boosted warm tones while keeping them natural, subtle background blur (bokeh) to focus on the dish and remove distractions, maintain current plating but crop or reframe for a clean centered top-down or 45-degree angle composition, modern chic inviting mood perfect for a trendy food influencer feed, no text logos or watermarks, aspect ratio 4:5 (Instagram portrait), high-resolution with crisp details.",
+    icon: "restaurant",
+    color: "#0077B5",
+    gradient: ["#0077B5", "#005885"],
+    features: ["Profesyonel çekim"],
+    rating: 4.8,
+    usageCount: "2.5K+",
+    isPopular: true,
+    badge: "En Popüler",
+    token: 4,
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiStatusUrl:
+      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+    aiResultUrl:
+      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+    image1: require("@/assets/images/carousel/image-a-1.png"),
+    image2: require("@/assets/images/carousel/image-a-2.jpg"),
+    hasMultipleInputImage: true,
+    hasPreSelectedImage: false,
+  },
+  {
     id: "style-transfer",
     disabled: false,
     title: "Stil Transferi",

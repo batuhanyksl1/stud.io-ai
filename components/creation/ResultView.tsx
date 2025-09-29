@@ -51,7 +51,7 @@ export const ResultView: React.FC<ResultViewProps> = ({
     <ScrollView
       contentContainerStyle={[
         styles.scrollArea,
-        { paddingHorizontal: isTablet ? 24 : isSmallDevice ? 12 : 16 },
+        { paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6 },
       ]}
       showsVerticalScrollIndicator={false}
     >

@@ -8,7 +8,7 @@ import {
 } from "@/constants/DesignTokens";
 import { useDeviceDimensions, useTheme } from "@/hooks";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
   Image,
@@ -19,6 +19,8 @@ import {
   TextInput,
   View,
 } from "react-native";
+import PagerView from "react-native-pager-view";
+import { Header } from "../home/Header";
 
 interface InitialViewProps {
   title: string;
@@ -45,6 +47,9 @@ export const InitialView: React.FC<InitialViewProps> = ({
   const { isTablet, isSmallDevice } = useDeviceDimensions();
   const [showCustomPrompt, setShowCustomPrompt] = useState(false);
   const [customPrompt, setCustomPrompt] = useState("");
+  const [currentExamplePage, setCurrentExamplePage] = useState(0);
+  const examplePagerRef = useRef<PagerView>(null);
+  const autoScrollInterval = useRef<number | null>(null);
 
   const handleCustomPromptChange = (text: string) => {
     setCustomPrompt(text);
@@ -63,14 +68,37 @@ export const InitialView: React.FC<InitialViewProps> = ({
     [],
   );
 
+  // Otomatik kaydırma için useEffect
+  useEffect(() => {
+    autoScrollInterval.current = setInterval(() => {
+      const nextPage = (currentExamplePage + 1) % exampleItems.length;
+      setCurrentExamplePage(nextPage);
+      examplePagerRef.current?.setPage(nextPage);
+    }, 5000); // 5 saniyede bir değişir
+
+    return () => {
+      if (autoScrollInterval.current) {
+        clearInterval(autoScrollInterval.current);
+      }
+    };
+  }, [currentExamplePage, exampleItems.length]);
+
+  // Sayfa değiştiğinde
+  const onExamplePageSelected = (e: any) => {
+    const newPage = e.nativeEvent.position;
+    setCurrentExamplePage(newPage);
+  };
+
   return (
     <ScrollView
       contentContainerStyle={[
         styles.scrollArea,
-        { paddingHorizontal: isTablet ? 24 : isSmallDevice ? 12 : 16 },
+        { paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6 },
       ]}
       showsVerticalScrollIndicator={false}
     >
+      <Header leftIconType="arrow-back" rightIconType="settings" />
+
       <Animated.View
         style={[
           styles.heroCard,
@@ -363,102 +391,125 @@ export const InitialView: React.FC<InitialViewProps> = ({
           keşfedin.
         </Text>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.exampleList}
-        >
-          {exampleItems.map((item, index) => (
-            <View
-              key={item.id}
-              style={[
-                styles.exampleItem,
-                {
-                  borderColor: colors.border,
-                  backgroundColor: colors.surfaceElevated,
-                },
-                index === exampleItems.length - 1 && styles.exampleItemLast,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.exampleTitle,
-                  {
-                    color: colors.textPrimary,
-                    fontSize: isTablet ? 20 : isSmallDevice ? 16 : 18,
-                  },
-                ]}
-              >
-                {item.title}
-              </Text>
-              <Text
-                style={[
-                  styles.exampleSubtitle,
-                  {
-                    color: colors.textSecondary,
-                    fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
-                  },
-                ]}
-              >
-                {item.subtitle}
-              </Text>
-
-              <View style={styles.exampleImageRow}>
-                <View style={styles.exampleImageWrapper}>
-                  <Text
-                    style={[
-                      styles.exampleImageLabel,
-                      {
-                        color: colors.textTertiary,
-                        fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
-                      },
-                    ]}
-                  >
-                    Önce
-                  </Text>
-                  <Image
-                    source={item.beforeImage}
-                    style={styles.exampleImage}
-                  />
-                </View>
-                <Text
+        <View style={styles.carouselContainer}>
+          <PagerView
+            ref={examplePagerRef}
+            style={styles.pagerView}
+            initialPage={0}
+            onPageSelected={onExamplePageSelected}
+          >
+            {exampleItems.map((item) => (
+              <View key={item.id} style={styles.pageContainer}>
+                <View
                   style={[
-                    styles.exampleArrow,
+                    styles.exampleItem,
                     {
-                      color: colors.primary,
-                      fontSize: isTablet ? 20 : isSmallDevice ? 16 : 18,
+                      borderColor: colors.border,
+                      backgroundColor: colors.surfaceElevated,
                     },
                   ]}
                 >
-                  →
-                </Text>
-                <View style={styles.exampleImageWrapper}>
                   <Text
                     style={[
-                      styles.exampleImageLabel,
+                      styles.exampleTitle,
                       {
-                        color: colors.textTertiary,
-                        fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
+                        color: colors.textPrimary,
+                        fontSize: isTablet ? 20 : isSmallDevice ? 16 : 18,
                       },
                     ]}
                   >
-                    Sonra
+                    {item.title}
                   </Text>
-                  <Image source={item.afterImage} style={styles.exampleImage} />
+                  <Text
+                    style={[
+                      styles.exampleSubtitle,
+                      {
+                        color: colors.textSecondary,
+                        fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                      },
+                    ]}
+                  >
+                    {item.subtitle}
+                  </Text>
+
+                  <View style={styles.exampleImageRow}>
+                    <View style={styles.exampleImageWrapper}>
+                      <Text
+                        style={[
+                          styles.exampleImageLabel,
+                          {
+                            color: colors.textTertiary,
+                            fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
+                          },
+                        ]}
+                      >
+                        Önce
+                      </Text>
+                      <Image
+                        source={item.beforeImage}
+                        style={styles.exampleImage}
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.exampleArrow,
+                        {
+                          color: colors.primary,
+                          fontSize: isTablet ? 20 : isSmallDevice ? 16 : 18,
+                        },
+                      ]}
+                    >
+                      →
+                    </Text>
+                    <View style={styles.exampleImageWrapper}>
+                      <Text
+                        style={[
+                          styles.exampleImageLabel,
+                          {
+                            color: colors.textTertiary,
+                            fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
+                          },
+                        ]}
+                      >
+                        Sonra
+                      </Text>
+                      <Image
+                        source={item.afterImage}
+                        style={styles.exampleImage}
+                      />
+                    </View>
+                  </View>
                 </View>
               </View>
-            </View>
-          ))}
-        </ScrollView>
+            ))}
+          </PagerView>
+
+          {/* Sayfa göstergeleri */}
+          <View style={styles.pagination}>
+            {exampleItems.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.paginationDot,
+                  {
+                    backgroundColor:
+                      index === currentExamplePage
+                        ? colors.primary
+                        : colors.border,
+                    width: index === currentExamplePage ? 24 : 8,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+        </View>
       </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollArea: {
-    paddingVertical: Spacing.xxl,
-  },
+  scrollArea: {},
   heroCard: {
     width: "100%",
     borderRadius: BorderRadius.xl,
@@ -523,10 +574,10 @@ const styles = StyleSheet.create({
   },
   examplesCard: {
     borderRadius: BorderRadius.xl,
-    paddingVertical: Spacing.xxl,
-    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
     borderWidth: 1,
-    marginTop: Spacing.xl,
+    marginTop: Spacing.lg,
     ...Shadows.none,
   },
   examplesDescription: {
@@ -535,18 +586,35 @@ const styles = StyleSheet.create({
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.md,
     marginBottom: Spacing.xl,
   },
-  exampleList: {
-    paddingRight: Spacing.xl,
+  carouselContainer: {
+    height: 320,
+    marginBottom: Spacing.lg,
+  },
+  pagerView: {
+    flex: 1,
+  },
+  pageContainer: {
+    flex: 1,
+    paddingHorizontal: Spacing.sm,
   },
   exampleItem: {
-    width: 260,
+    width: "100%",
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     padding: Spacing.lg,
-    marginRight: Spacing.lg,
+    height: 280,
+    justifyContent: "center",
   },
-  exampleItemLast: {
-    marginRight: 0,
+  pagination: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: Spacing.md,
+    gap: Spacing.sm,
+  },
+  paginationDot: {
+    height: 8,
+    borderRadius: 4,
   },
   exampleTitle: {
     fontSize: Typography.fontSize.lg,

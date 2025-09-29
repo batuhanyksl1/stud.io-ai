@@ -66,7 +66,7 @@ export const HomeServices: React.FC = () => {
           )
         }
         activeOpacity={0.8}
-        style={[styles.serviceCardContainer, { width: cardWidth }]}
+        style={[styles.serviceCardContainer, { width: cardWidth as any }]}
       >
         <LinearGradient
           colors={service.gradient as [string, string, ...string[]]}
@@ -98,17 +98,21 @@ export const HomeServices: React.FC = () => {
               <View style={styles.serviceTextContainer}>
                 <ThemedText
                   variant="caption"
-                  style={[
-                    styles.serviceSubtitle,
-                    { fontSize: subtitleFontSize },
-                  ]}
+                  style={
+                    [
+                      styles.serviceSubtitle,
+                      { fontSize: subtitleFontSize },
+                    ] as any
+                  }
                 >
                   {service.subtitle}
                 </ThemedText>
                 <ThemedText
                   variant="h4"
                   weight="bold"
-                  style={[styles.serviceTitle, { fontSize: titleFontSize }]}
+                  style={
+                    [styles.serviceTitle, { fontSize: titleFontSize }] as any
+                  }
                   numberOfLines={2}
                   ellipsizeMode="tail"
                 >
@@ -133,13 +137,15 @@ export const HomeServices: React.FC = () => {
                 <Ionicon name="star" size={10} color="#FFD700" />
                 <ThemedText
                   variant="caption"
-                  style={[styles.rating, { fontSize: ratingFontSize }]}
+                  style={[styles.rating, { fontSize: ratingFontSize }] as any}
                 >
                   {service.rating}
                 </ThemedText>
                 <ThemedText
                   variant="caption"
-                  style={[styles.usageCount, { fontSize: ratingFontSize }]}
+                  style={
+                    [styles.usageCount, { fontSize: ratingFontSize }] as any
+                  }
                 >
                   • {service.usageCount}
                 </ThemedText>
@@ -180,7 +186,12 @@ export const HomeServices: React.FC = () => {
 
   return (
     <ThemedView
-      style={[styles.servicesSection, { paddingHorizontal: isTablet ? 0 : 12 }]}
+      style={
+        [
+          styles.servicesSection,
+          { paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6 },
+        ] as any
+      }
     >
       <View style={styles.sectionHeader}>
         <ThemedText variant="h3" weight="bold">
@@ -276,16 +287,12 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontSize: 16,
     lineHeight: 20,
-    numberOfLines: 1, // Tek satır
-    ellipsizeMode: "tail", // Sonuna ... ekle
   },
   serviceDescription: {
     color: "rgba(255,255,255,0.9)",
     lineHeight: 18,
     fontSize: 13,
     marginTop: 6,
-    numberOfLines: 2, // Maksimum 2 satır
-    ellipsizeMode: "tail", // Sonuna ... ekle
   },
   serviceFooter: {
     flexDirection: "row",

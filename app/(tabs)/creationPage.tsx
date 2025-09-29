@@ -6,7 +6,6 @@ import {
   LoadingModal,
   ResultView,
 } from "@/components/creation";
-import { Header } from "@/components/home/Header";
 import {
   Animations,
   BorderRadius,
@@ -359,7 +358,6 @@ const ImageGeneratorScreen = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <Header leftIconType="arrow-back" rightIconType="settings" />
       <ExamplesModal
         visible={isExamplesModalVisible}
         activeExampleIndex={activeExampleIndex}
@@ -382,7 +380,7 @@ const ImageGeneratorScreen = () => {
             {
               backgroundColor: colors.errorSubtle,
               borderColor: colors.error,
-              marginHorizontal: isTablet ? 24 : isSmallDevice ? 12 : 16,
+              marginHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6,
               padding: isTablet ? 20 : isSmallDevice ? 12 : 16,
             },
           ]}

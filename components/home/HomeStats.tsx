@@ -62,7 +62,7 @@ export const HomeStats: React.FC = () => {
     <ThemedView
       style={[
         styles.todayStatsSection,
-        { paddingHorizontal: isTablet ? 0 : 12 },
+        { paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6 },
       ]}
     >
       <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>

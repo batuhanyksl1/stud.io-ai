@@ -160,7 +160,10 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
   return (
     <ThemedView
-      style={[styles.carouselSection, { paddingHorizontal: isTablet ? 0 : 12 }]}
+      style={[
+        styles.carouselSection,
+        { paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6 },
+      ]}
     >
       <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
         Öne Çıkanlar

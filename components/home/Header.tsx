@@ -4,6 +4,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { RelativePathString, router } from "expo-router";
 import React from "react";
 import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Spacing } from "../../constants/DesignTokens";
 
 type HeaderProps = {
   leftIconExists?: boolean;
@@ -110,7 +111,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingTop: Platform.OS === "ios" ? 0 : 60,
+    paddingTop: Platform.OS === "ios" ? 0 : 30,
+    paddingBottom: Spacing.lg,
   },
   iconButton: {
     borderRadius: 100,

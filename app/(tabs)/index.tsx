@@ -24,7 +24,7 @@ export default function HomeScreen() {
             styles.scrollView,
             {
               backgroundColor: colors.background,
-              paddingHorizontal: isTablet ? 24 : isSmallDevice ? 8 : 16,
+              paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6,
             },
           ]}
           showsVerticalScrollIndicator={false}
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     // Platform spesifik margin - iOS'te gerekli, Android'de sorun yaratıyor
-    marginHorizontal: Platform.OS === "ios" ? 8 : -4,
+    marginHorizontal: Platform.OS === "ios" ? 4 : -4,
   },
   scrollContent: {
     paddingBottom: 20,
