@@ -36,6 +36,10 @@ export const Header: React.FC<HeaderProps> = ({
     case "home":
       leftIconPath = "/(tabs)";
       break;
+    case "information":
+      leftIconPath =
+        "https://batuhanyuksel.notion.site/Gizlilik-Politikas-27bb651f144e80f7b32ece22facf79fa";
+      break;
   }
   switch (rightIconType) {
     case "settings":

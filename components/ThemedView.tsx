@@ -1,12 +1,12 @@
 import { Spacing } from "@/constants/DesignTokens";
 import { useTheme } from "@/hooks/useTheme";
 import React, { ReactNode } from "react";
-import { SafeAreaView, ViewStyle } from "react-native";
+import { SafeAreaView, StyleProp, ViewStyle } from "react-native";
 
 // ThemedView bileşeninin alabileceği özellikler
 interface ThemedViewProps {
   children: ReactNode; // İçeride gösterilecek bileşenler
-  style?: ViewStyle; // Ek stil özellikleri
+  style?: StyleProp<ViewStyle>; // Ek stil özellikleri
   backgroundColor?:
     | "background"
     | "surface"
@@ -45,7 +45,7 @@ export default function ThemedView({
   const { colors } = useTheme();
 
   // Stil dizisini oluştur
-  const viewStyle: ViewStyle[] = [
+  const viewStyle: StyleProp<ViewStyle> = [
     // 1. Arka plan rengini ayarla
     {
       backgroundColor:

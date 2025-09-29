@@ -6,7 +6,13 @@ import Ionicon from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export const HomeServices: React.FC = () => {
   const router = useRouter();
@@ -74,6 +80,21 @@ export const HomeServices: React.FC = () => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
+          {/* Arka plan görseli */}
+          <View style={styles.bgImageContainer}>
+            <Image
+              source={
+                typeof service.image2 === "string"
+                  ? { uri: service.image2 }
+                  : (service.image2 as any)
+              }
+              style={styles.bgImage}
+            />
+          </View>
+
+          {/* Android için okunabilirlik overlay'i */}
+          <View style={styles.readabilityOverlay} />
+
           <View style={styles.serviceCardContent}>
             <View style={styles.serviceHeader}>
               <View style={styles.serviceIconWrapper}>
@@ -101,6 +122,7 @@ export const HomeServices: React.FC = () => {
                   style={
                     [
                       styles.serviceSubtitle,
+                      Platform.OS === "android" ? null : styles.textShadow,
                       { fontSize: subtitleFontSize },
                     ] as any
                   }
@@ -111,24 +133,33 @@ export const HomeServices: React.FC = () => {
                   variant="h4"
                   weight="bold"
                   style={
-                    [styles.serviceTitle, { fontSize: titleFontSize }] as any
+                    [
+                      styles.serviceTitle,
+                      Platform.OS === "android"
+                        ? styles.textShadow
+                        : styles.textShadow,
+                      { fontSize: titleFontSize },
+                    ] as any
                   }
                   numberOfLines={2}
                   ellipsizeMode="tail"
                 >
                   {service.title}
                 </ThemedText>
-                {/* <ThemedText
+                <ThemedText
                   variant="caption"
-                  style={[
-                    styles.serviceDescription,
-                    { fontSize: descriptionFontSize },
-                  ]}
+                  style={
+                    [
+                      styles.serviceDescription,
+                      Platform.OS === "android" ? null : styles.textShadow,
+                      { fontSize: descriptionFontSize },
+                    ] as any
+                  }
                   numberOfLines={2}
                   ellipsizeMode="tail"
                 >
                   {service.description}
-                </ThemedText> */}
+                </ThemedText>
               </View>
             </View>
 
@@ -182,7 +213,7 @@ export const HomeServices: React.FC = () => {
   const ratingFontSize = isTablet ? 14 : isSmallDevice ? 10 : 12;
 
   // Responsive kart yüksekliği - daha yüksek
-  const cardHeight = isTablet ? 200 : isSmallDevice ? 160 : 180;
+  const cardHeight = isTablet ? 200 : isSmallDevice ? 190 : 180;
 
   return (
     <ThemedView
@@ -232,7 +263,31 @@ const styles = StyleSheet.create({
   serviceGradient: {
     borderRadius: 12,
     padding: 10,
+    overflow: "hidden",
     // Yükseklik dinamik olarak ayarlanacak
+  },
+  bgImageContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  bgImage: {
+    width: "100%",
+    height: "100%",
+    opacity: 0.25,
+    resizeMode: "cover",
+  },
+  readabilityOverlay: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    top: 0,
+    backgroundColor: "rgba(0,0,0,0.15)",
   },
   serviceCardContent: {
     flex: 1,
@@ -284,9 +339,14 @@ const styles = StyleSheet.create({
   },
   serviceTitle: {
     color: "#FFFFFF",
-    marginBottom: 8,
+    // marginBottom: 8,
     fontSize: 16,
-    lineHeight: 20,
+    lineHeight: 15,
+  },
+  textShadow: {
+    textShadowColor: "rgba(0,0,0,0.6)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
   },
   serviceDescription: {
     color: "rgba(255,255,255,0.9)",

@@ -2,11 +2,11 @@ import { Typography } from "@/constants/DesignTokens";
 import { useDeviceDimensions, useTheme } from "@/hooks";
 import { getResponsiveFontSize, getResponsiveLineHeight } from "@/utils";
 import React, { ReactNode } from "react";
-import { Text, TextStyle } from "react-native";
+import { StyleProp, Text, TextStyle } from "react-native";
 
 interface ThemedTextProps {
   children: ReactNode;
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
   variant?:
     | "h1"
     | "h2"
@@ -222,7 +222,7 @@ export default function ThemedText({
     }
   };
 
-  const textStyle: TextStyle[] = [
+  const textStyle: StyleProp<TextStyle> = [
     getVariantStyle(),
     getWeightStyle(),
     {
@@ -230,7 +230,7 @@ export default function ThemedText({
       textAlign: align,
       ...(fontFamily && { fontFamily }),
     },
-    ...(style ? [style] : []),
+    style,
   ];
 
   return (

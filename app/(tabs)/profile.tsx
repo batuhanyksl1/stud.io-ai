@@ -334,17 +334,11 @@ export default function ProfileTab() {
     fetchUserToken();
   }, [user?.uid]);
 
-  const _createNewImage = useCallback(() => {
-    if (Platform.OS !== "web") {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    router.push("/");
-  }, []);
-
   return (
     <ThemedView style={styles.container}>
-      {/* Header */}
-      {/* <View style={[styles.header, { backgroundColor: colors.surface }]}>
+      <ScrollView>
+        {/* Header */}
+        {/* <View style={[styles.header, { backgroundColor: colors.surface }]}>
         <View style={styles.headerContent}>
           <ThemedText variant="h2" weight="bold">
             Profilim
@@ -363,214 +357,216 @@ export default function ProfileTab() {
           <Text style={styles.settingsIcon}>⚙️</Text>
         </TouchableOpacity>
       </View> */}
-      <Header leftIconType="home" rightIconType="settings" />
-      <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
+        <Header leftIconType="home" rightIconType="settings" />
+        <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-            colors={[colors.primary]}
-            progressBackgroundColor={colors.surface}
-          />
-        }
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Profile Header Section */}
-        <View style={styles.profileHeaderSection}>
-          <UserProfileCard userProfile={userProfile} />
-        </View>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+              progressBackgroundColor={colors.surface}
+            />
+          }
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Profile Header Section */}
+          <View style={styles.profileHeaderSection}>
+            <UserProfileCard userProfile={userProfile} />
+          </View>
 
-        {/* Stats Section */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statsSection}>
-            <View
-              style={[styles.statCard, { backgroundColor: colors.surface }]}
-            >
-              <ThemedText
-                weight="bold"
-                color="primary"
-                style={styles.statNumber}
+          {/* Stats Section */}
+          <View style={styles.statsContainer}>
+            <View style={styles.statsSection}>
+              <View
+                style={[styles.statCard, { backgroundColor: colors.surface }]}
               >
+                <ThemedText
+                  weight="bold"
+                  color="primary"
+                  style={styles.statNumber}
+                >
+                  {
+                    documents.filter(
+                      (doc) => doc.result?.data?.images?.length > 0,
+                    ).length
+                  }
+                </ThemedText>
+                <ThemedText
+                  variant="caption"
+                  color="secondary"
+                  style={styles.statLabel}
+                >
+                  Yaratım
+                </ThemedText>
+              </View>
+
+              <View
+                style={[styles.statCard, { backgroundColor: colors.surface }]}
+              >
+                <ThemedText
+                  weight="bold"
+                  color="primary"
+                  style={styles.statNumber}
+                >
+                  {documents.reduce((total, doc) => {
+                    return total + (doc.result?.data?.images?.length || 0);
+                  }, 0)}
+                </ThemedText>
+                <ThemedText
+                  variant="caption"
+                  color="secondary"
+                  style={styles.statLabel}
+                >
+                  Toplam Görsel
+                </ThemedText>
+              </View>
+
+              <View
+                style={[styles.statCard, { backgroundColor: colors.surface }]}
+              >
+                <ThemedText
+                  variant="body"
+                  weight="bold"
+                  color="primary"
+                  style={styles.statNumber}
+                >
+                  {currentToken ?? ""}
+                </ThemedText>
+                <ThemedText
+                  variant="caption"
+                  color="secondary"
+                  style={styles.statLabel}
+                >
+                  Kalan Token
+                </ThemedText>
+              </View>
+            </View>
+          </View>
+          {/* Gallery Section */}
+          <View style={styles.imagesSection}>
+            <View style={styles.sectionHeader}>
+              <ThemedText variant="h4" weight="semiBold">
+                Galerim
+              </ThemedText>
+              <ThemedText variant="caption" color="secondary">
                 {
                   documents.filter(
                     (doc) => doc.result?.data?.images?.length > 0,
                   ).length
-                }
-              </ThemedText>
-              <ThemedText
-                variant="caption"
-                color="secondary"
-                style={styles.statLabel}
-              >
-                Yaratım
+                }{" "}
+                yaratım
               </ThemedText>
             </View>
 
-            <View
-              style={[styles.statCard, { backgroundColor: colors.surface }]}
-            >
-              <ThemedText
-                weight="bold"
-                color="primary"
-                style={styles.statNumber}
-              >
-                {documents.reduce((total, doc) => {
-                  return total + (doc.result?.data?.images?.length || 0);
-                }, 0)}
-              </ThemedText>
-              <ThemedText
-                variant="caption"
-                color="secondary"
-                style={styles.statLabel}
-              >
-                Toplam Görsel
-              </ThemedText>
-            </View>
-
-            <View
-              style={[styles.statCard, { backgroundColor: colors.surface }]}
-            >
-              <ThemedText
-                variant="body"
-                weight="bold"
-                color="primary"
-                style={styles.statNumber}
-              >
-                {currentToken ?? ""}
-              </ThemedText>
-              <ThemedText
-                variant="caption"
-                color="secondary"
-                style={styles.statLabel}
-              >
-                Kalan Token
-              </ThemedText>
-            </View>
-          </View>
-        </View>
-        {/* Gallery Section */}
-        <View style={styles.imagesSection}>
-          <View style={styles.sectionHeader}>
-            <ThemedText variant="h4" weight="semiBold">
-              Galerim
-            </ThemedText>
-            <ThemedText variant="caption" color="secondary">
-              {
-                documents.filter((doc) => doc.result?.data?.images?.length > 0)
-                  .length
-              }{" "}
-              yaratım
-            </ThemedText>
-          </View>
-
-          {loading ? (
-            <View style={styles.loadingState}>
-              <ActivityIndicator size="large" color={colors.primary} />
-              <ThemedText
-                variant="body"
-                color="secondary"
-                style={styles.loadingText}
-              >
-                Galeri yükleniyor...
-              </ThemedText>
-            </View>
-          ) : error ? (
-            <View style={styles.errorState}>
-              <ThemedText
-                variant="bodyLarge"
-                weight="semiBold"
-                align="center"
-                style={styles.errorTitle}
-              >
-                Galeri Yüklenemedi
-              </ThemedText>
-              <ThemedText
-                variant="body"
-                color="secondary"
-                align="center"
-                style={styles.errorDescription}
-              >
-                {error}
-              </ThemedText>
-              <TouchableOpacity
-                style={[
-                  styles.retryButton,
-                  { backgroundColor: colors.primary },
-                ]}
-                onPress={fetchUserDocuments}
-                activeOpacity={0.7}
-              >
+            {loading ? (
+              <View style={styles.loadingState}>
+                <ActivityIndicator size="large" color={colors.primary} />
                 <ThemedText
                   variant="body"
-                  weight="semiBold"
-                  color="onPrimary"
-                  style={styles.retryButtonText}
+                  color="secondary"
+                  style={styles.loadingText}
                 >
-                  Tekrar Dene
+                  Galeri yükleniyor...
                 </ThemedText>
-              </TouchableOpacity>
-            </View>
-          ) : documents.length > 0 ? (
-            <View style={styles.galleryGrid}>
-              {documents
-                .filter((doc) => doc.result?.data?.images?.length > 0)
-                .map((doc, _index) => {
-                  // Sadece result.data.images'den ilk görseli kapak fotoğrafı olarak kullan
-                  const coverImageUrl = doc.result?.data?.images?.[0]?.url;
+              </View>
+            ) : error ? (
+              <View style={styles.errorState}>
+                <ThemedText
+                  variant="bodyLarge"
+                  weight="semiBold"
+                  align="center"
+                  style={styles.errorTitle}
+                >
+                  Galeri Yüklenemedi
+                </ThemedText>
+                <ThemedText
+                  variant="body"
+                  color="secondary"
+                  align="center"
+                  style={styles.errorDescription}
+                >
+                  {error}
+                </ThemedText>
+                <TouchableOpacity
+                  style={[
+                    styles.retryButton,
+                    { backgroundColor: colors.primary },
+                  ]}
+                  onPress={fetchUserDocuments}
+                  activeOpacity={0.7}
+                >
+                  <ThemedText
+                    variant="body"
+                    weight="semiBold"
+                    color="onPrimary"
+                    style={styles.retryButtonText}
+                  >
+                    Tekrar Dene
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
+            ) : documents.length > 0 ? (
+              <View style={styles.galleryGrid}>
+                {documents
+                  .filter((doc) => doc.result?.data?.images?.length > 0)
+                  .map((doc, _index) => {
+                    // Sadece result.data.images'den ilk görseli kapak fotoğrafı olarak kullan
+                    const coverImageUrl = doc.result?.data?.images?.[0]?.url;
 
-                  return (
-                    <TouchableOpacity
-                      key={doc.id}
-                      style={styles.galleryItem}
-                      activeOpacity={0.8}
-                      onPress={() => {
-                        // Detay sayfasına yönlen
-                        router.push({
-                          pathname: "/gallery/[id]",
-                          params: { id: doc.id },
-                        });
-                      }}
-                    >
-                      <View style={styles.galleryImageContainer}>
-                        <Image
-                          source={{ uri: coverImageUrl }}
-                          style={styles.galleryImage}
-                          resizeMode="cover"
-                        />
+                    return (
+                      <TouchableOpacity
+                        key={doc.id}
+                        style={styles.galleryItem}
+                        activeOpacity={0.8}
+                        onPress={() => {
+                          // Detay sayfasına yönlen
+                          router.push({
+                            pathname: "/gallery/[id]",
+                            params: { id: doc.id },
+                          });
+                        }}
+                      >
+                        <View style={styles.galleryImageContainer}>
+                          <Image
+                            source={{ uri: coverImageUrl }}
+                            style={styles.galleryImage}
+                            resizeMode="cover"
+                          />
 
-                        {/* Gradient Overlay */}
-                        <View style={styles.galleryGradient} />
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-            </View>
-          ) : (
-            <View style={styles.emptyState}>
-              <ThemedText
-                variant="bodyLarge"
-                weight="semiBold"
-                align="center"
-                style={styles.emptyStateTitle}
-              >
-                Henüz Görsel Yok
-              </ThemedText>
-              <ThemedText
-                variant="body"
-                color="secondary"
-                align="center"
-                style={styles.emptyStateDescription}
-              >
-                İlk görselinizi oluşturmak için yukarıdaki butona tıklayın
-              </ThemedText>
-            </View>
-          )}
-        </View>
+                          {/* Gradient Overlay */}
+                          <View style={styles.galleryGradient} />
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+              </View>
+            ) : (
+              <View style={styles.emptyState}>
+                <ThemedText
+                  variant="bodyLarge"
+                  weight="semiBold"
+                  align="center"
+                  style={styles.emptyStateTitle}
+                >
+                  Henüz Görsel Yok
+                </ThemedText>
+                <ThemedText
+                  variant="body"
+                  color="secondary"
+                  align="center"
+                  style={styles.emptyStateDescription}
+                >
+                  İlk görselinizi oluşturmak için yukarıdaki butona tıklayın
+                </ThemedText>
+              </View>
+            )}
+          </View>
+        </ScrollView>
       </ScrollView>
     </ThemedView>
   );

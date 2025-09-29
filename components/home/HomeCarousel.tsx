@@ -14,7 +14,6 @@ import {
   View,
 } from "react-native";
 import PagerView from "react-native-pager-view";
-import { Badge } from "../ui/Badge";
 
 interface HomeCarouselProps {
   onPageChange?: (_page: number) => void;
@@ -24,7 +23,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
   const router = useRouter();
   const { colors } = useTheme();
   const { clearAllImages, resetUIState } = useContentCreation();
-  const { width, isTablet, isSmallDevice } = useDeviceDimensions();
+  const { isTablet, isSmallDevice } = useDeviceDimensions();
   const [currentPage, setCurrentPage] = useState(0);
   const pagerRef = useRef<PagerView>(null);
   const autoScrollInterval = useRef<number | null>(null);
@@ -89,36 +88,46 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
         {/* Görseller arka planda */}
         <View style={styles.carouselImagesContainer}>
           <Image
-            source={item.image1}
+            source={
+              typeof item.image1 === "string"
+                ? { uri: item.image1 }
+                : (item.image1 as any)
+            }
             style={[
               styles.carouselImage,
               { width: imageWidth, height: imageHeight },
             ]}
           />
           <Image
-            source={item.image2}
+            source={
+              typeof item.image2 === "string"
+                ? { uri: item.image2 }
+                : (item.image2 as any)
+            }
             style={[
               styles.carouselImage,
               { width: imageWidth, height: imageHeight },
             ]}
           />
         </View>
-        <Badge style={styles.carouselBadge} variant="coming-soon">
-          Yakında ✨
-        </Badge>
 
-        {/* Yazılar ön planda */}
         <View style={styles.carouselContent}>
           <ThemedText
             variant="h4"
             weight="bold"
-            style={[styles.carouselTitle, { fontSize: titleFontSize }]}
+            style={[
+              styles.carouselTitle as any,
+              { fontSize: titleFontSize } as any,
+            ]}
           >
             {item.title}
           </ThemedText>
           <ThemedText
             variant="body"
-            style={[styles.carouselSubtitle, { fontSize: subtitleFontSize }]}
+            style={[
+              styles.carouselSubtitle as any,
+              { fontSize: subtitleFontSize } as any,
+            ]}
           >
             {item.subtitle}
           </ThemedText>
@@ -136,7 +145,10 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
             <ThemedText
               variant="body"
               weight="semiBold"
-              style={[styles.carouselButtonText, { fontSize: buttonFontSize }]}
+              style={[
+                styles.carouselButtonText as any,
+                { fontSize: buttonFontSize } as any,
+              ]}
             >
               Dene
             </ThemedText>
@@ -149,8 +161,8 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
   // Responsive boyutlar
   const carouselHeight = isTablet ? 350 : isSmallDevice ? 280 : 300;
-  const cardHeight = isTablet ? 320 : isSmallDevice ? 250 : 280;
-  const imageWidth = isTablet ? 200 : isSmallDevice ? 160 : 180;
+  const cardHeight = isTablet ? 320 : isSmallDevice ? 247 : 280;
+  const imageWidth = isTablet ? 200 : isSmallDevice ? 171 : 205;
   const imageHeight = isTablet ? 300 : isSmallDevice ? 240 : 275;
 
   // Responsive font boyutları
@@ -161,8 +173,8 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
   return (
     <ThemedView
       style={[
-        styles.carouselSection,
-        { paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6 },
+        styles.carouselSection as any,
+        { paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6 } as any,
       ]}
     >
       <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
@@ -217,7 +229,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
 
 const styles = StyleSheet.create({
   carouselSection: {
-    paddingVertical: Platform.OS === "ios" ? 0 : 5,
+    paddingVertical: Platform.OS === "ios" ? 0 : 0,
     marginBottom: Platform.OS === "ios" ? 5 : 0,
   },
   carouselContainer: {
@@ -248,11 +260,6 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
     marginBottom: 10,
-  },
-  carouselBadge: {
-    position: "absolute",
-    top: 10,
-    right: 10,
   },
   carouselImagesContainer: {
     position: "absolute",

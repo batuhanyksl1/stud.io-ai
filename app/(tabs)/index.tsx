@@ -15,30 +15,32 @@ export default function HomeScreen() {
 
   return (
     <ThemedView backgroundColor="background" style={styles.container}>
-      <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
-      <Header leftIconType="information" rightIconType="settings" />
+      <ScrollView>
+        <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
+        <Header leftIconType="information" rightIconType="settings" />
 
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <ScrollView
-          style={[
-            styles.scrollView,
-            {
-              backgroundColor: colors.background,
-              paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6,
-            },
-          ]}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingHorizontal: isTablet ? 0 : 0 },
-          ]}
-        >
-          <HomeCarousel />
-          <HomeServices />
-          <HomeStats />
-          <View style={{ height: 16 }} />
-        </ScrollView>
-      </View>
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+          <ScrollView
+            style={[
+              styles.scrollView,
+              {
+                backgroundColor: colors.background,
+                paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6,
+              },
+            ]}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingHorizontal: isTablet ? 0 : 0 },
+            ]}
+          >
+            <HomeCarousel />
+            <HomeServices />
+            <HomeStats />
+            <View style={{ height: 16 }} />
+          </ScrollView>
+        </View>
+      </ScrollView>
     </ThemedView>
   );
 }
