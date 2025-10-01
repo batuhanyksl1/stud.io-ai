@@ -193,17 +193,9 @@ export const HomeServices: React.FC = () => {
     );
   };
 
-  // Responsive grid ayarları
-  const getGridColumns = () => {
-    if (isTablet) return 3;
-    if (isSmallDevice) return 2;
-    return 2;
-  };
-
   const getCardWidth = () => {
-    if (isTablet) return "31%";
-    if (isSmallDevice) return "48%";
-    return "48%";
+    if (isTablet) return "31%"; // 3 kolon
+    return "48%"; // 2 kolon
   };
 
   // Responsive font boyutları
@@ -229,7 +221,12 @@ export const HomeServices: React.FC = () => {
           Tüm Servisler
         </ThemedText>
       </View>
-      <View style={[styles.servicesGrid, { gap: isTablet ? 12 : 8 }]}>
+      <View
+        style={[
+          styles.servicesGrid,
+          { rowGap: isTablet ? 12 : 8, columnGap: isTablet ? 10 : 8 },
+        ]}
+      >
         {editingServices.map((service) =>
           renderServiceCard(service, getCardWidth()),
         )}
@@ -254,8 +251,7 @@ const styles = StyleSheet.create({
   servicesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
   },
   serviceCardContainer: {
     marginBottom: 0,
@@ -278,7 +274,7 @@ const styles = StyleSheet.create({
   bgImage: {
     width: "100%",
     height: "100%",
-    opacity: 0.25,
+    opacity: 0.15,
     resizeMode: "cover",
   },
   readabilityOverlay: {
@@ -287,7 +283,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     top: 0,
-    backgroundColor: "rgba(0,0,0,0.15)",
+    backgroundColor: "rgba(0, 0, 0, 0.04)",
   },
   serviceCardContent: {
     flex: 1,
@@ -344,9 +340,9 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   textShadow: {
-    textShadowColor: "rgba(0,0,0,0.6)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    // textShadowColor: "rgb(0, 0, 0)",
+    // textShadowOffset: { width: 0, height: 0 },
+    // textShadowRadius: 100,
   },
   serviceDescription: {
     color: "rgba(255,255,255,0.9)",
