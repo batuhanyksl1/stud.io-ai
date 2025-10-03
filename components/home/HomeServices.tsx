@@ -7,6 +7,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
+  FlatList,
   Image,
   Platform,
   StyleSheet,
@@ -51,10 +52,7 @@ export const HomeServices: React.FC = () => {
     console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
   };
 
-  const renderServiceCard = (
-    service: (typeof editingServices)[0],
-    cardWidth: string,
-  ) => {
+  const renderServiceCard = (service: (typeof editingServices)[0]) => {
     return (
       <TouchableOpacity
         key={service.id}
@@ -72,7 +70,7 @@ export const HomeServices: React.FC = () => {
           )
         }
         activeOpacity={0.8}
-        style={[styles.serviceCardContainer, { width: cardWidth as any }]}
+        style={[styles.serviceCardContainer, { flex: 1 }]}
       >
         <LinearGradient
           colors={service.gradient as [string, string, ...string[]]}
@@ -122,7 +120,6 @@ export const HomeServices: React.FC = () => {
                   style={
                     [
                       styles.serviceSubtitle,
-                      Platform.OS === "android" ? null : styles.textShadow,
                       { fontSize: subtitleFontSize },
                     ] as any
                   }
@@ -133,13 +130,7 @@ export const HomeServices: React.FC = () => {
                   variant="h4"
                   weight="bold"
                   style={
-                    [
-                      styles.serviceTitle,
-                      Platform.OS === "android"
-                        ? styles.textShadow
-                        : styles.textShadow,
-                      { fontSize: titleFontSize },
-                    ] as any
+                    [styles.serviceTitle, { fontSize: titleFontSize }] as any
                   }
                   numberOfLines={2}
                   ellipsizeMode="tail"
@@ -151,7 +142,7 @@ export const HomeServices: React.FC = () => {
                   style={
                     [
                       styles.serviceDescription,
-                      Platform.OS === "android" ? null : styles.textShadow,
+
                       { fontSize: descriptionFontSize },
                     ] as any
                   }
@@ -193,11 +184,6 @@ export const HomeServices: React.FC = () => {
     );
   };
 
-  const getCardWidth = () => {
-    if (isTablet) return "31%"; // 3 kolon
-    return "48%"; // 2 kolon
-  };
-
   // Responsive font boyutları
   const titleFontSize = isTablet ? 18 : isSmallDevice ? 14 : 16;
   const subtitleFontSize = isTablet ? 14 : isSmallDevice ? 10 : 12;
@@ -212,7 +198,9 @@ export const HomeServices: React.FC = () => {
       style={
         [
           styles.servicesSection,
-          { paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6 },
+          {
+            paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6,
+          },
         ] as any
       }
     >
@@ -221,16 +209,17 @@ export const HomeServices: React.FC = () => {
           Tüm Servisler
         </ThemedText>
       </View>
-      <View
-        style={[
-          styles.servicesGrid,
-          { rowGap: isTablet ? 12 : 8, columnGap: isTablet ? 10 : 8 },
-        ]}
-      >
-        {editingServices.map((service) =>
-          renderServiceCard(service, getCardWidth()),
+      <FlatList
+        data={editingServices}
+        keyExtractor={(item) => String(item.id)}
+        numColumns={isTablet ? 3 : 2}
+        scrollEnabled={false}
+        columnWrapperStyle={{ columnGap: isTablet ? 10 : 8 }}
+        ItemSeparatorComponent={() => (
+          <View style={{ height: isTablet ? 12 : 8 }} />
         )}
-      </View>
+        renderItem={({ item }) => renderServiceCard(item)}
+      />
     </ThemedView>
   );
 };
@@ -245,16 +234,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  // sectionTitle: {
-  //   marginBottom: 16,
-  // },
-  servicesGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-  },
   serviceCardContainer: {
+    // card container
     marginBottom: 0,
+    flex: 1,
   },
   serviceGradient: {
     borderRadius: 12,
@@ -263,6 +246,7 @@ const styles = StyleSheet.create({
     // Yükseklik dinamik olarak ayarlanacak
   },
   bgImageContainer: {
+    flex: 1,
     position: "absolute",
     top: 0,
     left: 0,
@@ -335,15 +319,10 @@ const styles = StyleSheet.create({
   },
   serviceTitle: {
     color: "#FFFFFF",
-    // marginBottom: 8,
     fontSize: 16,
     lineHeight: 15,
   },
-  textShadow: {
-    // textShadowColor: "rgb(0, 0, 0)",
-    // textShadowOffset: { width: 0, height: 0 },
-    // textShadowRadius: 100,
-  },
+
   serviceDescription: {
     color: "rgba(255,255,255,0.9)",
     lineHeight: 18,

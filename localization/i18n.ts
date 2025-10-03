@@ -16,7 +16,7 @@ const resources = {
 const supportedLanguages = ["en", "tr", "ru"];
 
 // Güvenli dil algılama
-const getDeviceLanguage = () => {
+const getDeviceLanguage = () => {3
   try {
     const locales = Localization.getLocales();
     if (locales && locales.length > 0) {
@@ -35,7 +35,7 @@ const getDeviceLanguage = () => {
 i18n.use(initReactI18next).init({
   resources,
   lng: getDeviceLanguage(),
-  fallbackLng: "en",
+  fallbackLng: "tr",
   debug: __DEV__, // Sadece geliştirme modunda debug
   interpolation: {
     escapeValue: false,
