@@ -26,5 +26,9 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:216158155286:ios:f2151c38a32f642d877b37</string>
-</dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Uygulama, yapay zekâ ile fotoğraf üretimi yapabilmeniz için kütüphanenizdeki görsellere erişim ister. Bu sayede kendi fotoğraflarınızı seçip düzenleyebilir veya yapay zekâya referans olarak kullanabilirsiniz.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Uygulama, yapay zekâ tarafından oluşturulan veya düzenlenen fotoğrafları cihazınızın kütüphanesine kaydedebilmek için izin ister. Böylece oluşturduğunuz görselleri kendi albümünüzde saklayabilirsiniz.</string>
+	</dict>
 </plist>
