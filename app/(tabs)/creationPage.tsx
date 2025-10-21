@@ -17,7 +17,7 @@ import { useContentCreation, useDeviceDimensions } from "@/hooks";
 import { useTheme } from "@/hooks/useTheme";
 import { pickImage } from "@/utils/pickImage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
@@ -99,6 +99,7 @@ const ImageGeneratorScreen = () => {
   const [currentPrompt, setCurrentPrompt] = useState(servicePrompt);
   const [currentViewingImage, setCurrentViewingImage] = useState<string>("");
   const [autoSave, setAutoSave] = useState<boolean>(true);
+  const hasRedirectedRef = React.useRef(false);
 
   const isGenerating = status === "pending";
   const hasImages =
@@ -274,6 +275,20 @@ const ImageGeneratorScreen = () => {
     }
   }, [createdImageUrl, autoSave, handleDownloadImage]);
 
+  // 402 hatasında otomatik yönlendirme
+  React.useEffect(() => {
+    if (!hasRedirectedRef.current && errorMessage?.includes("402")) {
+      hasRedirectedRef.current = true;
+      // Bu hatayı ekranda göstermemek için temizleyelim
+      setErrorMessage(null);
+      // Premium ekranına yönlendir
+      router.push("/premium");
+      hasRedirectedRef.current = false;
+
+      setErrorMessage(null);
+    }
+  }, [errorMessage, setErrorMessage]);
+
   const handleStartNew = useCallback(() => {
     clearAllImages();
     resetState();
@@ -353,7 +368,9 @@ const ImageGeneratorScreen = () => {
       onDownload={handleDownloadImage}
     />
   );
-
+  const redirectToPremium = () => {
+    router.push("/premium");
+  };
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
@@ -373,7 +390,7 @@ const ImageGeneratorScreen = () => {
       {isEditing && renderEditingView()}
       {hasResult && renderResultView()}
 
-      {errorMessage && (
+      {errorMessage && !errorMessage.includes("402") ? (
         <View
           style={[
             styles.errorBanner,
@@ -397,7 +414,7 @@ const ImageGeneratorScreen = () => {
             {errorMessage}
           </Text>
         </View>
-      )}
+      ) : null}
     </SafeAreaView>
   );
 };

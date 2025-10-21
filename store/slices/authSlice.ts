@@ -174,7 +174,16 @@ export const signUp = createAsyncThunk(
               createdAt: firestore.FieldValue.serverTimestamp(),
               emailVerified: false,
               lastLoginAt: null,
-              currentToken: 10, // Başlangıç token sayısı
+              currentToken: 12, // Başlangıç token sayısı
+              isPremium: false,
+              premiumPlan: "free",
+              premiumExpirationDate: null,
+              premiumPlanStartDate: null,
+              premiumPlanEndDate: null,
+              premiumPlanStatus: null,
+              premiumPlanType: null,
+              premiumPlanAmount: null,
+              premiumPlanCurrency: null,
             });
           console.log(
             "Kullanıcı Firestore'da oluşturuldu:",
