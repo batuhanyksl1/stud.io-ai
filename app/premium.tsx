@@ -1,11 +1,13 @@
 import { Button } from "@/components";
+import { RC_ENTITLEMENT_ID } from "@/constants";
 import { useTheme } from "@/hooks";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { ArrowLeft, Check, Crown, X, Zap } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import Purchases, { PurchasesPackage } from "react-native-purchases";
 
 interface PlanFeature {
   name: string;
@@ -13,20 +15,17 @@ interface PlanFeature {
   premium: boolean;
 }
 
-interface PricingPlan {
-  id: string;
-  name: string;
-  price: string;
-  period: string;
-  popular?: boolean;
-  savings?: string;
-}
+// Removed unused PricingPlan interface
 
 export default function PremiumScreen() {
   const { t } = useTranslation();
   const { colorScheme } = useTheme();
-  const [selectedPlan, setSelectedPlan] = useState<string>("yearly");
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState<boolean>(true);
+  const [packages, setPackages] = useState<PurchasesPackage[]>([]);
+  const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
+    null,
+  );
 
   const features: PlanFeature[] = [
     { name: t("premium.unlimitedPhotos"), free: false, premium: true },
@@ -39,51 +38,93 @@ export default function PremiumScreen() {
     { name: "Local Storage", free: true, premium: true },
   ];
 
-  const plans: PricingPlan[] = [
-    {
-      id: "monthly",
-      name: t("premium.monthlyPlan"),
-      price: "$9.99",
-      period: "/month",
-    },
-    {
-      id: "yearly",
-      name: t("premium.yearlyPlan"),
-      price: "$59.99",
-      period: "/year",
-      popular: true,
-      savings: "Save 50%",
-    },
-  ];
+  useEffect(() => {
+    const loadOfferings = async () => {
+      try {
+        setFetching(true);
+        const offerings = await Purchases.getOfferings();
+        const available = offerings.current?.availablePackages ?? [];
+        setPackages(available);
+        if (available.length > 0) {
+          setSelectedPackageId(available[0].identifier);
+        }
+      } catch (_e) {
+        Alert.alert(
+          t("common.error"),
+          "Paketler alınırken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.",
+        );
+      } finally {
+        setFetching(false);
+      }
+    };
 
-  const handleSubscribe = async (planId: string) => {
+    loadOfferings();
+  }, [t]);
+
+  const selectedPackage = useMemo(
+    () => packages.find((p) => p.identifier === selectedPackageId) ?? null,
+    [packages, selectedPackageId],
+  );
+
+  function formatPeriod(period?: string | null): string {
+    if (!period) return "";
+    switch (period) {
+      case "P1W":
+        return "/hafta";
+      case "P1M":
+        return "/ay";
+      case "P3M":
+        return "/3 ay";
+      case "P6M":
+        return "/6 ay";
+      case "P1Y":
+        return "/yıl";
+      default:
+        return "";
+    }
+  }
+
+  const handleSubscribe = async () => {
     setLoading(true);
 
     try {
-      // Simulate subscription process
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Subscription state would be managed here
-
-      Alert.alert(
-        t("common.success"),
-        "Welcome to Premium! You now have access to all premium features.",
-        [{ text: "OK", onPress: () => router.back() }],
+      if (!selectedPackage) {
+        Alert.alert(t("common.error"), "Lütfen bir plan seçin.");
+        return;
+      }
+      const { customerInfo } = await Purchases.purchasePackage(selectedPackage);
+      const isActive = Boolean(
+        customerInfo.entitlements.active[RC_ENTITLEMENT_ID],
       );
-    } catch {
-      Alert.alert(
-        t("common.error"),
-        "Failed to process subscription. Please try again.",
-      );
+      if (isActive) {
+        Alert.alert(t("common.success"), "Premium'a hoş geldiniz!", [
+          { text: "OK", onPress: () => router.back() },
+        ]);
+      }
+    } catch (e: any) {
+      if (e?.userCancelled) return; // kullanıcı iptali
+      Alert.alert(t("common.error"), "Satın alma işlemi başarısız oldu.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleRestore = async () => {
-    Alert.alert("Restore Purchases", "No previous purchases found.", [
-      { text: "OK" },
-    ]);
+    try {
+      const customerInfo = await Purchases.restorePurchases();
+      const isActive = Boolean(
+        customerInfo.entitlements.active[RC_ENTITLEMENT_ID],
+      );
+      if (isActive) {
+        Alert.alert(t("common.success"), "Satın alımlar geri yüklendi.", [
+          { text: "OK", onPress: () => router.back() },
+        ]);
+      } else {
+        Alert.alert("Restore Purchases", "Aktif satın alma bulunamadı.");
+      }
+    } catch (_e) {
+      Alert.alert(t("common.error"), "Geri yükleme başarısız oldu.");
+    }
   };
 
   return (
@@ -234,16 +275,17 @@ export default function PremiumScreen() {
           <Text style={styles.pricingTitle}>Planınızı Seçin</Text>
 
           <View style={styles.plansContainer}>
-            {plans.map((plan) => (
+            {packages.map((pack) => (
               <View
-                key={plan.id}
+                key={pack.identifier}
                 style={[
                   styles.planCard,
-                  selectedPlan === plan.id && styles.selectedPlanCard,
+                  selectedPackageId === pack.identifier &&
+                    styles.selectedPlanCard,
                 ]}
               >
                 {/* Popular Badge */}
-                {plan.popular && (
+                {pack.packageType === "MONTHLY" && (
                   <View style={styles.popularBadge}>
                     <LinearGradient
                       colors={["#ff6b6b", "#ee5a24"]}
@@ -257,7 +299,7 @@ export default function PremiumScreen() {
                 {/* Card Content */}
                 <LinearGradient
                   colors={
-                    selectedPlan === plan.id
+                    selectedPackageId === pack.identifier
                       ? ["#667eea", "#764ba2"]
                       : ["#ffffff", "#f8f9fa"]
                   }
@@ -268,83 +310,60 @@ export default function PremiumScreen() {
                       <Text
                         style={[
                           styles.planName,
-                          selectedPlan === plan.id && styles.selectedPlanText,
+                          selectedPackageId === pack.identifier &&
+                            styles.selectedPlanText,
                         ]}
                       >
-                        {plan.name}
+                        {pack.product.title}
                       </Text>
 
                       <View style={styles.priceContainer}>
                         <Text
                           style={[
                             styles.planPrice,
-                            selectedPlan === plan.id && styles.selectedPlanText,
+                            selectedPackageId === pack.identifier &&
+                              styles.selectedPlanText,
                           ]}
                         >
-                          {plan.price}
+                          {pack.product.priceString}
                         </Text>
                         <Text
                           style={[
                             styles.planPeriod,
-                            selectedPlan === plan.id &&
+                            selectedPackageId === pack.identifier &&
                               styles.selectedPlanPeriod,
                           ]}
                         >
-                          {plan.period}
+                          {formatPeriod(pack.product.subscriptionPeriod)}
                         </Text>
                       </View>
 
-                      {plan.savings && (
-                        <View style={styles.savingsBadge}>
-                          <Text style={styles.savingsText}>
-                            💰 %50 Tasarruf
-                          </Text>
-                        </View>
-                      )}
-
                       {/* Plan Benefits */}
                       <View style={styles.planBenefits}>
-                        {plan.id === "yearly" ? (
-                          <>
-                            <Text
-                              style={[
-                                styles.benefitItem,
-                                selectedPlan === plan.id &&
-                                  styles.selectedBenefitItem,
-                              ]}
-                            >
-                              ✨ Tüm premium özellikler
-                            </Text>
-                            <Text
-                              style={[
-                                styles.benefitItem,
-                                selectedPlan === plan.id &&
-                                  styles.selectedBenefitItem,
-                              ]}
-                            >
-                              🚀 Öncelikli destek
-                            </Text>
-                          </>
-                        ) : (
-                          <Text
-                            style={[
-                              styles.benefitItem,
-                              selectedPlan === plan.id &&
-                                styles.selectedBenefitItem,
-                            ]}
-                          >
-                            📱 Tüm premium özellikler
-                          </Text>
-                        )}
+                        <Text
+                          style={[
+                            styles.benefitItem,
+                            selectedPackageId === pack.identifier &&
+                              styles.selectedBenefitItem,
+                          ]}
+                        >
+                          📱 Tüm premium özellikler
+                        </Text>
                       </View>
                     </View>
 
                     <View style={styles.selectButton}>
                       <Button
-                        title={selectedPlan === plan.id ? "✓ Seçildi" : "Seç"}
-                        onPress={() => setSelectedPlan(plan.id)}
+                        title={
+                          selectedPackageId === pack.identifier
+                            ? "✓ Seçildi"
+                            : "Seç"
+                        }
+                        onPress={() => setSelectedPackageId(pack.identifier)}
                         variant={
-                          selectedPlan === plan.id ? "outline" : "primary"
+                          selectedPackageId === pack.identifier
+                            ? "outline"
+                            : "primary"
                         }
                         size="sm"
                       />
@@ -366,8 +385,9 @@ export default function PremiumScreen() {
             >
               <Button
                 title={loading ? "" : "🚀 7 Gün Ücretsiz Deneyin"}
-                onPress={() => handleSubscribe(selectedPlan)}
+                onPress={handleSubscribe}
                 loading={loading}
+                disabled={fetching || !selectedPackage}
                 variant="primary"
                 size="lg"
                 icon={!loading && <Zap size={24} color="white" />}
