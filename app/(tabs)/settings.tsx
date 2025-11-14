@@ -76,6 +76,8 @@ export default function SettingsScreen() {
           style: "destructive",
           onPress: async () => {
             await logout();
+            // Sign out sonrası ilk giriş sayfasına yönlendir
+            router.replace("/auth");
           },
         },
       ],

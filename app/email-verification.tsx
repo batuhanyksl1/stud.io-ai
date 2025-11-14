@@ -78,7 +78,7 @@ export default function EmailVerificationScreen() {
   const handleSignOut = async () => {
     try {
       await auth().signOut();
-      router.replace("/");
+      router.replace("/auth");
     } catch (error) {
       console.error("Çıkış yapılırken hata:", error);
     }
