@@ -4,10 +4,22 @@ import { useTheme } from "@/hooks";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { ArrowLeft, Check, Crown, X, Zap } from "lucide-react-native";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import Purchases, { PurchasesPackage } from "react-native-purchases";
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Purchases, {
+  CustomerInfo,
+  PurchasesPackage,
+} from "react-native-purchases";
 
 interface PlanFeature {
   name: string;
@@ -26,6 +38,12 @@ export default function PremiumScreen() {
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(
     null,
   );
+  const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
+  const [customerInfoLoading, setCustomerInfoLoading] = useState<boolean>(true);
+  const [refreshingCustomerInfo, setRefreshingCustomerInfo] =
+    useState<boolean>(false);
+  const [showRawCustomerInfo, setShowRawCustomerInfo] =
+    useState<boolean>(false);
 
   const features: PlanFeature[] = [
     { name: t("premium.unlimitedPhotos"), free: false, premium: true },
@@ -38,33 +56,206 @@ export default function PremiumScreen() {
     { name: "Local Storage", free: true, premium: true },
   ];
 
-  useEffect(() => {
-    const loadOfferings = async () => {
+  const fetchOfferings = useCallback(async () => {
+    try {
+      setFetching(true);
+      const offerings = await Purchases.getOfferings();
+      const available = offerings.current?.availablePackages ?? [];
+      setPackages(available);
+      if (available.length > 0) {
+        setSelectedPackageId((prev) => {
+          if (prev && available.some((pack) => pack.identifier === prev)) {
+            return prev;
+          }
+          return available[0].identifier;
+        });
+      } else {
+        setSelectedPackageId(null);
+      }
+    } catch (_e) {
+      Alert.alert(
+        t("common.error"),
+        "Paketler alınırken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.",
+      );
+    } finally {
+      setFetching(false);
+    }
+  }, [t]);
+
+  const fetchCustomerDetails = useCallback(
+    async (withPrimaryLoader = true) => {
       try {
-        setFetching(true);
-        const offerings = await Purchases.getOfferings();
-        const available = offerings.current?.availablePackages ?? [];
-        setPackages(available);
-        if (available.length > 0) {
-          setSelectedPackageId(available[0].identifier);
+        if (withPrimaryLoader) {
+          setCustomerInfoLoading(true);
+        } else {
+          setRefreshingCustomerInfo(true);
         }
+        const info = await Purchases.getCustomerInfo();
+        setCustomerInfo(info);
       } catch (_e) {
         Alert.alert(
           t("common.error"),
-          "Paketler alınırken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.",
+          "Abonelik bilgileri alınırken bir hata oluştu. Lütfen tekrar deneyin.",
         );
       } finally {
-        setFetching(false);
+        if (withPrimaryLoader) {
+          setCustomerInfoLoading(false);
+        } else {
+          setRefreshingCustomerInfo(false);
+        }
       }
-    };
+    },
+    [t],
+  );
 
-    loadOfferings();
-  }, [t]);
+  useEffect(() => {
+    fetchOfferings();
+    fetchCustomerDetails();
+  }, [fetchOfferings, fetchCustomerDetails]);
 
   const selectedPackage = useMemo(
     () => packages.find((p) => p.identifier === selectedPackageId) ?? null,
     [packages, selectedPackageId],
   );
+
+  // Premium durumunu kontrol et - aktif entitlement varsa premium aktif
+  const activeEntitlements = customerInfo
+    ? Object.values(customerInfo.entitlements.active ?? {})
+    : [];
+  const isPremiumActive =
+    activeEntitlements.length > 0 &&
+    activeEntitlements.some((ent) => ent.isActive === true);
+
+  useEffect(() => {
+    if (customerInfo) {
+      console.log(
+        "[PremiumScreen] CustomerInfo:",
+        JSON.stringify(customerInfo, null, 2),
+      );
+    }
+  }, [customerInfo]);
+
+  const subscriptionDetails = useMemo(() => {
+    if (!customerInfo) return [];
+
+    const activeEnts = Object.values(customerInfo.entitlements.active ?? {});
+    const firstActiveEntitlement = activeEnts.find((ent) => ent.isActive);
+    const subscriptions = customerInfo.subscriptionsByProductIdentifier ?? {};
+    const firstSubscription =
+      customerInfo.activeSubscriptions.length > 0
+        ? subscriptions[customerInfo.activeSubscriptions[0]]
+        : null;
+
+    return [
+      {
+        label: "Premium Durumu",
+        value: isPremiumActive ? "✅ Aktif" : "❌ Pasif",
+        highlight: isPremiumActive,
+      },
+      {
+        label: "Entitlement",
+        value: firstActiveEntitlement?.identifier ?? "-",
+      },
+      {
+        label: "Ürün Kimliği",
+        value:
+          firstActiveEntitlement?.productIdentifier ??
+          firstSubscription?.productIdentifier ??
+          "-",
+      },
+      {
+        label: "Aktif Abonelikler",
+        value:
+          customerInfo.activeSubscriptions.length > 0
+            ? customerInfo.activeSubscriptions.join(", ")
+            : "Bulunamadı",
+      },
+      {
+        label: "Mağaza",
+        value:
+          firstSubscription?.store === "APP_STORE"
+            ? "App Store"
+            : (firstSubscription?.store ?? "-"),
+      },
+      {
+        label: "Ortam",
+        value: firstSubscription?.isSandbox
+          ? "🧪 Sandbox (Test)"
+          : "🚀 Production",
+      },
+      {
+        label: "Fiyat",
+        value:
+          firstSubscription && "price" in firstSubscription
+            ? `${(firstSubscription as any).price.amount} ${(firstSubscription as any).price.currency}`
+            : "-",
+      },
+      {
+        label: "İlk Satın Alma",
+        value: formatDateTime(
+          firstActiveEntitlement?.originalPurchaseDate ??
+            firstSubscription?.originalPurchaseDate,
+        ),
+      },
+      {
+        label: "Son Satın Alma",
+        value: formatDateTime(
+          firstActiveEntitlement?.latestPurchaseDate ??
+            firstSubscription?.purchaseDate,
+        ),
+      },
+      {
+        label: "Bitiş Tarihi",
+        value: formatDateTime(
+          firstActiveEntitlement?.expirationDate ??
+            firstSubscription?.expiresDate,
+        ),
+      },
+      {
+        label: "Otomatik Yenileme",
+        value:
+          firstActiveEntitlement?.willRenew || firstSubscription?.willRenew
+            ? "✅ Evet"
+            : "❌ Hayır",
+      },
+      {
+        label: "Kullanıcı ID",
+        value: customerInfo.originalAppUserId ?? "-",
+      },
+      {
+        label: "İlk Görülme",
+        value: formatDateTime(customerInfo.firstSeen),
+      },
+      {
+        label: "Son Güncelleme",
+        value: formatDateTime(customerInfo.requestDate),
+      },
+    ];
+  }, [customerInfo, isPremiumActive]);
+
+  const customerInfoJson = useMemo(
+    () =>
+      customerInfo
+        ? JSON.stringify(customerInfo, null, 2)
+        : "RevenueCat üzerinden veri alınamadı.",
+    [customerInfo],
+  );
+
+  function formatDateTime(dateInput?: string | null): string {
+    if (!dateInput) return "-";
+    const date = new Date(dateInput);
+    if (Number.isNaN(date.getTime())) return "-";
+    try {
+      const datePart = date.toLocaleDateString("tr-TR");
+      const timePart = date.toLocaleTimeString("tr-TR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return `${datePart} ${timePart}`;
+    } catch (_e) {
+      return date.toISOString();
+    }
+  }
 
   function formatPeriod(period?: string | null): string {
     if (!period) return "";
@@ -92,10 +283,13 @@ export default function PremiumScreen() {
         Alert.alert(t("common.error"), "Lütfen bir plan seçin.");
         return;
       }
-      const { customerInfo } = await Purchases.purchasePackage(selectedPackage);
+      const { customerInfo: purchaseCustomerInfo } =
+        await Purchases.purchasePackage(selectedPackage);
+      setCustomerInfo(purchaseCustomerInfo);
       const isActive = Boolean(
-        customerInfo.entitlements.active[RC_ENTITLEMENT_ID],
+        purchaseCustomerInfo.entitlements.active[RC_ENTITLEMENT_ID],
       );
+      void fetchOfferings();
       if (isActive) {
         Alert.alert(t("common.success"), "Premium'a hoş geldiniz!", [
           { text: "OK", onPress: () => router.back() },
@@ -111,10 +305,12 @@ export default function PremiumScreen() {
 
   const handleRestore = async () => {
     try {
-      const customerInfo = await Purchases.restorePurchases();
+      const restoredCustomerInfo = await Purchases.restorePurchases();
+      setCustomerInfo(restoredCustomerInfo);
       const isActive = Boolean(
-        customerInfo.entitlements.active[RC_ENTITLEMENT_ID],
+        restoredCustomerInfo.entitlements.active[RC_ENTITLEMENT_ID],
       );
+      void fetchOfferings();
       if (isActive) {
         Alert.alert(t("common.success"), "Satın alımlar geri yüklendi.", [
           { text: "OK", onPress: () => router.back() },
@@ -126,6 +322,30 @@ export default function PremiumScreen() {
       Alert.alert(t("common.error"), "Geri yükleme başarısız oldu.");
     }
   };
+
+  const handleOpenManagementURL = useCallback(() => {
+    const url = customerInfo?.managementURL;
+    if (!url) {
+      Alert.alert("Bilgi", "Yönetim bağlantısı şu anda mevcut değil.");
+      return;
+    }
+    Linking.openURL(url).catch(() => {
+      Alert.alert("Hata", "Yönetim bağlantısı açılamadı.");
+    });
+  }, [customerInfo]);
+
+  const handleLogCustomerInfo = useCallback(() => {
+    if (!customerInfo) {
+      console.log("[PremiumScreen] CustomerInfo: null");
+      Alert.alert("Bilgi", "CustomerInfo henüz yüklenmedi.");
+      return;
+    }
+    console.log(
+      "[PremiumScreen] CustomerInfo:",
+      JSON.stringify(customerInfo, null, 2),
+    );
+    Alert.alert("Başarılı", "CustomerInfo konsola loglandı!");
+  }, [customerInfo]);
 
   return (
     <LinearGradient
@@ -184,6 +404,118 @@ export default function PremiumScreen() {
                 <Text style={styles.benefitText}>☁️ Bulut Depolama</Text>
               </View>
             </View>
+          </View>
+        </View>
+
+        {/* Subscription Status */}
+        <View style={styles.statusSection}>
+          <View style={styles.statusCard}>
+            <View style={styles.statusHeader}>
+              <Text style={styles.statusTitle}>Abonelik Durumunuz</Text>
+              <View
+                style={[
+                  styles.statusBadge,
+                  isPremiumActive
+                    ? styles.statusBadgeActive
+                    : styles.statusBadgeInactive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusBadgeText,
+                    isPremiumActive
+                      ? styles.statusBadgeTextActive
+                      : styles.statusBadgeTextInactive,
+                  ]}
+                >
+                  {isPremiumActive ? "Aktif" : "Pasif"}
+                </Text>
+              </View>
+            </View>
+
+            {customerInfoLoading ? (
+              <View style={styles.statusLoading}>
+                <ActivityIndicator color="#667eea" />
+                <Text style={styles.statusLoadingText}>
+                  Abonelik bilgileriniz yükleniyor...
+                </Text>
+              </View>
+            ) : customerInfo ? (
+              <View style={styles.statusDetails}>
+                {subscriptionDetails.map((detail) => (
+                  <View
+                    key={detail.label}
+                    style={[
+                      styles.statusRow,
+                      detail.highlight && styles.statusRowHighlight,
+                    ]}
+                  >
+                    <Text style={styles.statusLabel}>{detail.label}</Text>
+                    <Text
+                      style={[
+                        styles.statusValue,
+                        detail.highlight && styles.statusValueHighlight,
+                      ]}
+                    >
+                      {detail.value}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View style={styles.statusLoading}>
+                <Text style={styles.statusLoadingText}>
+                  RevenueCat üzerinden abonelik bilginiz bulunamadı.
+                </Text>
+              </View>
+            )}
+
+            <View style={styles.statusActions}>
+              <Button
+                title={refreshingCustomerInfo ? "" : "Bilgileri Yenile"}
+                onPress={() => fetchCustomerDetails(false)}
+                loading={refreshingCustomerInfo}
+                variant="outline"
+                size="sm"
+              />
+              <Button
+                title="Aboneliği Yönet"
+                onPress={handleOpenManagementURL}
+                variant="outline"
+                size="sm"
+                disabled={!customerInfo?.managementURL}
+              />
+              <Button
+                title="Console'a Logla"
+                onPress={handleLogCustomerInfo}
+                variant="outline"
+                size="sm"
+                disabled={!customerInfo}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={styles.rawDataToggle}
+              onPress={() => setShowRawCustomerInfo((prev) => !prev)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.rawDataToggleText}>
+                {showRawCustomerInfo
+                  ? "RevenueCat çıktısını gizle"
+                  : "RevenueCat çıktısını göster"}
+              </Text>
+              <Text style={styles.rawDataToggleHint}>
+                {showRawCustomerInfo
+                  ? "Gizlemek için dokunun"
+                  : "Ham JSON verisini görüntüleyin"}
+              </Text>
+            </TouchableOpacity>
+
+            {showRawCustomerInfo && (
+              <View style={styles.rawDataContainer}>
+                <Text style={styles.rawDataText}>{customerInfoJson}</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -534,6 +866,134 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: "Inter-SemiBold",
     fontSize: 14,
+  },
+  statusSection: {
+    paddingHorizontal: 24,
+    marginBottom: 32,
+  },
+  statusCard: {
+    backgroundColor: "white",
+    borderRadius: 24,
+    padding: 24,
+  },
+  statusHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  statusTitle: {
+    fontSize: 22,
+    fontFamily: "Inter-Black",
+    color: "#1f2937",
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  statusBadgeActive: {
+    backgroundColor: "rgba(34, 197, 94, 0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(34, 197, 94, 0.35)",
+  },
+  statusBadgeInactive: {
+    backgroundColor: "rgba(239, 68, 68, 0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(239, 68, 68, 0.35)",
+  },
+  statusBadgeText: {
+    fontFamily: "Inter-SemiBold",
+    fontSize: 14,
+  },
+  statusBadgeTextActive: {
+    color: "#15803d",
+  },
+  statusBadgeTextInactive: {
+    color: "#b91c1c",
+  },
+  statusLoading: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 24,
+    gap: 8,
+  },
+  statusLoadingText: {
+    fontFamily: "Inter-Medium",
+    color: "#4b5563",
+    textAlign: "center",
+  },
+  statusDetails: {
+    gap: 12,
+    marginTop: 8,
+  },
+  statusRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+  },
+  statusRowHighlight: {
+    backgroundColor: "rgba(34, 197, 94, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(34, 197, 94, 0.2)",
+  },
+  statusLabel: {
+    fontFamily: "Inter-SemiBold",
+    color: "#4b5563",
+    flex: 1,
+    flexShrink: 1,
+    fontSize: 14,
+  },
+  statusValue: {
+    fontFamily: "Inter-Medium",
+    color: "#1f2937",
+    flex: 1.1,
+    fontSize: 14,
+    textAlign: "right",
+    flexShrink: 1,
+  },
+  statusValueHighlight: {
+    fontFamily: "Inter-Bold",
+    color: "#15803d",
+    fontSize: 15,
+  },
+  statusActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+    marginTop: 24,
+  },
+  rawDataToggle: {
+    marginTop: 16,
+  },
+  rawDataToggleText: {
+    fontFamily: "Inter-SemiBold",
+    color: "#4338ca",
+    fontSize: 14,
+  },
+  rawDataToggleHint: {
+    fontFamily: "Inter-Regular",
+    color: "#6b7280",
+    fontSize: 12,
+    marginTop: 4,
+  },
+  rawDataContainer: {
+    marginTop: 16,
+    backgroundColor: "#0f172a",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.4)",
+  },
+  rawDataText: {
+    fontFamily: "Inter-Regular",
+    fontSize: 12,
+    color: "#e0f2fe",
+    lineHeight: 18,
   },
   featuresSection: {
     paddingHorizontal: 24,

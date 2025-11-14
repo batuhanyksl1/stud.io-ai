@@ -145,6 +145,14 @@ export default function SettingsScreen() {
           },
         },
         {
+          id: "premium",
+          title: "Premium",
+          subtitle: "Aboneliğinizi yönetin",
+          icon: <Ionicons name="crown" size={20} color={colors.textPrimary} />,
+          type: "navigation",
+          onPress: () => router.push("/premium"),
+        },
+        {
           id: "notifications",
           title: "Bildirimler",
           subtitle: "Push bildirimleri",
