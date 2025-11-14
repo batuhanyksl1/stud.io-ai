@@ -1,4 +1,4 @@
-import { RC_ANDROID_API_KEY, RC_ENTITLEMENT_ID } from "@/constants";
+// import { RC_ANDROID_API_KEY, RC_ENTITLEMENT_ID } from "@/constants";
 import "@/localization/i18n";
 import { AppProvider } from "@/providers";
 import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
@@ -30,8 +30,8 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
-import { Platform } from "react-native";
-import Purchases, { LOG_LEVEL } from "react-native-purchases";
+// import { Platform } from "react-native";
+// import Purchases, { LOG_LEVEL } from "react-native-purchases";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -56,33 +56,33 @@ export default function RootLayout() {
   //   })();
   // }, []);
 
-  useEffect(() => {
-    Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-    if (Platform.OS === "ios") {
-      Purchases.configure({ apiKey: "appl_OXTGqZMqjMTqmSsjIqVFKCtlGqw" });
-    } else if (Platform.OS === "android") {
-      Purchases.configure({ apiKey: RC_ANDROID_API_KEY });
-    }
+  // useEffect(() => {
+  //   Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+  //   if (Platform.OS === "ios") {
+  //     Purchases.configure({ apiKey: "appl_OXTGqZMqjMTqmSsjIqVFKCtlGqw" });
+  //   } else if (Platform.OS === "android") {
+  //     Purchases.configure({ apiKey: RC_ANDROID_API_KEY });
+  //   }
 
-    getCustomerInfo();
-    getProducts();
-    getOfferings();
-  }, []);
+  //   getCustomerInfo();
+  //   getProducts();
+  //   getOfferings();
+  // }, []);
 
-  async function getCustomerInfo() {
-    const customerInfo = await Purchases.getCustomerInfo();
-    // console.log("customerInfo", JSON.stringify(customerInfo, null, 2));
-  }
+  // async function getCustomerInfo() {
+  //   const customerInfo = await Purchases.getCustomerInfo();
+  //   // console.log("customerInfo", JSON.stringify(customerInfo, null, 2));
+  // }
 
-  async function getProducts() {
-    const products = await Purchases.getProducts([RC_ENTITLEMENT_ID]);
-    //console.log(JSON.stringify(products, null, 2));
-  }
+  // async function getProducts() {
+  //   const products = await Purchases.getProducts([RC_ENTITLEMENT_ID]);
+  //   //console.log(JSON.stringify(products, null, 2));
+  // }
 
-  async function getOfferings() {
-    const offerings = await Purchases.getOfferings();
-    console.log("offerings", JSON.stringify(offerings, null, 2));
-  }
+  // async function getOfferings() {
+  //   const offerings = await Purchases.getOfferings();
+  //   console.log("offerings", JSON.stringify(offerings, null, 2));
+  // }
 
   const [fontsLoaded, fontError] = useFonts({
     "Inter-Regular": Inter_400Regular,
