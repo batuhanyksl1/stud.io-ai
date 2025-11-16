@@ -72,11 +72,24 @@ export default function PremiumScreen() {
       } else {
         setSelectedPackageId(null);
       }
-    } catch (_e) {
-      Alert.alert(
-        t("common.error"),
-        "Paketler alınırken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.",
-      );
+    } catch (error: any) {
+      console.error("Paketler alınırken bir hata oluştu:", error);
+
+      // RevenueCat yapılandırılmamışsa kullanıcıya bilgi ver
+      if (
+        error?.message?.includes("configure") ||
+        error?.message?.includes("singleton instance")
+      ) {
+        Alert.alert(
+          t("common.error"),
+          "RevenueCat henüz yapılandırılmamış. Lütfen uygulamayı yeniden başlatın.",
+        );
+      } else {
+        Alert.alert(
+          t("common.error"),
+          "Paketler alınırken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.",
+        );
+      }
     } finally {
       setFetching(false);
     }
@@ -92,11 +105,24 @@ export default function PremiumScreen() {
         }
         const info = await Purchases.getCustomerInfo();
         setCustomerInfo(info);
-      } catch (_e) {
-        Alert.alert(
-          t("common.error"),
-          "Abonelik bilgileri alınırken bir hata oluştu. Lütfen tekrar deneyin.",
-        );
+      } catch (error: any) {
+        console.error("Abonelik bilgileri alınırken bir hata oluştu:", error);
+
+        // RevenueCat yapılandırılmamışsa kullanıcıya bilgi ver
+        if (
+          error?.message?.includes("configure") ||
+          error?.message?.includes("singleton instance")
+        ) {
+          Alert.alert(
+            t("common.error"),
+            "RevenueCat henüz yapılandırılmamış. Lütfen uygulamayı yeniden başlatın.",
+          );
+        } else {
+          Alert.alert(
+            t("common.error"),
+            "Abonelik bilgileri alınırken bir hata oluştu. Lütfen tekrar deneyin.",
+          );
+        }
       } finally {
         if (withPrimaryLoader) {
           setCustomerInfoLoading(false);
@@ -297,7 +323,19 @@ export default function PremiumScreen() {
       }
     } catch (e: any) {
       if (e?.userCancelled) return; // kullanıcı iptali
-      Alert.alert(t("common.error"), "Satın alma işlemi başarısız oldu.");
+
+      // RevenueCat yapılandırılmamışsa kullanıcıya bilgi ver
+      if (
+        e?.message?.includes("configure") ||
+        e?.message?.includes("singleton instance")
+      ) {
+        Alert.alert(
+          t("common.error"),
+          "RevenueCat henüz yapılandırılmamış. Lütfen uygulamayı yeniden başlatın.",
+        );
+      } else {
+        Alert.alert(t("common.error"), "Satın alma işlemi başarısız oldu.");
+      }
     } finally {
       setLoading(false);
     }
@@ -318,8 +356,21 @@ export default function PremiumScreen() {
       } else {
         Alert.alert("Restore Purchases", "Aktif satın alma bulunamadı.");
       }
-    } catch (_e) {
-      Alert.alert(t("common.error"), "Geri yükleme başarısız oldu.");
+    } catch (error: any) {
+      console.error("Geri yükleme hatası:", error);
+
+      // RevenueCat yapılandırılmamışsa kullanıcıya bilgi ver
+      if (
+        error?.message?.includes("configure") ||
+        error?.message?.includes("singleton instance")
+      ) {
+        Alert.alert(
+          t("common.error"),
+          "RevenueCat henüz yapılandırılmamış. Lütfen uygulamayı yeniden başlatın.",
+        );
+      } else {
+        Alert.alert(t("common.error"), "Geri yükleme başarısız oldu.");
+      }
     }
   };
 

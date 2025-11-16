@@ -5,7 +5,7 @@ import {
   Spacing,
   Typography,
 } from "@/constants/DesignTokens";
-import { useAuth, useTheme } from "@/hooks";
+import { useAuth, useBilling, useCredits, useTheme } from "@/hooks";
 import auth, { getAuth } from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 import * as Haptics from "expo-haptics";
@@ -197,6 +197,11 @@ ImageCard.displayName = "ImageCard";
 export default function ProfileTab() {
   const { colors, colorScheme } = useTheme();
   const { user } = useAuth();
+  
+  // Billing listener'ı başlat
+  useBilling();
+  
+  const { totalCredits, subscriptionCredits, extraCredits, plan } = useCredits();
 
   // Kullanıcı profil bilgilerini currentUser'dan al
   const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -207,7 +212,7 @@ export default function ProfileTab() {
       ? new Date(user.metadata.creationTime)
       : new Date(),
     totalCreations: 0,
-    remainingTokens: 100, // Varsayılan token sayısı
+    remainingTokens: totalCredits,
   });
 
   // Firebase verileri için state'ler
@@ -215,38 +220,6 @@ export default function ProfileTab() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentToken, setCurrentToken] = useState<number | null>(null);
-
-  // Token bilgisini Firestore'dan çek
-  const fetchUserToken = async () => {
-    try {
-      const currentUser = auth().currentUser;
-      if (!currentUser) {
-        console.log("Kullanıcı giriş yapmamış, token çekilemiyor");
-        return;
-      }
-
-      const userDoc = await firestore()
-        .collection("Account")
-        .doc(currentUser.uid)
-        .get();
-
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const token = userData?.currentToken;
-        console.log("📊 Firestore'dan gelen token:", token);
-        console.log("📊 userData:", userData);
-        setCurrentToken(typeof token === "number" ? token : null);
-        console.log("✅ Token state güncellendi:", token);
-      } else {
-        console.log("❌ Kullanıcı dokümanı bulunamadı");
-        setCurrentToken(null); // Yüklenene kadar gösterme
-      }
-    } catch (error) {
-      console.error("Token çekme hatası:", error);
-      setCurrentToken(null); // Hata durumunda gösterme
-    }
-  };
 
   // Firebase sorgusu - firebase-test.tsx'deki gibi
   const fetchUserDocuments = async () => {
@@ -302,7 +275,6 @@ export default function ProfileTab() {
   // Kullanıcı bilgilerini güncelle
   useEffect(() => {
     if (user) {
-      console.log("🔄 userProfile güncelleniyor, currentToken:", currentToken);
       setUserProfile({
         name: user.displayName || "",
         email: user.email || "",
@@ -311,10 +283,10 @@ export default function ProfileTab() {
           ? new Date(user.metadata.creationTime)
           : new Date(),
         totalCreations: 0,
-        remainingTokens: typeof currentToken === "number" ? currentToken : 0, // UI'da kullanılmıyor
+        remainingTokens: totalCredits,
       });
     }
-  }, [user, currentToken]);
+  }, [user, totalCredits]);
 
   // Refresh fonksiyonu
   const onRefresh = useCallback(async () => {
@@ -322,7 +294,7 @@ export default function ProfileTab() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     try {
-      await Promise.all([fetchUserDocuments(), fetchUserToken()]);
+      await fetchUserDocuments();
     } finally {
       setRefreshing(false);
     }
@@ -331,7 +303,6 @@ export default function ProfileTab() {
   // Component mount olduğunda veriyi çek
   useEffect(() => {
     fetchUserDocuments();
-    fetchUserToken();
   }, [user?.uid]);
 
   return (
@@ -426,8 +397,10 @@ export default function ProfileTab() {
                 </ThemedText>
               </View>
 
-              <View
+              <TouchableOpacity
                 style={[styles.statCard, { backgroundColor: colors.surface }]}
+                activeOpacity={0.7}
+                onPress={() => router.push("/premium")}
               >
                 <ThemedText
                   variant="body"
@@ -435,16 +408,31 @@ export default function ProfileTab() {
                   color="primary"
                   style={styles.statNumber}
                 >
-                  {currentToken ?? ""}
+                  {totalCredits}
                 </ThemedText>
                 <ThemedText
                   variant="caption"
                   color="secondary"
                   style={styles.statLabel}
                 >
-                  Kalan Token
+                  Kalan Kredi
                 </ThemedText>
-              </View>
+                {plan !== "free" && (
+                  <ThemedText
+                    variant="caption"
+                    color="tertiary"
+                    style={styles.planBadge}
+                  >
+                    {plan === "starter"
+                      ? "Starter"
+                      : plan === "pro"
+                        ? "Pro"
+                        : plan === "pro_yearly"
+                          ? "Pro Yıllık"
+                          : ""}
+                  </ThemedText>
+                )}
+              </TouchableOpacity>
             </View>
           </View>
           {/* Gallery Section */}
@@ -841,6 +829,11 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     textAlign: "center",
+  },
+  planBadge: {
+    marginTop: 4,
+    fontSize: Typography.fontSize.xs,
+    textTransform: "capitalize",
   },
   galleryGrid: {
     flexDirection: "row",

@@ -161,7 +161,7 @@ export default function SignUpScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       {/* Arka plan görseli */}
       <Image
         source={require("@/assets/images/carousel/image-a-2.jpg")}
@@ -370,7 +370,7 @@ export default function SignUpScreen() {
           />
         );
       })()}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -1,3 +1,4 @@
+import { NotEnoughCreditsError } from "@/services/billingConsume";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   clearAllImages as clearAllImagesAction,
@@ -16,9 +17,11 @@ import {
   setOriginalImageForResult as setOriginalImageForResultAction,
   setOriginalImagesForResult as setOriginalImagesForResultAction,
 } from "@/store/slices/contentCreationSlice";
+import { useCredits } from "./useCredits";
 
 export function useContentCreation() {
   const dispatch = useAppDispatch();
+  const { canGenerate, consumeCredits, totalCredits } = useCredits();
 
   // Redux store'dan state'leri al
   const {
@@ -113,18 +116,38 @@ export function useContentCreation() {
       throw new Error("Görsel seçilmemiş");
     }
 
-    return await dispatch(
-      generateImageAction({
-        localImageUri: localImageUri || undefined,
-        localImageUris: localImageUris || undefined,
-        servicePrompt,
-        aiRequestUrl,
-        aiStatusUrl,
-        aiResultUrl,
-        token,
-        hasCustomPrompt,
-      }),
-    );
+    // Kredi kontrolü ve tüketimi
+    const cost = token && token > 0 ? token : 1;
+    if (!canGenerate(cost)) {
+      throw new NotEnoughCreditsError();
+    }
+
+    try {
+      // Kredileri tüket
+      await consumeCredits(cost);
+
+      // Görsel üretimini başlat
+      return await dispatch(
+        generateImageAction({
+          localImageUri: localImageUri || undefined,
+          localImageUris: localImageUris || undefined,
+          servicePrompt,
+          aiRequestUrl,
+          aiStatusUrl,
+          aiResultUrl,
+          token,
+          hasCustomPrompt,
+        }),
+      );
+    } catch (error) {
+      // Eğer görsel üretimi başarısız olursa, kredileri geri vermek için
+      // Firestore listener zaten güncelleyecek ama burada bilgilendirme yapabiliriz
+      if (error instanceof NotEnoughCreditsError) {
+        throw error;
+      }
+      // Diğer hatalar için tekrar fırlat
+      throw error;
+    }
   };
 
   const downloadImage = async () => {
@@ -156,6 +179,9 @@ export function useContentCreation() {
     isImageViewerVisible,
     isExamplesModalVisible,
     activeExampleIndex,
+    // Credits
+    totalCredits,
+    canGenerate,
     // Actions
     clearError,
     clearAllImages,

@@ -1,4 +1,5 @@
 import { useContentCreation } from "@/hooks/useContentCreation";
+import { NotEnoughCreditsError } from "@/services/billingConsume";
 import { pickImage } from "@/utils/pickImage";
 import { router } from "expo-router";
 import { useCallback } from "react";
@@ -158,9 +159,25 @@ export function useImageGeneratorHandlers({
       console.log("✅ handleGenerateImage - işlem başarıyla tamamlandı");
     } catch (err: any) {
       console.error("❌ handleGenerateImage - hata yakalandı:", err);
-      const message = err.message || "Beklenmeyen bir hata oluştu.";
-      console.error("❌ handleGenerateImage - hata mesajı:", message);
-      Alert.alert("İşlem başarısız", message);
+
+      if (err instanceof NotEnoughCreditsError) {
+        Alert.alert(
+          "Yetersiz Kredi",
+          "Görsel üretmek için yeterli krediniz bulunmamaktadır. Lütfen premium'a geçin veya paket alın.",
+          [
+            {
+              text: "Premium'a Geç",
+              onPress: () => router.push("/premium"),
+              style: "default",
+            },
+            { text: "Tamam", style: "cancel" },
+          ],
+        );
+      } else {
+        const message = err.message || "Beklenmeyen bir hata oluştu.";
+        console.error("❌ handleGenerateImage - hata mesajı:", message);
+        Alert.alert("İşlem başarısız", message);
+      }
     }
   }, [
     localImageUri,
@@ -234,4 +251,3 @@ export function useImageGeneratorHandlers({
     setLocalImageUri,
   };
 }
-

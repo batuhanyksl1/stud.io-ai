@@ -1,4 +1,4 @@
-// import { RC_ANDROID_API_KEY, RC_ENTITLEMENT_ID } from "@/constants";
+import { RC_ANDROID_API_KEY, RC_APPLE_API_KEY } from "@/constants";
 import "@/localization/i18n";
 import { AppProvider } from "@/providers";
 import { BebasNeue_400Regular } from "@expo-google-fonts/bebas-neue";
@@ -30,59 +30,42 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect } from "react";
-// import { Platform } from "react-native";
-// import Purchases, { LOG_LEVEL } from "react-native-purchases";
+import { Platform } from "react-native";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  // useEffect(() => {
-  //   (async () => {
-  //     try {
-  //       if (Constants.executionEnvironment === "storeClient") return;
-  //       if (Platform.OS !== "ios" && Platform.OS !== "android") return;
-  //       const hasRNPurchases = !!(NativeModules as any)?.RNPurchases;
-  //       if (!hasRNPurchases) return;
-  //       const module = await import("react-native-purchases");
-  //       const Purchases = module.default;
-  //       const apiKey =
-  //         Platform.OS === "ios" ? RC_APPLE_API_KEY : RC_ANDROID_API_KEY;
-  //       if (apiKey) {
-  //         Purchases.configure({ apiKey });
-  //       }
-  //     } catch (_e) {
-  //       // Expo Go veya native modül yoksa sessizce geç
-  //     }
-  //   })();
-  // }, []);
+  // RevenueCat yapılandırması
+  useEffect(() => {
+    const configureRevenueCat = async () => {
+      try {
+        // Sadece iOS ve Android'de çalıştır
+        if (Platform.OS !== "ios" && Platform.OS !== "android") {
+          return;
+        }
 
-  // useEffect(() => {
-  //   Purchases.setLogLevel(LOG_LEVEL.DEBUG);
-  //   if (Platform.OS === "ios") {
-  //     Purchases.configure({ apiKey: "appl_OXTGqZMqjMTqmSsjIqVFKCtlGqw" });
-  //   } else if (Platform.OS === "android") {
-  //     Purchases.configure({ apiKey: RC_ANDROID_API_KEY });
-  //   }
+        const apiKey =
+          Platform.OS === "ios" ? RC_APPLE_API_KEY : RC_ANDROID_API_KEY;
 
-  //   getCustomerInfo();
-  //   getProducts();
-  //   getOfferings();
-  // }, []);
+        if (!apiKey) {
+          console.warn(
+            "[RevenueCat] API key bulunamadı. Lütfen environment variable'ları kontrol edin.",
+          );
+          return;
+        }
 
-  // async function getCustomerInfo() {
-  //   const customerInfo = await Purchases.getCustomerInfo();
-  //   // console.log("customerInfo", JSON.stringify(customerInfo, null, 2));
-  // }
+        Purchases.setLogLevel(LOG_LEVEL.INFO);
+        await Purchases.configure({ apiKey });
+        console.log("[RevenueCat] Başarıyla yapılandırıldı");
+      } catch (error) {
+        console.error("[RevenueCat] Yapılandırma hatası:", error);
+        // Expo Go veya native modül yoksa sessizce geç
+      }
+    };
 
-  // async function getProducts() {
-  //   const products = await Purchases.getProducts([RC_ENTITLEMENT_ID]);
-  //   //console.log(JSON.stringify(products, null, 2));
-  // }
-
-  // async function getOfferings() {
-  //   const offerings = await Purchases.getOfferings();
-  //   console.log("offerings", JSON.stringify(offerings, null, 2));
-  // }
+    void configureRevenueCat();
+  }, []);
 
   const [fontsLoaded, fontError] = useFonts({
     "Inter-Regular": Inter_400Regular,

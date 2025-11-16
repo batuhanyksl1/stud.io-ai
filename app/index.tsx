@@ -1,4 +1,4 @@
-import { useTheme } from "@/hooks";
+import { useBilling, useTheme } from "@/hooks";
 import "@/localization/i18n";
 import { AppProvider } from "@/providers";
 import { getAuth, onAuthStateChanged } from "@react-native-firebase/auth";
@@ -15,6 +15,9 @@ function IndexPageContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isReady, setIsReady] = useState(false);
+
+  // Billing listener'ları başlat
+  useBilling();
 
   // Auth state'ini kontrol et
   useEffect(() => {

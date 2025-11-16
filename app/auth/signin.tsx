@@ -38,15 +38,7 @@ const schema = yup.object().shape({
 export default function SignInScreen() {
   const { t } = useTranslation();
 
-  const {
-    login,
-    loginAsGuest,
-    isLoading,
-    needsDisplayName,
-    updateUserName,
-    isAuthenticated,
-    user,
-  } = useAuth();
+  const { login, isLoading, updateUserName, isAuthenticated, user } = useAuth();
 
   const {
     control,
@@ -60,10 +52,7 @@ export default function SignInScreen() {
   const handleSignIn = async (data: SignInCredentials) => {
     try {
       const result = await login(data);
-      if (result.meta.requestStatus === "fulfilled") {
-        // needsDisplayName state'i güncellendikten sonra useEffect ile kontrol edilecek
-        // Burada hiçbir şey yapmıyoruz
-      } else {
+      if (result.meta.requestStatus !== "fulfilled") {
         Alert.alert("Hata", result.payload as string);
       }
     } catch (error) {
@@ -73,25 +62,11 @@ export default function SignInScreen() {
     }
   };
 
-  // Display name modal'ı göster (kullanıcı bu sayfaya geldiyse display name yok demektir)
   useEffect(() => {
-    console.log("=== SIGNIN SCREEN DEBUG ===");
-    console.log("isAuthenticated:", isAuthenticated);
-    console.log("user:", user);
-    console.log("needsDisplayName:", needsDisplayName);
-
     if (isAuthenticated && user) {
-      console.log("Current user display name:", user.displayName);
       const hasDisplayName = user.displayName && user.displayName.trim() !== "";
-      console.log("Has display name:", hasDisplayName);
-
       if (hasDisplayName) {
-        // Display name varsa ana uygulamaya git
-        console.log("✅ User has display name - navigating to main app");
         router.replace("/(tabs)");
-      } else {
-        // Display name yoksa modal göster
-        console.log("🚨 User needs display name - modal should be visible");
       }
     }
   }, [isAuthenticated, user]);
@@ -112,8 +87,6 @@ export default function SignInScreen() {
   };
 
   const handleDisplayNameCancel = () => {
-    // Logout user if they cancel display name entry
-    // This ensures they can't access the app without a display name
     router.replace("/auth/signin");
   };
 
@@ -123,21 +96,6 @@ export default function SignInScreen() {
 
   const handleGoToSignUp = () => {
     router.push("/auth/signup");
-  };
-
-  const handleGuestLogin = async () => {
-    // try {
-    //   const result = await loginAsGuest();
-    //   if (result.meta.requestStatus === "fulfilled") {
-    //     // Misafir girişi başarılı, display name modal'ı gösterilecek
-    //   } else {
-    //     Alert.alert("Hata", result.payload as string);
-    //   }
-    // } catch (error) {
-    //   const errorMessage =
-    //     error instanceof Error ? error.message : "Misafir girişi yapılamadı";
-    //   Alert.alert("Hata", errorMessage);
-    // }
   };
 
   return (
@@ -257,18 +215,6 @@ export default function SignInScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Guest login button */}
-            <TouchableOpacity
-              style={styles.guestButton}
-              onPress={handleGuestLogin}
-              disabled={isLoading}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.guestButtonText}>
-                {isLoading ? t("common.loading") : "Misafir Olarak Devam Et"}
-              </Text>
-            </TouchableOpacity>
-
             {/* Sign up link */}
             <View style={styles.signUpContainer}>
               <Text style={styles.signUpText}>{t("auth.dontHaveAccount")}</Text>
@@ -281,27 +227,16 @@ export default function SignInScreen() {
       </KeyboardAvoidingView>
 
       {/* Display Name Modal */}
-      {(() => {
-        const shouldShowModal =
+      <DisplayNameModal
+        visible={
           isAuthenticated &&
           user !== null &&
-          (!user.displayName || user.displayName.trim() === "");
-
-        console.log("Modal visibility check:");
-        console.log("- isAuthenticated:", isAuthenticated);
-        console.log("- user !== null:", user !== null);
-        console.log("- user.displayName:", user?.displayName);
-        console.log("- shouldShowModal:", shouldShowModal);
-
-        return (
-          <DisplayNameModal
-            visible={shouldShowModal}
-            onConfirm={handleDisplayNameConfirm}
-            onCancel={handleDisplayNameCancel}
-            isLoading={isLoading}
-          />
-        );
-      })()}
+          (!user.displayName || user.displayName.trim() === "")
+        }
+        onConfirm={handleDisplayNameConfirm}
+        onCancel={handleDisplayNameCancel}
+        isLoading={isLoading}
+      />
     </View>
   );
 }
@@ -335,14 +270,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 60,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    justifyContent: "center",
-    alignItems: "center",
   },
   logoContainer: {
     flex: 1,
@@ -439,20 +366,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#ffffff",
     textDecorationLine: "underline",
-  },
-  guestButton: {
-    height: 56,
-    backgroundColor: "transparent",
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
-  },
-  guestButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#ffffff",
   },
 });

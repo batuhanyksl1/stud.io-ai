@@ -1,0 +1,158 @@
+{
+    "originalPurchaseDateMillis": 1375340400000,
+    "allPurchasedProductIdentifiers": [
+      "StudioAI_Free",
+      "StudioAI_StudioMonthly",
+      "StudioAI_Monthly"
+    ],
+    "firstSeenMillis": 1763069184000,
+    "activeSubscriptions": [
+      "StudioAI_Free"
+    ],
+    "nonSubscriptionTransactions": [],
+    "latestExpirationDate": "2025-11-16T11:35:38Z",
+    "originalApplicationVersion": "1.0",
+    "subscriptionsByProductIdentifier": {
+      "StudioAI_Free": {
+        "expiresDate": "2025-11-16T11:35:38Z",
+        "unsubscribeDetectedAt": null,
+        "periodType": "NORMAL",
+        "isSandbox": true,
+        "price": {
+          "currency": "TRY",
+          "amount": 449.99
+        },
+        "store": "APP_STORE",
+        "isActive": true,
+        "storeTransactionId": "2000001057729949",
+        "willRenew": true,
+        "ownershipType": "PURCHASED",
+        "billingIssuesDetectedAt": null,
+        "productIdentifier": "StudioAI_Free",
+        "purchaseDate": "2025-11-16T11:32:38Z",
+        "gracePeriodExpiresDate": null,
+        "refundedAt": null,
+        "originalPurchaseDate": "2025-11-13T21:43:17Z"
+      },
+      "StudioAI_Monthly": {
+        "ownershipType": "PURCHASED",
+        "price": {
+          "currency": "TRY",
+          "amount": 137.77605555555556
+        },
+        "productIdentifier": "StudioAI_Monthly",
+        "billingIssuesDetectedAt": null,
+        "purchaseDate": "2025-11-16T10:20:41Z",
+        "refundedAt": null,
+        "originalPurchaseDate": "2025-11-13T21:43:17Z",
+        "willRenew": true,
+        "isSandbox": true,
+        "expiresDate": "2025-11-16T10:21:12Z",
+        "store": "APP_STORE",
+        "storeTransactionId": "2000001057714986",
+        "gracePeriodExpiresDate": null,
+        "periodType": "NORMAL",
+        "isActive": false,
+        "unsubscribeDetectedAt": null
+      },
+      "StudioAI_StudioMonthly": {
+        "periodType": "NORMAL",
+        "purchaseDate": "2025-11-16T09:51:07Z",
+        "expiresDate": "2025-11-16T10:20:41Z",
+        "refundedAt": null,
+        "store": "APP_STORE",
+        "price": {
+          "currency": "TRY",
+          "amount": 492.7695648148148
+        },
+        "isActive": false,
+        "storeTransactionId": "2000001057704230",
+        "unsubscribeDetectedAt": null,
+        "isSandbox": true,
+        "gracePeriodExpiresDate": null,
+        "productIdentifier": "StudioAI_StudioMonthly",
+        "ownershipType": "PURCHASED",
+        "originalPurchaseDate": "2025-11-13T21:43:17Z",
+        "willRenew": true,
+        "billingIssuesDetectedAt": null
+      }
+    },
+    "latestExpirationDateMillis": 1763292938000,
+    "allExpirationDates": {
+      "StudioAI_Monthly": "2025-11-16T10:21:12Z",
+      "StudioAI_StudioMonthly": "2025-11-16T10:20:41Z",
+      "StudioAI_Free": "2025-11-16T11:35:38Z"
+    },
+    "allPurchaseDates": {
+      "StudioAI_Free": "2025-11-16T11:32:38Z",
+      "StudioAI_Monthly": "2025-11-16T10:20:41Z",
+      "StudioAI_StudioMonthly": "2025-11-16T09:51:07Z"
+    },
+    "originalAppUserId": "$RCAnonymousID:a5d66d3cc3304012b36c400b4ce42e3e",
+    "entitlements": {
+      "verification": "NOT_REQUESTED",
+      "all": {
+        "StudioAiPro": {
+          "unsubscribeDetectedAt": null,
+          "billingIssueDetectedAt": null,
+          "latestPurchaseDateMillis": 1763292758000,
+          "originalPurchaseDate": "2025-11-13T21:43:17Z",
+          "isSandbox": true,
+          "ownershipType": "PURCHASED",
+          "periodType": "NORMAL",
+          "isActive": true,
+          "verification": "NOT_REQUESTED",
+          "willRenew": true,
+          "latestPurchaseDate": "2025-11-16T11:32:38Z",
+          "originalPurchaseDateMillis": 1763070197000,
+          "unsubscribeDetectedAtMillis": null,
+          "store": "APP_STORE",
+          "billingIssueDetectedAtMillis": null,
+          "productPlanIdentifier": null,
+          "productIdentifier": "StudioAI_Free",
+          "expirationDate": "2025-11-16T11:35:38Z",
+          "identifier": "StudioAiPro",
+          "expirationDateMillis": 1763292938000
+        }
+      },
+      "active": {
+        "StudioAiPro": {
+          "willRenew": true,
+          "billingIssueDetectedAtMillis": null,
+          "latestPurchaseDateMillis": 1763292758000,
+          "expirationDate": "2025-11-16T11:35:38Z",
+          "originalPurchaseDate": "2025-11-13T21:43:17Z",
+          "originalPurchaseDateMillis": 1763070197000,
+          "isSandbox": true,
+          "billingIssueDetectedAt": null,
+          "productIdentifier": "StudioAI_Free",
+          "identifier": "StudioAiPro",
+          "store": "APP_STORE",
+          "isActive": true,
+          "ownershipType": "PURCHASED",
+          "periodType": "NORMAL",
+          "unsubscribeDetectedAt": null,
+          "productPlanIdentifier": null,
+          "expirationDateMillis": 1763292938000,
+          "unsubscribeDetectedAtMillis": null,
+          "latestPurchaseDate": "2025-11-16T11:32:38Z",
+          "verification": "NOT_REQUESTED"
+        }
+      }
+    },
+    "managementURL": "https://apps.apple.com/account/subscriptions",
+    "requestDateMillis": 1763292769639,
+    "firstSeen": "2025-11-13T21:26:24Z",
+    "originalPurchaseDate": "2013-08-01T07:00:00Z",
+    "allExpirationDatesMillis": {
+      "StudioAI_Free": 1763292938000,
+      "StudioAI_Monthly": 1763288472000,
+      "StudioAI_StudioMonthly": 1763288441000
+    },
+    "requestDate": "2025-11-16T11:32:49Z",
+    "allPurchaseDatesMillis": {
+      "StudioAI_Free": 1763292758000,
+      "StudioAI_Monthly": 1763288441000,
+      "StudioAI_StudioMonthly": 1763286667000
+    }
+  }
