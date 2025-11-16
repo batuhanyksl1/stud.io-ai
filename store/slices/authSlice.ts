@@ -9,6 +9,8 @@ import auth, {
 } from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Platform } from "react-native";
+import Purchases from "react-native-purchases";
 
 // Types
 export type AuthUser = FirebaseAuthTypes.User;
@@ -24,21 +26,11 @@ export interface SignUpCredentials {
   displayName: string;
 }
 
-export interface UpdateProfileData {
-  displayName?: string;
-  photoURL?: string;
-}
-
-export interface DeleteAccountData {
-  password: string;
-}
-
 interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isVerified: boolean;
   isLoading: boolean;
-  isInitializing: boolean;
   error: string | null;
   needsDisplayName: boolean;
 }
@@ -48,7 +40,6 @@ const initialState: AuthState = {
   isAuthenticated: false,
   isVerified: false,
   isLoading: false,
-  isInitializing: false,
   error: null,
   needsDisplayName: false,
 };
@@ -83,6 +74,20 @@ export const deleteUserAccountBackend = createAsyncThunk(
         throw new Error(text || "Hesap silinemedi");
       }
 
+      // RevenueCat'ten çıkış yap
+      try {
+        await Purchases.logOut();
+        console.log("[Auth] RevenueCat'ten çıkış yapıldı (hesap silme)");
+      } catch (rcError: any) {
+        // RevenueCat configure edilmemişse bu hata normal, sessizce geç
+        if (
+          !rcError?.message?.includes("singleton instance") &&
+          !rcError?.message?.includes("configure")
+        ) {
+          console.error("[Auth] RevenueCat logOut error:", rcError);
+        }
+      }
+
       // Backend başarılıysa çıkış yap
       await signOutFirebase(auth());
       return null;
@@ -106,8 +111,22 @@ export const signIn = createAsyncThunk(
         !userCredential.user.displayName ||
         userCredential.user.displayName.trim() === "";
 
-      console.log("SignIn - Display Name:", userCredential.user.displayName);
-      console.log("SignIn - Needs Display Name:", needsDisplayName);
+      // RevenueCat'e kullanıcı ID'sini bağla
+      try {
+        await Purchases.logIn(userCredential.user.uid);
+        console.log(
+          "[Auth] RevenueCat'e kullanıcı ID'si bağlandı (signIn):",
+          userCredential.user.uid,
+        );
+      } catch (rcError: any) {
+        // RevenueCat configure edilmemişse bu hata normal, sessizce geç
+        if (
+          !rcError?.message?.includes("singleton instance") &&
+          !rcError?.message?.includes("configure")
+        ) {
+          console.error("[Auth] RevenueCat logIn error (signIn):", rcError);
+        }
+      }
 
       return {
         user: userCredential.user,
@@ -160,7 +179,6 @@ export const signUp = createAsyncThunk(
 
         // Send email verification
         await sendEmailVerification(userCredential.user);
-        console.log("Email doğrulama maili gönderildi");
 
         // Create user document in Firestore Account collection
         try {
@@ -174,7 +192,7 @@ export const signUp = createAsyncThunk(
               createdAt: firestore.FieldValue.serverTimestamp(),
               emailVerified: false,
               lastLoginAt: null,
-              currentToken: 12, // Başlangıç token sayısı
+              currentToken: 12, // Başlangıç token sayısı (eski sistem için geriye dönük uyumluluk)
               isPremium: false,
               premiumPlan: "free",
               premiumExpirationDate: null,
@@ -185,13 +203,47 @@ export const signUp = createAsyncThunk(
               premiumPlanAmount: null,
               premiumPlanCurrency: null,
             });
-          console.log(
-            "Kullanıcı Firestore'da oluşturuldu:",
-            userCredential.user.uid,
-          );
         } catch (firestoreError) {
           console.error("Firestore'a kullanıcı kaydedilemedi:", firestoreError);
           // Firestore hatası olsa bile kullanıcı oluşturma işlemini devam ettir
+        }
+
+        // Create userBilling document for new token/credit system
+        try {
+          await firestore()
+            .collection("userBilling")
+            .doc(userCredential.user.uid)
+            .set({
+              plan: "free",
+              subscriptionCredits: 20, // Welcome bonus
+              extraCredits: 0,
+              maxSubscriptionCredits: 0,
+              lastRefillAt: firestore.FieldValue.serverTimestamp(),
+              nextRefillAt: null,
+              platform: Platform.OS === "ios" ? "ios" : "android",
+              rcCustomerId: null,
+              entitlements: {},
+            });
+        } catch (billingError) {
+          console.error("Firestore'a billing kaydedilemedi:", billingError);
+          // Billing hatası olsa bile kullanıcı oluşturma işlemini devam ettir
+        }
+
+        // RevenueCat'e kullanıcı ID'sini bağla
+        try {
+          await Purchases.logIn(userCredential.user.uid);
+          console.log(
+            "[Auth] RevenueCat'e kullanıcı ID'si bağlandı (signUp):",
+            userCredential.user.uid,
+          );
+        } catch (rcError: any) {
+          // RevenueCat configure edilmemişse bu hata normal, sessizce geç
+          if (
+            !rcError?.message?.includes("singleton instance") &&
+            !rcError?.message?.includes("configure")
+          ) {
+            console.error("[Auth] RevenueCat logIn error (signUp):", rcError);
+          }
         }
       }
 
@@ -225,6 +277,20 @@ export const signOut = createAsyncThunk(
   "auth/signOut",
   async (_, { rejectWithValue }) => {
     try {
+      // RevenueCat'ten çıkış yap
+      try {
+        await Purchases.logOut();
+        console.log("[Auth] RevenueCat'ten çıkış yapıldı");
+      } catch (rcError: any) {
+        // RevenueCat configure edilmemişse bu hata normal, sessizce geç
+        if (
+          !rcError?.message?.includes("singleton instance") &&
+          !rcError?.message?.includes("configure")
+        ) {
+          console.error("[Auth] RevenueCat logOut error:", rcError);
+        }
+      }
+
       await signOutFirebase(auth());
       return null;
     } catch (error: any) {
@@ -302,8 +368,25 @@ export const signInAsGuest = createAsyncThunk(
       // Misafir kullanıcı için display name kontrolü
       const needsDisplayName = true; // Misafir kullanıcılar her zaman display name girmeli
 
-      console.log("Guest SignIn - User:", userCredential.user);
-      console.log("Guest SignIn - Needs Display Name:", needsDisplayName);
+      // RevenueCat'e kullanıcı ID'sini bağla
+      try {
+        await Purchases.logIn(userCredential.user.uid);
+        console.log(
+          "[Auth] RevenueCat'e kullanıcı ID'si bağlandı (signInAsGuest):",
+          userCredential.user.uid,
+        );
+      } catch (rcError: any) {
+        // RevenueCat configure edilmemişse bu hata normal, sessizce geç
+        if (
+          !rcError?.message?.includes("singleton instance") &&
+          !rcError?.message?.includes("configure")
+        ) {
+          console.error(
+            "[Auth] RevenueCat logIn error (signInAsGuest):",
+            rcError,
+          );
+        }
+      }
 
       return {
         user: userCredential.user,
@@ -350,104 +433,6 @@ export const updateDisplayName = createAsyncThunk(
   },
 );
 
-// export const updateProfile = createAsyncThunk(
-//   "auth/updateProfile",
-//   async (profileData: UpdateProfileData, { rejectWithValue }) => {
-//     try {
-//       const currentUser = currentUser(auth());
-
-//       if (!currentUser) {
-//         throw new Error("Kullanıcı oturumu bulunamadı");
-//       }
-
-//       await currentUser.updateProfile(profileData);
-
-//       // Return updated user data
-//       return currentUser(auth()) as AuthUser;
-//     } catch (error: any) {
-//       return rejectWithValue(
-//         error.message || "Profil güncellenirken bir hata oluştu",
-//       );
-//     }
-//   },
-// );
-
-// export const deleteAccount = createAsyncThunk(
-//   "auth/deleteAccount",
-//   async (data: DeleteAccountData, { rejectWithValue }) => {
-//     try {
-//       const currentUser = currentUser(auth());
-
-//       if (!currentUser || !currentUser.email) {
-//         throw new Error("Kullanıcı oturumu bulunamadı");
-//       }
-
-//       // Re-authenticate user before deletion
-//       const credential = EmailAuthProvider.credential(
-//         currentUser.email,
-//         data.password,
-//         // NOTE: If you use phone or other providers, adapt flow accordingly
-//       );
-
-//       await currentUser.reauthenticateWithCredential(credential);
-//       await currentUser.delete();
-
-//       return null;
-//     } catch (error: any) {
-//       let errorMessage = "Hesap silinemedi";
-
-//       switch (error.code) {
-//         case "auth/wrong-password":
-//           errorMessage = "Hatalı şifre";
-//           break;
-//         case "auth/requires-recent-login":
-//           errorMessage = "Hesap silmek için yeniden giriş yapmanız gerekiyor";
-//           break;
-//         default:
-//           errorMessage = error.message || "Hesap silinirken bir hata oluştu";
-//       }
-
-//       return rejectWithValue(errorMessage);
-//     }
-//   },
-// );
-
-// Auth state listener
-// export const initializeAuth = createAsyncThunk(
-//   "auth/initializeAuth",
-//   async (_, { dispatch }) => {
-//     return new Promise<void>((resolve) => {
-//       try {
-//         if ((global as any).authUnsubscribe) {
-//           (global as any).authUnsubscribe();
-//         }
-
-//         const handleAuthStateChange = (firebaseUser: AuthUser | null) => {
-//           if (firebaseUser) {
-//             dispatch(setUser(firebaseUser));
-//           } else {
-//             dispatch(clearAuth());
-//           }
-
-//           dispatch(setInitializing(false));
-
-//           if (!(global as any).authInitialized) {
-//             (global as any).authInitialized = true;
-//             resolve();
-//           }
-//         };
-
-//         const unsubscribe = onAuthStateChanged(auth(), handleAuthStateChange);
-//         (global as any).authUnsubscribe = unsubscribe;
-//       } catch (error) {
-//         console.error("authSlice.ts: Error setting up auth listener:", error);
-//         dispatch(setInitializing(false));
-//         resolve();
-//       }
-//     });
-//   },
-// );
-
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -468,30 +453,11 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
-    setInitializing: (state, action: PayloadAction<boolean>) => {
-      state.isInitializing = action.payload;
-    },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    // cleanupAuth: (state) => {
-    //   if ((global as any).authUnsubscribe) {
-    //     (global as any).authUnsubscribe();
-    //     (global as any).authUnsubscribe = null;
-    //   }
-    //   (global as any).authInitialized = false;
-    // },
   },
   extraReducers: (builder) => {
-    // Initialize Auth
-    // builder
-    //   .addCase(initializeAuth.pending, (state) => {
-    //     state.isInitializing = true;
-    //   })
-    //   .addCase(initializeAuth.fulfilled, (state) => {
-    //     state.isInitializing = false;
-    //   });
-
     // Sign In
     builder
       .addCase(signIn.pending, (state) => {
@@ -630,49 +596,9 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       });
-
-    // Update Profile
-    // builder
-    //   .addCase(updateProfile.pending, (state) => {
-    //     state.isLoading = true;
-    //     state.error = null;
-    //   })
-    //   .addCase(updateProfile.fulfilled, (state, action) => {
-    //     state.isLoading = false;
-    //     state.user = action.payload as AuthUser;
-    //     state.error = null;
-    //   })
-    //   .addCase(updateProfile.rejected, (state, action) => {
-    //     state.isLoading = false;
-    //     state.error = action.payload as string;
-    //   });
-
-    // Delete Account
-    // builder
-    //   .addCase(deleteAccount.pending, (state) => {
-    //     state.isLoading = true;
-    //     state.error = null;
-    //   })
-    //   .addCase(deleteAccount.fulfilled, (state) => {
-    //     state.isLoading = false;
-    //     state.user = null;
-    //     state.isAuthenticated = false;
-    //     state.error = null;
-    //   })
-    //   .addCase(deleteAccount.rejected, (state, action) => {
-    //     state.isLoading = false;
-    //     state.error = action.payload as string;
-    //   });
   },
 });
 
-export const {
-  setUser,
-  clearAuth,
-  clearError,
-  setInitializing,
-  setLoading,
-  //cleanupAuth,
-} = authSlice.actions;
+export const { setUser, clearAuth, clearError, setLoading } = authSlice.actions;
 
 export default authSlice.reducer;
