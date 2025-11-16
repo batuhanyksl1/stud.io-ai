@@ -1,5 +1,8 @@
+import {
+  consumeCreditsOnBackend,
+  NotEnoughCreditsError,
+} from "@/services/billingConsume";
 import { useAppSelector } from "@/store/hooks";
-import { consumeCreditsOnBackend, NotEnoughCreditsError } from "@/services/billingConsume";
 
 export function useCredits() {
   const billing = useAppSelector((state) => state.billing);
@@ -36,4 +39,3 @@ export function useCredits() {
     consumeCredits,
   };
 }
-

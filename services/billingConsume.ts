@@ -50,4 +50,3 @@ export async function consumeCreditsOnBackend(cost: number): Promise<void> {
   // Redux'ı optimistik güncelle (snapshot zaten gelecek ama hızlı UI için)
   store.dispatch(consumeCredits(cost));
 }
-

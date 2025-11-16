@@ -1,7 +1,7 @@
 import { firestore } from "@/firebase.config";
 import { store } from "@/store";
-import { setBillingState } from "@/store/slices/billingSlice";
 import type { SubscriptionPlan } from "@/store/slices/billingSlice";
+import { setBillingState } from "@/store/slices/billingSlice";
 
 export function listenUserBilling(uid: string) {
   const ref = firestore().collection("userBilling").doc(uid);
@@ -57,4 +57,3 @@ export function listenUserBilling(uid: string) {
 
   return unsubscribe;
 }
-

@@ -26,6 +26,7 @@ import {
   Poppins_600SemiBold,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
+import auth from "@react-native-firebase/auth";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -55,9 +56,23 @@ export default function RootLayout() {
           return;
         }
 
+        // Firebase auth durumunu kontrol et
+        const currentUser = auth().currentUser;
+        const appUserID = currentUser?.uid;
+
         Purchases.setLogLevel(LOG_LEVEL.INFO);
-        await Purchases.configure({ apiKey });
-        console.log("[RevenueCat] Başarıyla yapılandırıldı");
+
+        // Eğer kullanıcı varsa appUserID parametresini ekle
+        if (appUserID) {
+          await Purchases.configure({ apiKey, appUserID });
+          console.log(
+            "[RevenueCat] Başarıyla yapılandırıldı (Firebase UID ile):",
+            appUserID,
+          );
+        } else {
+          await Purchases.configure({ apiKey });
+          console.log("[RevenueCat] Başarıyla yapılandırıldı");
+        }
       } catch (error) {
         console.error("[RevenueCat] Yapılandırma hatası:", error);
         // Expo Go veya native modül yoksa sessizce geç
