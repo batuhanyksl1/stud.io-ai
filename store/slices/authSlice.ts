@@ -9,7 +9,6 @@ import auth, {
 } from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Platform } from "react-native";
 import Purchases from "react-native-purchases";
 
 // Types
@@ -206,27 +205,6 @@ export const signUp = createAsyncThunk(
         } catch (firestoreError) {
           console.error("Firestore'a kullanıcı kaydedilemedi:", firestoreError);
           // Firestore hatası olsa bile kullanıcı oluşturma işlemini devam ettir
-        }
-
-        // Create userBilling document for new token/credit system
-        try {
-          await firestore()
-            .collection("userBilling")
-            .doc(userCredential.user.uid)
-            .set({
-              plan: "free",
-              subscriptionCredits: 20, // Welcome bonus
-              extraCredits: 0,
-              maxSubscriptionCredits: 0,
-              lastRefillAt: firestore.FieldValue.serverTimestamp(),
-              nextRefillAt: null,
-              platform: Platform.OS === "ios" ? "ios" : "android",
-              rcCustomerId: null,
-              entitlements: {},
-            });
-        } catch (billingError) {
-          console.error("Firestore'a billing kaydedilemedi:", billingError);
-          // Billing hatası olsa bile kullanıcı oluşturma işlemini devam ettir
         }
 
         // RevenueCat'e kullanıcı ID'sini bağla

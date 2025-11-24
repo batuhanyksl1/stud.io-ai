@@ -5,7 +5,7 @@ import {
   Spacing,
   Typography,
 } from "@/constants/DesignTokens";
-import { useAuth, useBilling, useCredits, useTheme } from "@/hooks";
+import { useAuth, useTheme } from "@/hooks";
 import auth, { getAuth } from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 import * as Haptics from "expo-haptics";
@@ -48,13 +48,10 @@ interface UserProfile {
   remainingTokens: number;
 }
 
-// Mock veriler kaldırıldı, artık Firestore'dan gerçek veriler kullanılıyor
-
 // Components
 const UserProfileCard = React.memo(
   ({ userProfile: _userProfile }: { userProfile: UserProfile }) => {
     const currentUser = getAuth().currentUser;
-
     const { colors } = useTheme();
 
     const formatJoinDate = useCallback((date: Date) => {
@@ -197,11 +194,13 @@ ImageCard.displayName = "ImageCard";
 export default function ProfileTab() {
   const { colors, colorScheme } = useTheme();
   const { user } = useAuth();
-  
-  // Billing listener'ı başlat
-  useBilling();
-  
-  const { totalCredits, subscriptionCredits, extraCredits, plan } = useCredits();
+
+  // Firebase currentUser'ı al
+  const currentUser = auth().currentUser;
+
+  // Token balance ve plan bilgileri için state'ler
+  const [totalCredits, setTotalCredits] = useState<number>(0);
+  const [plan, setPlan] = useState<string>("free");
 
   // Kullanıcı profil bilgilerini currentUser'dan al
   const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -212,7 +211,7 @@ export default function ProfileTab() {
       ? new Date(user.metadata.creationTime)
       : new Date(),
     totalCreations: 0,
-    remainingTokens: totalCredits,
+    remainingTokens: 0,
   });
 
   // Firebase verileri için state'ler
@@ -272,10 +271,76 @@ export default function ProfileTab() {
     }
   };
 
+  // Token balance ve plan bilgisini Firestore'dan oku
+  useEffect(() => {
+    if (!currentUser?.uid) {
+      console.log("⚠️ User UID yok, token balance okunamıyor");
+      setTotalCredits(0);
+      setPlan("free");
+      return;
+    }
+
+    console.log("🔄 Firestore'dan token balance okunuyor...", currentUser.uid);
+
+    firestore()
+      .collection("Account")
+      .doc(currentUser.uid)
+      .get()
+      .then((doc) => {
+        const data = doc.data();
+        console.log("📊 Firestore Account dokümanı:", data);
+
+        if (data) {
+          // currentTokenBalance veya currentToken alanını kontrol et
+          const tokenBalance =
+            data?.currentTokenBalance ?? data?.currentToken ?? 0;
+          // premiumPlan veya plan alanını kontrol et
+          const userPlan = data?.premiumPlan ?? data?.plan ?? "free";
+
+          console.log(
+            "✅ Token balance okundu:",
+            tokenBalance,
+            "Plan:",
+            userPlan,
+          );
+
+          setTotalCredits(tokenBalance);
+          setPlan(userPlan);
+
+          // userProfile'ı da güncelle
+          setUserProfile((prev) => ({
+            ...prev,
+            remainingTokens: tokenBalance,
+          }));
+        } else {
+          // Doküman yoksa varsayılan değerler
+          console.log(
+            "⚠️ Account dokümanı bulunamadı, varsayılan değerler kullanılıyor",
+          );
+          setTotalCredits(0);
+          setPlan("free");
+          setUserProfile((prev) => ({
+            ...prev,
+            remainingTokens: 0,
+          }));
+        }
+      })
+      .catch((error) => {
+        console.error("❌ Token balance okuma hatası:", error);
+        setTotalCredits(0);
+        setPlan("free");
+        setUserProfile((prev) => ({
+          ...prev,
+          remainingTokens: 0,
+        }));
+      });
+  }, [currentUser?.uid]);
+
   // Kullanıcı bilgilerini güncelle
   useEffect(() => {
     if (user) {
-      setUserProfile({
+      setUserProfile((prev) => ({
+        ...prev,
         name: user.displayName || "",
         email: user.email || "",
         avatar: user.photoURL || undefined,
@@ -283,10 +348,9 @@ export default function ProfileTab() {
           ? new Date(user.metadata.creationTime)
           : new Date(),
         totalCreations: 0,
-        remainingTokens: totalCredits,
-      });
+      }));
     }
-  }, [user, totalCredits]);
+  }, [user]);
 
   // Refresh fonksiyonu
   const onRefresh = useCallback(async () => {
@@ -308,26 +372,6 @@ export default function ProfileTab() {
   return (
     <ThemedView style={styles.container}>
       <ScrollView>
-        {/* Header */}
-        {/* <View style={[styles.header, { backgroundColor: colors.surface }]}>
-        <View style={styles.headerContent}>
-          <ThemedText variant="h2" weight="bold">
-            Profilim
-          </ThemedText>
-          <ThemedText variant="body" color="secondary">
-            Yaratılan görsellerinizi yönetin
-          </ThemedText>
-        </View>
-        <TouchableOpacity
-          style={[
-            styles.settingsButton,
-            { backgroundColor: colors.secondarySubtle },
-          ]}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.settingsIcon}>⚙️</Text>
-        </TouchableOpacity>
-      </View> */}
         <Header leftIconType="home" rightIconType="settings" />
         <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
 

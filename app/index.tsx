@@ -1,4 +1,3 @@
-import { useBilling, useTheme } from "@/hooks";
 import "@/localization/i18n";
 import { AppProvider } from "@/providers";
 import { getAuth, onAuthStateChanged } from "@react-native-firebase/auth";
@@ -10,14 +9,11 @@ import SplashScreenComponent from "./splash";
 SplashScreen.preventAutoHideAsync();
 
 function IndexPageContent() {
-  const { colorScheme } = useTheme();
+  // const { colorScheme } = useTheme();
   const [isInitializing, setIsInitializing] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isReady, setIsReady] = useState(false);
-
-  // Billing listener'ları başlat
-  useBilling();
 
   // Auth state'ini kontrol et
   useEffect(() => {
