@@ -1,4 +1,5 @@
 // State Management Hooks
+export { useAccount } from "./useAccount";
 export { useAuth } from "./useAuth";
 export { useContentCreation } from "./useContentCreation";
 export { useTheme } from "./useTheme";

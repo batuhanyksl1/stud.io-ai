@@ -1,117 +1,69 @@
-import { firestore } from "@/firebase.config";
-import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
+import { useCallback, useEffect, useState } from "react";
 
-export interface UserImage {
+export interface FirestoreDocument {
   id: string;
-  url: string;
-  timestamp: number;
-  filterName: string;
-  isFavorite: boolean;
-  downloads: number;
-  fileName?: string;
-  contentType?: string;
-  fileSize?: number;
+  [key: string]: any;
 }
 
 export function useUserImages() {
-  const { user } = useAuth();
-  const [images, setImages] = useState<UserImage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [documents, setDocuments] = useState<FirestoreDocument[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    console.log("=== useUserImages useEffect çalıştı ===");
-    console.log("User objesi:", user);
-    console.log("User UID:", user?.uid);
-    console.log("User email:", user?.email);
+  const fetchUserDocuments = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-    if (!user?.uid) {
-      console.log("❌ User UID yok, boş array döndürülüyor");
-      setImages([]);
-      setLoading(false);
-      return;
-    }
-
-    console.log("✅ User UID var:", user.uid, "Görseller çekiliyor...");
-
-    const fetchUserImages = async () => {
-      try {
-        console.log("🔄 Kullanıcı dokümanları çekiliyor...");
-        setLoading(true);
-        setError(null);
-
-        // Kullanıcı giriş yapmış mı kontrol et
-        if (!user?.uid) {
-          setError("Kullanıcı giriş yapmamış!");
-          setImages([]);
-          return;
-        }
-
-        console.log("👤 Kullanıcı UID:", user.uid);
-
-        // aiToolRequests koleksiyonundan kullanıcının dokümanlarını çek
-        const querySnapshot = await firestore()
-          .collection("aiToolRequests")
-          .where("userId", "==", user.uid)
-          .get();
-
-        console.log("📊 Sorgu sonucu:", querySnapshot.docs.length, "doküman");
-
-        if (querySnapshot.docs.length === 0) {
-          setError("Bu kullanıcı için doküman bulunamadı!");
-          setImages([]);
-        } else {
-          const docs = querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-
-          setImages([]); // Şimdilik boş array, veri yapısını görmek için
-          console.log("✅ Kullanıcı dokümanları yüklendi:", docs.length);
-          console.log("📋 TÜM DOKÜMANLAR:");
-          docs.forEach((doc, index) => {
-            console.log(`📄 Doküman #${index + 1}:`, doc);
-          });
-        }
-      } catch (err: any) {
-        console.error("❌ Veri çekme hatası:", err);
-        setError(`Hata: ${err.message}`);
-        setImages([]);
-      } finally {
-        setLoading(false);
+    try {
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        setError("Kullanıcı giriş yapmamış!");
+        setDocuments([]);
+        return;
       }
-    };
 
-    fetchUserImages();
-  }, [user?.uid, user]);
+      const querySnapshot = await firestore()
+        .collection("aiToolRequests")
+        .where("userId", "==", currentUser.uid)
+        .get();
 
-  const toggleFavorite = async (imageId: string) => {
-    setImages((prev) =>
-      prev.map((img) =>
-        img.id === imageId ? { ...img, isFavorite: !img.isFavorite } : img,
-      ),
-    );
-    // TODO: Firestore'da favori durumunu güncelle
-  };
+      if (querySnapshot.docs.length === 0) {
+        setError("Bu kullanıcı için doküman bulunamadı!");
+        setDocuments([]);
+      } else {
+        const docs = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-  const deleteImage = async (imageId: string) => {
-    setImages((prev) => prev.filter((img) => img.id !== imageId));
-    // TODO: Firestore'dan görseli sil
-  };
+        setDocuments(docs);
+      }
+    } catch (err: any) {
+      console.error("❌ Veri çekme hatası:", err);
+      setError(`Hata: ${err.message}`);
+      setDocuments([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const currentUser = auth().currentUser;
+    if (currentUser?.uid) {
+      fetchUserDocuments();
+    } else {
+      setDocuments([]);
+      setLoading(false);
+      setError(null);
+    }
+  }, [fetchUserDocuments]);
 
   return {
-    images,
+    documents,
     loading,
     error,
-    toggleFavorite,
-    deleteImage,
-    refetch: () => {
-      if (user?.uid) {
-        // useEffect'i tetiklemek için user.uid'yi değiştir
-        setImages([]);
-        setLoading(true);
-      }
-    },
+    refetch: fetchUserDocuments,
   };
 }

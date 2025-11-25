@@ -134,3 +134,6 @@ export interface AiToolResult {
     width: number;
   }[];
 }
+
+// Profile types
+export type { UserImage, UserProfile } from "./profile";
