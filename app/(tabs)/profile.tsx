@@ -33,7 +33,7 @@ export default function ProfileTab() {
 
   // accountData'dan türetilen değerler (local state DEĞİL artık)
   const tokenBalance =
-    accountData?.currentTokenBalance ?? accountData?.currentToken ?? 0;
+    accountData?.currentTokenBalance ?? accountData?.currentTokenBalance ?? 0;
 
   const userPlan = accountData?.premiumPlan ?? accountData?.plan ?? "free";
 
