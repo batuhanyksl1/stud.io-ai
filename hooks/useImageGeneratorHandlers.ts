@@ -84,9 +84,9 @@ export function useImageGeneratorHandlers({
       }
     } catch (error) {
       console.error("🖼️ handleSelectImage - hata:", error);
-      setErrorMessage(
-        "Görsel seçilirken bir sorun oluştu. Lütfen tekrar deneyin.",
-      );
+      // setErrorMessage(
+      //   "Görsel seçilirken bir sorun oluştu. Lütfen tekrar deneyin.",
+      // );
     }
   }, [
     hasMultipleInputImage,
@@ -94,7 +94,6 @@ export function useImageGeneratorHandlers({
     resetState,
     setLocalImageUris,
     setLocalImageUri,
-    setErrorMessage,
   ]);
 
   const handleGenerateImage = useCallback(async () => {
@@ -195,6 +194,18 @@ export function useImageGeneratorHandlers({
   const handleStartNew = useCallback(() => {
     clearAllImages();
     resetState();
+    // Router parametrelerini temizle
+    router.setParams({
+      servicePrompt: undefined,
+      aiRequestUrl: undefined,
+      aiStatusUrl: undefined,
+      aiResultUrl: undefined,
+      hasMultipleInputImage: undefined,
+      hasPreSelectedImage: undefined,
+      gradient: undefined,
+      title: undefined,
+      token: undefined,
+    });
   }, [clearAllImages, resetState]);
 
   const handleExamplesMomentumEnd = useCallback(

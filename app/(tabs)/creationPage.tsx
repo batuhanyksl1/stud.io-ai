@@ -15,11 +15,12 @@ import { useScreenAnimations } from "@/hooks/useScreenAnimations";
 import { useTheme } from "@/hooks/useTheme";
 import { parseGradient } from "@/utils/gradientParser";
 import { calculateViewState } from "@/utils/viewState";
-import { useLocalSearchParams } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
 
 const ImageGeneratorScreen = () => {
+  const router = useRouter();
   const {
     servicePrompt,
     aiRequestUrl,
@@ -66,6 +67,13 @@ const ImageGeneratorScreen = () => {
 
   const [currentPrompt, setCurrentPrompt] = useState(servicePrompt);
   const [currentViewingImage, setCurrentViewingImage] = useState<string>("");
+
+  // servicePrompt parametresi değiştiğinde currentPrompt'u güncelle
+  useEffect(() => {
+    if (servicePrompt) {
+      setCurrentPrompt(servicePrompt);
+    }
+  }, [servicePrompt]);
 
   // View state hesaplamaları
   const viewState = useMemo(
@@ -118,6 +126,24 @@ const ImageGeneratorScreen = () => {
   // Hata yönetimi
   const { shouldShowError } = useErrorHandler(errorMessage, setErrorMessage);
 
+  // hasResult true olduğunda router parametrelerini temizle
+  // hasMultipleInputImage parametresini koruyoruz çünkü ResultView'da referans görselleri göstermek için gerekli
+  useEffect(() => {
+    if (viewState.hasResult) {
+      router.setParams({
+        servicePrompt: undefined,
+        aiRequestUrl: undefined,
+        aiStatusUrl: undefined,
+        aiResultUrl: undefined,
+        hasPreSelectedImage: undefined,
+        gradient: undefined,
+        title: undefined,
+        token: undefined,
+        // hasMultipleInputImage parametresini koruyoruz
+      });
+    }
+  }, [viewState.hasResult, router]);
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
@@ -145,7 +171,6 @@ const ImageGeneratorScreen = () => {
           servicePrompt={servicePrompt}
           hasMultipleInputImage={hasMultipleInputImage}
           onSelectImage={handleSelectImage}
-          onPromptChange={setCurrentPrompt}
           fadeAnim={fadeAnim}
           scaleAnim={scaleAnim}
         />

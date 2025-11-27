@@ -16,7 +16,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import PagerView from "react-native-pager-view";
@@ -28,7 +27,6 @@ interface InitialViewProps {
   servicePrompt: string;
   hasMultipleInputImage: string;
   onSelectImage: () => void;
-  onPromptChange?: (_prompt: string) => void;
   fadeAnim: Animated.Value;
   scaleAnim: Animated.Value;
 }
@@ -39,22 +37,14 @@ export const InitialView: React.FC<InitialViewProps> = ({
   servicePrompt,
   hasMultipleInputImage,
   onSelectImage,
-  onPromptChange,
   fadeAnim,
   scaleAnim,
 }) => {
   const { colors } = useTheme();
   const { isTablet, isSmallDevice } = useDeviceDimensions();
-  const [showCustomPrompt, setShowCustomPrompt] = useState(false);
-  const [customPrompt, setCustomPrompt] = useState("");
   const [currentExamplePage, setCurrentExamplePage] = useState(0);
   const examplePagerRef = useRef<PagerView>(null);
   const autoScrollInterval = useRef<number | null>(null);
-
-  const handleCustomPromptChange = (text: string) => {
-    setCustomPrompt(text);
-    onPromptChange?.(text);
-  };
 
   const exampleItems = useMemo(
     () =>
@@ -146,83 +136,6 @@ export const InitialView: React.FC<InitialViewProps> = ({
           Referans görselinizi ekleyin, talimatınızı paylaşın yada Studio
           AI&apos;ın sizin için düzenlesin.
         </Text>
-
-        {/* Custom Prompt Section */}
-        {showCustomPrompt ? (
-          <View
-            style={[styles.customPromptSection, { borderColor: colors.border }]}
-          >
-            <Text
-              style={[
-                styles.customPromptLabel,
-                {
-                  color: colors.textSecondary,
-                  fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
-                },
-              ]}
-            >
-              Kendi talimatınızı yazın
-            </Text>
-            <TextInput
-              style={[
-                styles.customPromptInput,
-                {
-                  borderColor: colors.border,
-                  backgroundColor: colors.surfaceElevated,
-                  color: colors.textPrimary,
-                  fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
-                },
-              ]}
-              value={customPrompt}
-              onChangeText={handleCustomPromptChange}
-              placeholder="Özel talimatınızı buraya yazın..."
-              placeholderTextColor={colors.textTertiary}
-              multiline
-              numberOfLines={3}
-              textAlignVertical="top"
-            />
-            <Pressable
-              style={[
-                styles.customPromptCancelButton,
-                { borderColor: colors.border },
-              ]}
-              onPress={() => {
-                setShowCustomPrompt(false);
-                setCustomPrompt("");
-                onPromptChange?.(servicePrompt);
-              }}
-            >
-              <Text
-                style={[
-                  styles.customPromptCancelText,
-                  {
-                    color: colors.textSecondary,
-                    fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
-                  },
-                ]}
-              >
-                Varsayılan talimatı kullan
-              </Text>
-            </Pressable>
-          </View>
-        ) : (
-          <Pressable
-            style={[styles.customPromptButton, { borderColor: colors.border }]}
-            onPress={() => setShowCustomPrompt(true)}
-          >
-            <Text
-              style={[
-                styles.customPromptButtonText,
-                {
-                  color: colors.textTertiary,
-                  fontSize: isTablet ? 14 : isSmallDevice ? 10 : 12,
-                },
-              ]}
-            >
-              Kendi talimatını ekle
-            </Text>
-          </Pressable>
-        )}
 
         <Pressable
           style={[styles.buttonPrimary, { backgroundColor: colors.primary }]}
@@ -701,49 +614,5 @@ const styles = StyleSheet.create({
     fontFamily: Typography.fontFamily.semiBold,
     textTransform: "uppercase",
     letterSpacing: Typography.letterSpacing.wide,
-  },
-  customPromptButton: {
-    alignSelf: "flex-start",
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-    marginBottom: Spacing.lg,
-  },
-  customPromptButtonText: {
-    fontSize: Typography.fontSize.xs,
-    fontFamily: Typography.fontFamily.medium,
-    //textDecorationLine: "underline",
-  },
-  customPromptSection: {
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    padding: Spacing.md,
-    marginBottom: Spacing.lg,
-  },
-  customPromptLabel: {
-    fontSize: Typography.fontSize.sm,
-    fontFamily: Typography.fontFamily.semiBold,
-    marginBottom: Spacing.sm,
-  },
-  customPromptInput: {
-    borderWidth: 1,
-    borderRadius: BorderRadius.md,
-    padding: Spacing.sm,
-    fontSize: Typography.fontSize.sm,
-    fontFamily: Typography.fontFamily.primary,
-    minHeight: 80,
-    marginBottom: Spacing.sm,
-  },
-  customPromptCancelButton: {
-    alignSelf: "flex-start",
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: Spacing.xs,
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-  },
-  customPromptCancelText: {
-    fontSize: Typography.fontSize.xs,
-    fontFamily: Typography.fontFamily.medium,
   },
 });
