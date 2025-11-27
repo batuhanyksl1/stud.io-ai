@@ -21,11 +21,11 @@ export const editingServices = [
     isPopular: true,
     badge: "En Popüler",
     token: 4,
-    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
     aiResultUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
     image1:
       "https://firebasestorage.googleapis.com/v0/b/studioai-980a7.firebasestorage.app/o/uploads%2FBxUr8QlqpTfB9hr85oNBBjPuPTs2%2F1758627824580-0.png?alt=media&token=e6a977d0-7b74-47d3-9a74-d1f4d87ce2d0",
     image2:
@@ -88,11 +88,11 @@ export const editingServices = [
     isPopular: true,
     badge: "Favori",
     token: 4,
-    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
     aiResultUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
     hasMultipleInputImage: true,
@@ -115,11 +115,11 @@ export const editingServices = [
     isPopular: false,
     badge: "Estetik",
     token: 4,
-    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
     aiResultUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
     image1:
       "https://firebasestorage.googleapis.com/v0/b/studioai-980a7.firebasestorage.app/o/uploads%2FjtLwwOXuljM4qa8nL7jFNjlL8UE3%2F1759178416077-0.jpeg?alt=media&token=a7b507c1-5d20-4f32-a8c6-cae4452ec0be",
     image2: "https://v3b.fal.media/files/b/penguin/PSZT1UpftCdtaz-JjYyuN.jpg",
@@ -143,11 +143,11 @@ export const editingServices = [
     isPopular: false,
     badge: "Hassas",
     token: 4,
-    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
     aiResultUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
     image1:
       "https://firebasestorage.googleapis.com/v0/b/studioai-980a7.firebasestorage.app/o/uploads%2FBxUr8QlqpTfB9hr85oNBBjPuPTs2%2F1758579203480-0.png?alt=media&token=001cf04e-e0e9-4887-8cb4-e1a8b5a5a67f",
     image2:
@@ -172,11 +172,11 @@ export const editingServices = [
     isPopular: true,
     badge: "Popüler",
     token: 4,
-    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
     aiResultUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
     image1:
       "https://firebasestorage.googleapis.com/v0/b/studioai-980a7.firebasestorage.app/o/uploads%2FjtLwwOXuljM4qa8nL7jFNjlL8UE3%2F1759179548480-0.png?alt=media&token=767e60d6-d65e-4fea-b407-783f33b61a97",
     image2: "https://v3.fal.media/files/kangaroo/WkxD08ubyh5V0TpuZq2We.jpeg",
@@ -200,11 +200,11 @@ export const editingServices = [
   //   isPopular: false,
   //   badge: "Yaratıcı",
   //   token: 4,
-  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
   //   aiStatusUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
   //   aiResultUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
   //   image1: require("@/assets/images/carousel/image-a-1.png"),
   //   image2: require("@/assets/images/carousel/image-a-2.jpg"),
   //   hasMultipleInputImage: true,
@@ -227,11 +227,11 @@ export const editingServices = [
   //   isPopular: true,
   //   badge: "Portre",
   //   token: 4,
-  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
   //   aiStatusUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
   //   aiResultUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
   //   image1: require("@/assets/images/carousel/image-a-1.png"),
   //   image2: require("@/assets/images/carousel/image-a-2.jpg"),
   //   hasMultipleInputImage: true,
@@ -254,11 +254,11 @@ export const editingServices = [
   //   isPopular: false,
   //   badge: "Profesyonel",
   //   token: 4,
-  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
   //   aiStatusUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
   //   aiResultUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
   //   image1: require("@/assets/images/carousel/image-a-1.png"),
   //   image2: require("@/assets/images/carousel/image-a-2.jpg"),
   //   hasMultipleInputImage: true,
@@ -281,11 +281,11 @@ export const editingServices = [
   //   isPopular: true,
   //   badge: "Sihirli",
   //   token: 4,
-  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
   //   aiStatusUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
   //   aiResultUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
   //   image1: require("@/assets/images/carousel/image-a-1.png"),
   //   image2: require("@/assets/images/carousel/image-a-2.jpg"),
   //   hasMultipleInputImage: true,
@@ -308,11 +308,11 @@ export const editingServices = [
   //   isPopular: false,
   //   badge: "Sinematik",
   //   token: 4,
-  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
   //   aiStatusUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
   //   aiResultUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
   //   image1: require("@/assets/images/carousel/image-a-1.png"),
   //   image2: require("@/assets/images/carousel/image-a-2.jpg"),
   //   hasMultipleInputImage: true,
@@ -335,11 +335,11 @@ export const editingServices = [
   //   isPopular: false,
   //   badge: "Tematik",
   //   token: 4,
-  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+  //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
   //   aiStatusUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
   //   aiResultUrl:
-  //     "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+  //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
   //   image1: require("@/assets/images/carousel/image-a-1.png"),
   //   image2: require("@/assets/images/carousel/image-a-2.jpg"),
   //   hasMultipleInputImage: true,
@@ -388,11 +388,11 @@ export const editingServices = [
     isPopular: true,
     badge: "Eğlenceli",
     token: 4,
-    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
     aiResultUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
     hasMultipleInputImage: true,
@@ -415,11 +415,11 @@ export const editingServices = [
     isPopular: false,
     badge: "Deneysel",
     token: 4,
-    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana/edit",
+    aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}/status",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
     aiResultUrl:
-      "https://queue.fal.run/fal-ai/nano-banana/requests/${requestId}",
+      "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}",
     image1: require("@/assets/images/carousel/image-a-1.png"),
     image2: require("@/assets/images/carousel/image-a-2.jpg"),
     hasMultipleInputImage: true,
