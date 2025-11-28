@@ -1,13 +1,15 @@
 import { AppleLogo, DisplayNameModal, GoogleLogo } from "@/components";
 import { useAuth } from "@/hooks";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import React, { useEffect } from "react";
+import { router, useSegments } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   Image,
+  Modal,
   Platform,
   StyleSheet,
   Text,
@@ -19,6 +21,7 @@ const { width, height } = Dimensions.get("window");
 
 export default function OnboardingScreen() {
   const { t } = useTranslation();
+  const segments = useSegments();
   const {
     loginWithGoogle,
     loginWithApple,
@@ -27,54 +30,115 @@ export default function OnboardingScreen() {
     isAuthenticated,
     user,
   } = useAuth();
+  const [showLoading, setShowLoading] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const prevIsLoadingRef = useRef(false);
+  const prevIsAuthenticatedRef = useRef(false);
 
   const handleGoogleSignIn = async () => {
     try {
+      // Google sign-in başladığında flag'i set et
+      setIsSigningIn(true);
+
+      // Google sign-in başladığında loading göstermiyoruz
       const result = await loginWithGoogle();
+
+      // Google'dan dönünce result kontrolü yap
       if (result.meta.requestStatus !== "fulfilled") {
         Alert.alert("Hata", result.payload as string);
+        setIsSigningIn(false);
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Google ile giriş yapılamadı";
       Alert.alert("Hata", errorMessage);
+      setIsSigningIn(false);
     }
   };
 
   const handleAppleSignIn = async () => {
     try {
+      // Apple sign-in başladığında flag'i set et
+      setIsSigningIn(true);
+
       const result = await loginWithApple();
+
+      // Apple'dan dönünce result kontrolü yap
       if (result.meta.requestStatus !== "fulfilled") {
         Alert.alert("Hata", result.payload as string);
+        setIsSigningIn(false);
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Apple ile giriş yapılamadı";
       Alert.alert("Hata", errorMessage);
+      setIsSigningIn(false);
     }
   };
 
+  // Loading durumunu kontrol et ve sayfa değişimini izle
+  useEffect(() => {
+    // Google/Apple'dan dönünce isLoading true olduğunda loading'i göster
+    if (isLoading && !prevIsLoadingRef.current && isSigningIn) {
+      // isLoading yeni true olduysa ve sign-in işlemi başladıysa loading göster
+      setShowLoading(true);
+    }
+
+    // isLoading false olduğunda ve önceden true ise
+    if (prevIsLoadingRef.current && !isLoading && showLoading) {
+      // Eğer authentication başarılı olduysa ve display name varsa tabs'a git
+      if (isAuthenticated && user) {
+        const hasDisplayName =
+          user.displayName && user.displayName.trim() !== "";
+        if (hasDisplayName) {
+          router.replace("/(tabs)");
+        }
+      }
+    }
+
+    prevIsLoadingRef.current = isLoading;
+  }, [isLoading, isAuthenticated, user, showLoading, isSigningIn]);
+
+  // Sayfa değiştiğinde loading'i kapat
+  useEffect(() => {
+    // Tabs sayfasına gidildiğinde loading'i kapat
+    if (segments.length > 0 && segments[0] === "(tabs)") {
+      setShowLoading(false);
+      setIsSigningIn(false);
+    }
+  }, [segments]);
+
+  // Authentication durumu değiştiğinde kontrol et
   useEffect(() => {
     if (isAuthenticated && user) {
       const hasDisplayName = user.displayName && user.displayName.trim() !== "";
-      if (hasDisplayName) {
+      if (hasDisplayName && !prevIsAuthenticatedRef.current) {
+        // İlk kez authenticate olduysa ve display name varsa tabs'a git
         router.replace("/(tabs)");
       }
     }
+
+    prevIsAuthenticatedRef.current = isAuthenticated;
   }, [isAuthenticated, user]);
 
   const handleDisplayNameConfirm = async (displayName: string) => {
     try {
       const result = await updateUserName(displayName);
       if (result.meta.requestStatus === "fulfilled") {
+        setShowLoading(false);
+        setIsSigningIn(false);
         router.replace("/(tabs)");
       } else {
         Alert.alert("Hata", result.payload as string);
+        setShowLoading(false);
+        setIsSigningIn(false);
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "İsim güncellenemedi";
       Alert.alert("Hata", errorMessage);
+      setShowLoading(false);
+      setIsSigningIn(false);
     }
   };
 
@@ -134,7 +198,7 @@ export default function OnboardingScreen() {
           <TouchableOpacity
             style={styles.googleButton}
             onPress={handleGoogleSignIn}
-            disabled={isLoading}
+            disabled={showLoading}
             activeOpacity={0.8}
           >
             <GoogleLogo size={24} style={styles.googleIcon} />
@@ -146,7 +210,7 @@ export default function OnboardingScreen() {
             <TouchableOpacity
               style={styles.appleButton}
               onPress={handleAppleSignIn}
-              disabled={isLoading}
+              disabled={showLoading}
               activeOpacity={0.8}
             >
               <AppleLogo size={28} color="#ffffff" style={styles.appleIcon} />
@@ -185,6 +249,40 @@ export default function OnboardingScreen() {
           <Text style={styles.footerBrand}>{t("welcome.craftexBrand")}</Text>
         </View>
       </View>
+
+      {/* Loading Overlay */}
+      <Modal
+        transparent
+        animationType="fade"
+        visible={showLoading}
+        statusBarTranslucent
+      >
+        <View style={styles.loadingOverlay}>
+          <LinearGradient
+            colors={[
+              "rgba(15, 23, 42, 0.95)",
+              "rgba(22, 35, 87, 0.95)",
+              "rgba(15, 23, 42, 0.95)",
+            ]}
+            style={styles.loadingGradient}
+          >
+            <View style={styles.loadingContent}>
+              <View style={styles.loadingIconContainer}>
+                <Image
+                  source={require("@/assets/images/splash-icon.png")}
+                  style={styles.loadingIcon}
+                  resizeMode="contain"
+                />
+                <View style={styles.loadingSpinnerContainer}>
+                  <ActivityIndicator size="large" color="#ffffff" />
+                </View>
+              </View>
+              <Text style={styles.loadingText}>Giriş yapılıyor...</Text>
+              <Text style={styles.loadingSubtext}>Lütfen bekleyin</Text>
+            </View>
+          </LinearGradient>
+        </View>
+      </Modal>
 
       {/* Display Name Modal */}
       <DisplayNameModal
@@ -366,5 +464,50 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#ffffff",
+  },
+  loadingOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingGradient: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingContent: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingIconContainer: {
+    position: "relative",
+    marginBottom: 32,
+  },
+  loadingIcon: {
+    width: 120,
+    height: 120,
+    opacity: 0.9,
+  },
+  loadingSpinnerContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#ffffff",
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
+  loadingSubtext: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.7)",
+    letterSpacing: 0.3,
   },
 });
