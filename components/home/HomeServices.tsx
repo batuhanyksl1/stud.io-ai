@@ -1,22 +1,24 @@
 import ThemedText from "@/components/ThemedText";
 import ThemedView from "@/components/ThemedView";
 import { editingServices } from "@/components/data";
-import { useContentCreation, useDeviceDimensions } from "@/hooks";
+import { useContentCreation, useDeviceDimensions, useTheme } from "@/hooks";
 import Ionicon from "@expo/vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useRef } from "react";
 import {
+  Animated,
   FlatList,
   Image,
   Platform,
+  Pressable,
   StyleSheet,
-  TouchableOpacity,
   View,
 } from "react-native";
 
 export const HomeServices: React.FC = () => {
   const router = useRouter();
+  const { colors, isDark } = useTheme();
   const { clearAllImages, resetUIState } = useContentCreation();
   const { isTablet, isSmallDevice } = useDeviceDimensions();
 
@@ -31,7 +33,6 @@ export const HomeServices: React.FC = () => {
     title: string,
     token: number,
   ) => {
-    // Yeni servis seçildiğinde tüm görselleri ve UI state'ini temizle
     clearAllImages();
     resetUIState();
 
@@ -49,89 +50,135 @@ export const HomeServices: React.FC = () => {
         token: token,
       },
     });
-    console.log(aiRequestUrl, aiStatusUrl, aiResultUrl);
   };
 
-  const renderServiceCard = (service: (typeof editingServices)[0]) => {
+  // Responsive değerler
+  const titleFontSize = isTablet ? 17 : isSmallDevice ? 14 : 15;
+  const subtitleFontSize = isTablet ? 13 : isSmallDevice ? 10 : 11;
+  const descriptionFontSize = isTablet ? 13 : isSmallDevice ? 10 : 11;
+  const ratingFontSize = isTablet ? 12 : isSmallDevice ? 9 : 10;
+  const cardHeight = isTablet ? 210 : isSmallDevice ? 185 : 195;
+
+  const ServiceCard = ({
+    service,
+    index,
+  }: {
+    service: (typeof editingServices)[0];
+    index: number;
+  }) => {
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
+    const handlePressIn = () => {
+      Animated.spring(scaleAnim, {
+        toValue: 0.96,
+        friction: 8,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const handlePressOut = () => {
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 5,
+        useNativeDriver: true,
+      }).start();
+    };
+
     return (
-      <TouchableOpacity
-        key={service.id}
-        onPress={() =>
-          handleServicePress(
-            service.prompt,
-            service.aiRequestUrl as string,
-            service.aiStatusUrl as string,
-            service.aiResultUrl as string,
-            service.hasMultipleInputImage as boolean,
-            service.hasPreSelectedImage as boolean,
-            service.gradient as string[],
-            service.title as string,
-            service.token as number,
-          )
-        }
-        activeOpacity={0.8}
-        style={[styles.serviceCardContainer, { flex: 1 }]}
+      <Animated.View
+        style={[
+          styles.serviceCardContainer,
+          {
+            transform: [{ scale: scaleAnim }],
+          },
+        ]}
       >
-        <LinearGradient
-          colors={service.gradient as [string, string, ...string[]]}
-          style={[styles.serviceGradient, { height: cardHeight }]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+        <Pressable
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          onPress={() =>
+            handleServicePress(
+              service.prompt,
+              service.aiRequestUrl as string,
+              service.aiStatusUrl as string,
+              service.aiResultUrl as string,
+              service.hasMultipleInputImage as boolean,
+              service.hasPreSelectedImage as boolean,
+              service.gradient as string[],
+              service.title as string,
+              service.token as number,
+            )
+          }
+          style={{ flex: 1 }}
         >
-          {/* Arka plan görseli */}
-          <View style={styles.bgImageContainer}>
-            <Image
-              source={
-                typeof service.image2 === "string"
-                  ? { uri: service.image2 }
-                  : (service.image2 as any)
-              }
-              style={styles.bgImage}
-            />
-          </View>
-
-          {/* Android için okunabilirlik overlay'i */}
-          <View style={styles.readabilityOverlay} />
-
-          <View style={styles.serviceCardContent}>
-            <View style={styles.serviceHeader}>
-              <View style={styles.serviceIconWrapper}>
-                <Ionicon name={service.icon as any} size={20} color="#FFFFFF" />
-              </View>
-              {service.isPopular && (
-                <View
-                  style={[
-                    styles.popularBadge,
-                    { backgroundColor: "rgba(255,255,255,0.2)" },
-                  ]}
-                >
-                  <Ionicon name="star" size={8} color="#FFD700" />
-                  <ThemedText variant="caption" style={styles.popularText}>
-                    {service.badge}
-                  </ThemedText>
-                </View>
-              )}
+          <LinearGradient
+            colors={service.gradient as [string, string, ...string[]]}
+            style={[styles.serviceGradient, { height: cardHeight }]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            {/* Dekoratif elementler */}
+            <View style={styles.decorativeContainer}>
+              <View style={styles.decorCircleSmall} />
+              <View style={styles.decorCircleLarge} />
             </View>
 
-            <View style={styles.serviceContent}>
-              <View style={styles.serviceTextContainer}>
+            {/* Arka plan görseli */}
+            <View style={styles.bgImageContainer}>
+              <Image
+                source={
+                  typeof service.image2 === "string"
+                    ? { uri: service.image2 }
+                    : (service.image2 as any)
+                }
+                style={styles.bgImage}
+              />
+              <LinearGradient
+                colors={["transparent", "rgba(0,0,0,0.5)"]}
+                style={styles.imageOverlay}
+              />
+            </View>
+
+            <View style={styles.serviceCardContent}>
+              {/* Header */}
+              <View style={styles.serviceHeader}>
+                <View style={styles.serviceIconWrapper}>
+                  <LinearGradient
+                    colors={["rgba(255,255,255,0.3)", "rgba(255,255,255,0.15)"]}
+                    style={styles.iconGradient}
+                  >
+                    <Ionicon
+                      name={service.icon as any}
+                      size={18}
+                      color="#FFFFFF"
+                    />
+                  </LinearGradient>
+                </View>
+                {service.isPopular && (
+                  <View style={styles.popularBadge}>
+                    <Ionicon name="star" size={8} color="#FFD700" />
+                    <ThemedText variant="caption" style={styles.popularText}>
+                      {service.badge}
+                    </ThemedText>
+                  </View>
+                )}
+              </View>
+
+              {/* İçerik */}
+              <View style={styles.serviceContent}>
                 <ThemedText
-                  variant="caption"
-                  style={
-                    [
-                      styles.serviceSubtitle,
-                      { fontSize: subtitleFontSize },
-                    ] as any
-                  }
+                  variant="overline"
+                  style={[
+                    styles.serviceSubtitle,
+                    { fontSize: subtitleFontSize },
+                  ]}
                 >
                   {service.subtitle}
                 </ThemedText>
                 <ThemedText
                   variant="h4"
                   weight="bold"
-                  style={
-                    [styles.serviceTitle, { fontSize: titleFontSize }] as any
-                  }
+                  style={[styles.serviceTitle, { fontSize: titleFontSize }]}
                   numberOfLines={2}
                   ellipsizeMode="tail"
                 >
@@ -139,86 +186,106 @@ export const HomeServices: React.FC = () => {
                 </ThemedText>
                 <ThemedText
                   variant="caption"
-                  style={
-                    [
-                      styles.serviceDescription,
-
-                      { fontSize: descriptionFontSize },
-                    ] as any
-                  }
+                  style={[
+                    styles.serviceDescription,
+                    { fontSize: descriptionFontSize },
+                  ]}
                   numberOfLines={2}
                   ellipsizeMode="tail"
                 >
                   {service.description}
                 </ThemedText>
               </View>
-            </View>
 
-            <View style={styles.serviceFooter}>
-              <View style={styles.serviceStats}>
-                <Ionicon name="star" size={10} color="#FFD700" />
-                <ThemedText
-                  variant="caption"
-                  style={[styles.rating, { fontSize: ratingFontSize }] as any}
-                >
-                  {service.rating}
-                </ThemedText>
-                <ThemedText
-                  variant="caption"
-                  style={
-                    [styles.usageCount, { fontSize: ratingFontSize }] as any
-                  }
-                >
-                  • {service.usageCount}
-                </ThemedText>
+              {/* Footer */}
+              <View style={styles.serviceFooter}>
+                <View style={styles.serviceStats}>
+                  <View style={styles.ratingContainer}>
+                    <Ionicon name="star" size={10} color="#FFD700" />
+                    <ThemedText
+                      variant="caption"
+                      style={[styles.rating, { fontSize: ratingFontSize }]}
+                    >
+                      {service.rating}
+                    </ThemedText>
+                  </View>
+                  <View style={styles.divider} />
+                  <ThemedText
+                    variant="caption"
+                    style={[styles.usageCount, { fontSize: ratingFontSize }]}
+                  >
+                    {service.usageCount}
+                  </ThemedText>
+                </View>
+                <View style={styles.arrowButton}>
+                  <Ionicon name="arrow-forward" size={14} color="white" />
+                </View>
               </View>
-              <Ionicon
-                name="arrow-forward"
-                size={14}
-                color="rgba(255,255,255,0.8)"
-              />
             </View>
-          </View>
-        </LinearGradient>
-      </TouchableOpacity>
+          </LinearGradient>
+        </Pressable>
+      </Animated.View>
     );
   };
 
-  // Responsive font boyutları
-  const titleFontSize = isTablet ? 18 : isSmallDevice ? 14 : 16;
-  const subtitleFontSize = isTablet ? 14 : isSmallDevice ? 10 : 12;
-  const descriptionFontSize = isTablet ? 15 : isSmallDevice ? 11 : 13;
-  const ratingFontSize = isTablet ? 14 : isSmallDevice ? 10 : 12;
-
-  // Responsive kart yüksekliği - daha yüksek
-  const cardHeight = isTablet ? 200 : isSmallDevice ? 190 : 180;
-
   return (
     <ThemedView
-      style={
-        [
-          styles.servicesSection,
-          {
-            paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6,
-          },
-        ] as any
-      }
+      backgroundColor="transparent"
+      style={[
+        styles.servicesSection,
+        { paddingHorizontal: isTablet ? 8 : isSmallDevice ? 4 : 6 },
+      ]}
     >
+      {/* Section Header */}
       <View style={styles.sectionHeader}>
-        <ThemedText variant="h3" weight="bold">
-          Tüm Servisler
-        </ThemedText>
+        <View style={styles.sectionTitleContainer}>
+          <View
+            style={[
+              styles.sectionIcon,
+              {
+                backgroundColor: isDark
+                  ? "rgba(16, 185, 129, 0.2)"
+                  : "rgba(16, 185, 129, 0.12)",
+              },
+            ]}
+          >
+            <Ionicon name="grid" size={16} color="#10B981" />
+          </View>
+          <ThemedText variant="h3" weight="bold" style={styles.sectionTitle}>
+            Tüm Servisler
+          </ThemedText>
+        </View>
+        <View
+          style={[
+            styles.countBadge,
+            {
+              backgroundColor: isDark
+                ? "rgba(16, 185, 129, 0.15)"
+                : "rgba(16, 185, 129, 0.1)",
+            },
+          ]}
+        >
+          <ThemedText
+            variant="caption"
+            weight="semiBold"
+            style={{ color: "#10B981" }}
+          >
+            {editingServices.length} Servis
+          </ThemedText>
+        </View>
       </View>
+
       <FlatList
         data={editingServices}
         keyExtractor={(item) => String(item.id)}
         numColumns={isTablet ? 3 : 2}
         scrollEnabled={false}
-        columnWrapperStyle={{ columnGap: isTablet ? 10 : 8 }}
-        ItemSeparatorComponent={() => (
-          <View style={{ height: isTablet ? 12 : 8 }} />
+        columnWrapperStyle={styles.columnWrapper}
+        contentContainerStyle={styles.listContent}
+        ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+        renderItem={({ item, index }) => (
+          <ServiceCard service={item} index={index} />
         )}
-        renderItem={({ item }) => renderServiceCard(item)}
       />
     </ThemedView>
   );
@@ -226,27 +293,78 @@ export const HomeServices: React.FC = () => {
 
 const styles = StyleSheet.create({
   servicesSection: {
-    paddingTop: Platform.OS === "ios" ? 5 : 0,
+    paddingTop: Platform.OS === "ios" ? 12 : 8,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  sectionTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  sectionIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  sectionTitle: {
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  countBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  columnWrapper: {
+    gap: 10,
+  },
+  listContent: {
+    gap: 10,
+  },
+  itemSeparator: {
+    height: 0,
   },
   serviceCardContainer: {
-    // card container
-    marginBottom: 0,
     flex: 1,
   },
   serviceGradient: {
-    borderRadius: 12,
-    padding: 10,
+    borderRadius: 20,
+    padding: 14,
     overflow: "hidden",
-    // Yükseklik dinamik olarak ayarlanacak
+  },
+  decorativeContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  decorCircleSmall: {
+    position: "absolute",
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    top: -20,
+    right: -20,
+  },
+  decorCircleLarge: {
+    position: "absolute",
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    bottom: -40,
+    left: -30,
   },
   bgImageContainer: {
-    flex: 1,
     position: "absolute",
     top: 0,
     left: 0,
@@ -258,20 +376,20 @@ const styles = StyleSheet.create({
   bgImage: {
     width: "100%",
     height: "100%",
-    opacity: 0.15,
+    opacity: 0.12,
     resizeMode: "cover",
   },
-  readabilityOverlay: {
+  imageOverlay: {
     position: "absolute",
+    bottom: 0,
     left: 0,
     right: 0,
-    bottom: 0,
-    top: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.04)",
+    height: "50%",
   },
   serviceCardContent: {
     flex: 1,
     justifyContent: "space-between",
+    zIndex: 1,
   },
   serviceHeader: {
     flexDirection: "row",
@@ -279,55 +397,57 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   serviceIconWrapper: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  iconGradient: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },
   popularBadge: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-    gap: 2,
+    backgroundColor: "rgba(255,215,0,0.2)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255,215,0,0.3)",
   },
   popularText: {
     color: "#FFFFFF",
-    fontSize: 10,
-    fontWeight: "600",
+    fontSize: 9,
+    fontWeight: "700",
   },
   serviceContent: {
-    marginTop: 8,
-    marginBottom: 8,
     flex: 1,
-    justifyContent: "center", // İçeriği ortala
-  },
-  serviceTextContainer: {
-    flex: 1,
-    justifyContent: "flex-start", // Metinleri üstten başlat
-    paddingVertical: 4, // Üst ve alt padding
+    justifyContent: "center",
+    paddingVertical: 8,
   },
   serviceSubtitle: {
-    color: "rgba(255,255,255,0.8)",
-    marginBottom: 6,
-    fontSize: 12,
-    fontWeight: "500",
-    lineHeight: 16,
+    color: "rgba(255,255,255,0.75)",
+    marginBottom: 4,
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
   serviceTitle: {
     color: "#FFFFFF",
-    fontSize: 16,
-    lineHeight: 15,
+    lineHeight: 20,
+    marginBottom: 4,
+    textShadowColor: "rgba(0,0,0,0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
-
   serviceDescription: {
-    color: "rgba(255,255,255,0.9)",
-    lineHeight: 18,
-    fontSize: 13,
-    marginTop: 6,
+    color: "rgba(255,255,255,0.85)",
+    lineHeight: 16,
   },
   serviceFooter: {
     flexDirection: "row",
@@ -337,15 +457,37 @@ const styles = StyleSheet.create({
   serviceStats: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    backgroundColor: "rgba(0,0,0,0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    gap: 6,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
   },
   rating: {
     color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "700",
+  },
+  divider: {
+    width: 1,
+    height: 10,
+    backgroundColor: "rgba(255,255,255,0.3)",
   },
   usageCount: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 12,
+    color: "rgba(255,255,255,0.85)",
+  },
+  arrowButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
   },
 });
