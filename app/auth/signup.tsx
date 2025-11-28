@@ -46,6 +46,7 @@ export default function SignUpScreen() {
   const {
     register,
     loginAsGuest,
+    loginWithGoogle,
     isLoading,
     needsDisplayName,
     updateUserName,
@@ -112,6 +113,19 @@ export default function SignUpScreen() {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Misafir girişi yapılamadı";
+      Alert.alert("Hata", errorMessage);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await loginWithGoogle();
+      if (result.meta.requestStatus !== "fulfilled") {
+        Alert.alert("Hata", result.payload as string);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Google ile giriş yapılamadı";
       Alert.alert("Hata", errorMessage);
     }
   };
@@ -323,6 +337,31 @@ export default function SignUpScreen() {
                   {isLoading ? "Creating account..." : "Create account"}
                 </Text>
               </TouchableOpacity>
+
+              {/* Divider */}
+              <View style={styles.dividerContainer}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>veya</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              {/* Google Sign-In button */}
+              <TouchableOpacity
+                style={styles.googleButton}
+                onPress={handleGoogleSignIn}
+                disabled={isLoading}
+                activeOpacity={0.8}
+              >
+                <Image
+                  source={{
+                    uri: "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg",
+                  }}
+                  style={styles.googleIcon}
+                />
+                <Text style={styles.googleButtonText}>
+                  Google ile Devam Et
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {/* Guest login button */}
@@ -513,5 +552,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#ffffff",
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 24,
+    gap: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.2)",
+  },
+  dividerText: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+  },
+  googleButton: {
+    height: 56,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
+  },
+  googleIcon: {
+    width: 24,
+    height: 24,
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1f2937",
   },
 });

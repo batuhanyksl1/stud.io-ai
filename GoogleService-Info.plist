@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>216158155286-ffbvpd0reu5tlui3b82u65ih37ivcpqs.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.216158155286-ffbvpd0reu5tlui3b82u65ih37ivcpqs</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>216158155286-35mk5uuj2ulrp2te8ek0iqdq499t5g26.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyCgKsfjsuJnMUuE3NEqbSeVuXZ8Y3cTNjc</string>
 	<key>GCM_SENDER_ID</key>
@@ -26,9 +32,5 @@
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
 	<string>1:216158155286:ios:f2151c38a32f642d877b37</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Uygulama, yapay zekâ ile fotoğraf üretimi yapabilmeniz için kütüphanenizdeki görsellere erişim ister. Bu sayede kendi fotoğraflarınızı seçip düzenleyebilir veya yapay zekâya referans olarak kullanabilirsiniz.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Uygulama, yapay zekâ tarafından oluşturulan veya düzenlenen fotoğrafları cihazınızın kütüphanesine kaydedebilmek için izin ister. Böylece oluşturduğunuz görselleri kendi albümünüzde saklayabilirsiniz.</string>
-	</dict>
+</dict>
 </plist>

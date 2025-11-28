@@ -1,3 +1,7 @@
+import {
+  GOOGLE_IOS_CLIENT_ID,
+  GOOGLE_WEB_CLIENT_ID,
+} from "@/config/googleSignIn.config";
 import auth, {
   createUserWithEmailAndPassword,
   FirebaseAuthTypes,
@@ -8,7 +12,9 @@ import auth, {
   signOut as signOutFirebase,
 } from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Platform } from "react-native";
 import Purchases from "react-native-purchases";
 
 // Types
@@ -411,6 +417,104 @@ export const updateDisplayName = createAsyncThunk(
   },
 );
 
+export const signInWithGoogle = createAsyncThunk(
+  "auth/signInWithGoogle",
+  async (_, { rejectWithValue }) => {
+    try {
+      // Google Sign-In'i yapılandır
+      if (!GOOGLE_WEB_CLIENT_ID) {
+        throw new Error(
+          "Google Web Client ID yapılandırılmamış. Lütfen config/googleSignIn.config.ts dosyasını kontrol edin.",
+        );
+      }
+
+      // Platform'a göre yapılandırma
+      const config: any = {
+        webClientId: GOOGLE_WEB_CLIENT_ID,
+        offlineAccess: true,
+      };
+
+      // iOS için iosClientId ekle (zorunlu)
+      // Eğer GOOGLE_IOS_CLIENT_ID yoksa, Web Client ID'yi kullan (geçici çözüm)
+      // Not: Firebase Console'dan yeni GoogleService-Info.plist indirip CLIENT_ID'yi almanız önerilir
+      if (Platform.OS === "ios") {
+        config.iosClientId = GOOGLE_IOS_CLIENT_ID || GOOGLE_WEB_CLIENT_ID;
+
+        if (!config.iosClientId) {
+          throw new Error(
+            "iOS için Google Client ID yapılandırılmamış. Lütfen config/googleSignIn.config.ts dosyasına GOOGLE_IOS_CLIENT_ID ekleyin veya Firebase Console'dan GoogleService-Info.plist dosyasını indirip CLIENT_ID değerini alın.",
+          );
+        }
+      }
+
+      GoogleSignin.configure(config);
+
+      // Önce mevcut oturumu kontrol et ve varsa kapat
+      await GoogleSignin.signOut();
+
+      const signInResponse = await GoogleSignin.signIn();
+
+      if (signInResponse.type === "success" && signInResponse.data.idToken) {
+        // User signed in
+        const googleCredential = auth.GoogleAuthProvider.credential(
+          signInResponse.data.idToken,
+        );
+        const userCredential =
+          await auth().signInWithCredential(googleCredential);
+
+        // Check if display name is empty
+        const needsDisplayName =
+          !userCredential.user.displayName ||
+          userCredential.user.displayName.trim() === "";
+
+        // RevenueCat'e kullanıcı ID'sini bağla
+        try {
+          await Purchases.logIn(userCredential.user.uid);
+          console.log(
+            "[Auth] RevenueCat'e kullanıcı ID'si bağlandı (signInWithGoogle):",
+            userCredential.user.uid,
+          );
+        } catch (rcError: any) {
+          // RevenueCat configure edilmemişse bu hata normal, sessizce geç
+          if (
+            !rcError?.message?.includes("singleton instance") &&
+            !rcError?.message?.includes("configure")
+          ) {
+            console.error(
+              "[Auth] RevenueCat logIn error (signInWithGoogle):",
+              rcError,
+            );
+          }
+        }
+
+        return {
+          user: userCredential.user,
+          needsDisplayName,
+        };
+      } else {
+        return rejectWithValue("Google Sign-In başarısız oldu.");
+      }
+    } catch (error: any) {
+      let errorMessage = "Google Girişi yapılamadı";
+
+      // Kullanıcı iptal ettiyse
+      if (error.code === "SIGN_IN_CANCELLED") {
+        errorMessage = "Google girişi iptal edildi";
+      } else if (error.code === "IN_PROGRESS") {
+        errorMessage = "Google girişi zaten devam ediyor";
+      } else if (error.code === "PLAY_SERVICES_NOT_AVAILABLE") {
+        errorMessage = "Google Play Services kullanılamıyor";
+      } else if (error.code === "auth/operation-not-allowed") {
+        errorMessage = "Google girişi Firebase Console'da etkinleştirilmemiş.";
+      } else {
+        errorMessage =
+          error.message || "Google girişi yapılırken bir hata oluştu";
+      }
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -553,6 +657,25 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(updateDisplayName.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Sign In With Google
+    builder
+      .addCase(signInWithGoogle.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(signInWithGoogle.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.isVerified = action.payload.user.emailVerified;
+        state.needsDisplayName = action.payload.needsDisplayName;
+        state.error = null;
+      })
+      .addCase(signInWithGoogle.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

@@ -34,6 +34,12 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>com.googleusercontent.apps.216158155286-ffbvpd0reu5tlui3b82u65ih37ivcpqs</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
           <string>exp+studio-ai</string>
         </array>
       </dict>
