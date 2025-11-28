@@ -1,66 +1,27 @@
-import { DisplayNameModal } from "@/components";
+import { AppleLogo, DisplayNameModal, GoogleLogo } from "@/components";
 import { useAuth } from "@/hooks";
-import { SignInCredentials } from "@/types";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
   Dimensions,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import * as yup from "yup";
 
 const { width, height } = Dimensions.get("window");
-
-const schema = yup.object().shape({
-  email: yup
-    .string()
-    .email("Geçerli bir e-posta adresi girin")
-    .required("E-posta adresi gereklidir"),
-  password: yup
-    .string()
-    .min(6, "Şifre en az 6 karakter olmalıdır")
-    .required("Şifre gereklidir"),
-});
 
 export default function SignInScreen() {
   const { t } = useTranslation();
 
-  const { login, loginWithGoogle, isLoading, updateUserName, isAuthenticated, user } = useAuth();
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<SignInCredentials>({
-    resolver: yupResolver(schema),
-    mode: "onChange",
-  });
-
-  const handleSignIn = async (data: SignInCredentials) => {
-    try {
-      const result = await login(data);
-      if (result.meta.requestStatus !== "fulfilled") {
-        Alert.alert("Hata", result.payload as string);
-      }
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Giriş yapılamadı";
-      Alert.alert("Hata", errorMessage);
-    }
-  };
+  const { loginWithGoogle, loginWithApple, isLoading, updateUserName, isAuthenticated, user } = useAuth();
 
   const handleGoogleSignIn = async () => {
     try {
@@ -71,6 +32,19 @@ export default function SignInScreen() {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Google ile giriş yapılamadı";
+      Alert.alert("Hata", errorMessage);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      const result = await loginWithApple();
+      if (result.meta.requestStatus !== "fulfilled") {
+        Alert.alert("Hata", result.payload as string);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Apple ile giriş yapılamadı";
       Alert.alert("Hata", errorMessage);
     }
   };
@@ -101,14 +75,6 @@ export default function SignInScreen() {
 
   const handleDisplayNameCancel = () => {
     router.replace("/auth/signin");
-  };
-
-  const handleForgotPassword = () => {
-    router.push("/auth/forgot-password");
-  };
-
-  const handleGoToSignUp = () => {
-    router.push("/auth/signup");
   };
 
   return (
@@ -147,93 +113,11 @@ export default function SignInScreen() {
             <View style={styles.formHeader}>
               <Text style={styles.formTitle}>{t("auth.welcomeBack")}</Text>
               <Text style={styles.formSubtitle}>
-                {t("auth.signInToYourAccount")}
+                Hesabınıza giriş yaparak devam edin
               </Text>
             </View>
 
             <View style={styles.form}>
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>{t("auth.email")}</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder={t("auth.enterYourEmail")}
-                      placeholderTextColor="rgba(255,255,255,0.6)"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
-                    {errors.email && (
-                      <Text style={styles.errorText}>
-                        {errors.email.message}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <View style={styles.inputContainer}>
-                    <Text style={styles.inputLabel}>{t("auth.password")}</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder={t("auth.enterYourPassword")}
-                      placeholderTextColor="rgba(255,255,255,0.6)"
-                      value={value}
-                      onChangeText={onChange}
-                      onBlur={onBlur}
-                      secureTextEntry
-                      autoCorrect={false}
-                    />
-                    {errors.password && (
-                      <Text style={styles.errorText}>
-                        {errors.password.message}
-                      </Text>
-                    )}
-                  </View>
-                )}
-              />
-              {/* Forgot password */}
-              <TouchableOpacity
-                style={styles.forgotPasswordButton}
-                onPress={handleForgotPassword}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.forgotPasswordText}>
-                  {t("auth.forgotPassword")}
-                </Text>
-              </TouchableOpacity>
-              {/* Sign in button */}
-              <TouchableOpacity
-                style={[
-                  styles.signInButton,
-                  !isValid && styles.signInButtonDisabled,
-                ]}
-                onPress={handleSubmit(handleSignIn)}
-                disabled={!isValid || isLoading}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.signInButtonText}>
-                  {isLoading ? t("common.loading") : t("auth.signIn")}
-                </Text>
-              </TouchableOpacity>
-
-              {/* Divider */}
-              <View style={styles.dividerContainer}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>veya</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
               {/* Google Sign-In button */}
               <TouchableOpacity
                 style={styles.googleButton}
@@ -241,24 +125,26 @@ export default function SignInScreen() {
                 disabled={isLoading}
                 activeOpacity={0.8}
               >
-                <Image
-                  source={{
-                    uri: "https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg",
-                  }}
-                  style={styles.googleIcon}
-                />
+                <GoogleLogo size={24} style={styles.googleIcon} />
                 <Text style={styles.googleButtonText}>
                   Google ile Devam Et
                 </Text>
               </TouchableOpacity>
-            </View>
 
-            {/* Sign up link */}
-            <View style={styles.signUpContainer}>
-              <Text style={styles.signUpText}>{t("auth.dontHaveAccount")}</Text>
-              <TouchableOpacity onPress={handleGoToSignUp} activeOpacity={0.7}>
-                <Text style={styles.signUpLink}>{t("auth.signUp")}</Text>
-              </TouchableOpacity>
+              {/* Apple Sign-In button (sadece iOS'ta) */}
+              {Platform.OS === "ios" && (
+                <TouchableOpacity
+                  style={styles.appleButton}
+                  onPress={handleAppleSignIn}
+                  disabled={isLoading}
+                  activeOpacity={0.8}
+                >
+                  <AppleLogo size={28} color="#ffffff" style={styles.appleIcon} />
+                  <Text style={styles.appleButtonText}>
+                    Apple ile Devam Et
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </ScrollView>
@@ -338,87 +224,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   form: {
-    gap: 24,
-  },
-  inputContainer: {
-    gap: 8,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#ffffff",
-  },
-  input: {
-    height: 56,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: "#ffffff",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-  },
-  errorText: {
-    fontSize: 12,
-    color: "#ef4444",
-    marginTop: 4,
-  },
-  forgotPasswordButton: {
-    alignSelf: "flex-end",
-    paddingVertical: 8,
-  },
-  forgotPasswordText: {
-    fontSize: 14,
-    color: "#ffffff",
-    textDecorationLine: "underline",
-  },
-  signInButton: {
-    height: 56,
-    backgroundColor: "#ffffff",
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 16,
-  },
-  signInButtonDisabled: {
-    backgroundColor: "rgba(255,255,255,0.3)",
-  },
-  signInButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#0f172a",
-  },
-  signUpContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 32,
-  },
-  signUpText: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
-  },
-  signUpLink: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#ffffff",
-    textDecorationLine: "underline",
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 24,
-    gap: 12,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.2)",
-  },
-  dividerText: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
+    gap: 16,
   },
   googleButton: {
     height: 56,
@@ -431,13 +237,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.1)",
   },
-  googleIcon: {
-    width: 24,
-    height: 24,
-  },
   googleButtonText: {
     fontSize: 16,
     fontWeight: "600",
     color: "#1f2937",
+  },
+  appleButton: {
+    height: 56,
+    backgroundColor: "#000000",
+    borderRadius: 12,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+  },
+  appleButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#ffffff",
+  },
+  googleIcon: {
+    marginRight: 0,
+  },
+  appleIcon: {
+    marginRight: 0,
   },
 });

@@ -1,10 +1,14 @@
+import { AppleLogo, DisplayNameModal, GoogleLogo } from "@/components";
+import { useAuth } from "@/hooks";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Alert,
   Dimensions,
   Image,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,17 +19,68 @@ const { width, height } = Dimensions.get("window");
 
 export default function OnboardingScreen() {
   const { t } = useTranslation();
+  const {
+    loginWithGoogle,
+    loginWithApple,
+    isLoading,
+    updateUserName,
+    isAuthenticated,
+    user,
+  } = useAuth();
 
-  const handleLogin = () => {
-    router.push("/auth/signin");
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await loginWithGoogle();
+      if (result.meta.requestStatus !== "fulfilled") {
+        Alert.alert("Hata", result.payload as string);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Google ile giriş yapılamadı";
+      Alert.alert("Hata", errorMessage);
+    }
   };
 
-  const handleSignUp = () => {
-    router.push("/auth/signup");
+  const handleAppleSignIn = async () => {
+    try {
+      const result = await loginWithApple();
+      if (result.meta.requestStatus !== "fulfilled") {
+        Alert.alert("Hata", result.payload as string);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Apple ile giriş yapılamadı";
+      Alert.alert("Hata", errorMessage);
+    }
   };
 
-  const handleGuestContinue = () => {
-    router.replace("/(tabs)");
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const hasDisplayName = user.displayName && user.displayName.trim() !== "";
+      if (hasDisplayName) {
+        router.replace("/(tabs)");
+      }
+    }
+  }, [isAuthenticated, user]);
+
+  const handleDisplayNameConfirm = async (displayName: string) => {
+    try {
+      const result = await updateUserName(displayName);
+      if (result.meta.requestStatus === "fulfilled") {
+        router.replace("/(tabs)");
+      } else {
+        Alert.alert("Hata", result.payload as string);
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "İsim güncellenemedi";
+      Alert.alert("Hata", errorMessage);
+    }
+  };
+
+  const handleDisplayNameCancel = () => {
+    // Kullanıcı iptal ederse, auth sayfasında kalabilir veya signin sayfasına yönlendirilebilir
+    // Şimdilik hiçbir şey yapmıyoruz, modal kapanacak
   };
 
   return (
@@ -39,7 +94,16 @@ export default function OnboardingScreen() {
 
       {/* Gradient overlay */}
       <LinearGradient
-        colors={["rgba(88, 28, 135, 0.8)", "rgba(15, 23, 42, 0.9)"]}
+        colors={[
+          "#162357", // Derin neon mavi          "#295be7", // Parlak canlı AI mavisi
+          "rgb(85, 41, 231)", // Parlak canlı AI mavisi
+          "rgb(41, 91, 231)", // Parlak canlı AI mavisi
+          "#aa25f0", // Net mor
+          "#ffe900", // Vurgulu sarı
+        ]}
+        locations={[0, 0.25, 0.5, 0.75, 1]}
+        start={{ x: 0.05, y: 0.18 }}
+        end={{ x: 0.97, y: 0.92 }}
         style={styles.gradientOverlay}
       />
 
@@ -54,40 +118,61 @@ export default function OnboardingScreen() {
       {/* Ana içerik */}
       <View style={styles.content}>
         <View style={styles.textContainer}>
+          <Image
+            source={require("@/assets/images/splash-icon.png")}
+            style={styles.logoIcon}
+            resizeMode="contain"
+          />
           <Text style={styles.mainTitle}>{t("welcome.mainTitle")}</Text>
           <Text style={styles.subTitle}>{t("welcome.subTitle")}</Text>
           <Text style={styles.description}>{t("welcome.description")}</Text>
         </View>
 
-        {/* Butonlar */}
+        {/* Giriş butonları */}
         <View style={styles.buttonContainer}>
+          {/* Google Sign-In button */}
           <TouchableOpacity
-            style={styles.outlineButton}
-            onPress={handleLogin}
+            style={styles.googleButton}
+            onPress={handleGoogleSignIn}
+            disabled={isLoading}
             activeOpacity={0.8}
           >
-            <Text style={styles.outlineButtonText}>{t("welcome.logIn")}</Text>
+            <GoogleLogo size={24} style={styles.googleIcon} />
+            <Text style={styles.googleButtonText}>Google ile Devam Et</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.filledButton}
-            onPress={handleSignUp}
-            activeOpacity={0.8}
+          {/* Apple Sign-In button (sadece iOS'ta) */}
+          {Platform.OS === "ios" && (
+            <TouchableOpacity
+              style={styles.appleButton}
+              onPress={handleAppleSignIn}
+              disabled={isLoading}
+              activeOpacity={0.8}
+            >
+              <AppleLogo size={28} color="#ffffff" style={styles.appleIcon} />
+              <Text style={styles.appleButtonText}>Apple ile Devam Et</Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Divider */}
+          {/* <View style={styles.dividerContainer}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>veya</Text>
+            <View style={styles.dividerLine} />
+          </View> */}
+
+          {/* Misafir girişi */}
+          {/* <TouchableOpacity
+            style={styles.guestButton}
+            onPress={handleGuestContinue}
+            activeOpacity={0.7}
+            disabled={isLoading}
           >
-            <Text style={styles.filledButtonText}>{t("welcome.signUp")}</Text>
-          </TouchableOpacity>
+            <Text style={styles.guestButtonText}>
+              {t("welcome.continueAsGuest")}
+            </Text>
+          </TouchableOpacity> */}
         </View>
-
-        {/* Misafir girişi */}
-        <TouchableOpacity
-          style={styles.guestButton}
-          onPress={handleGuestContinue}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.guestButtonText}>
-            {t("welcome.continueAsGuest")}
-          </Text>
-        </TouchableOpacity>
       </View>
 
       {/* Footer */}
@@ -100,6 +185,18 @@ export default function OnboardingScreen() {
           <Text style={styles.footerBrand}>{t("welcome.craftexBrand")}</Text>
         </View>
       </View>
+
+      {/* Display Name Modal */}
+      <DisplayNameModal
+        visible={
+          isAuthenticated &&
+          user !== null &&
+          (!user.displayName || user.displayName.trim() === "")
+        }
+        onConfirm={handleDisplayNameConfirm}
+        onCancel={handleDisplayNameCancel}
+        isLoading={isLoading}
+      />
     </View>
   );
 }
@@ -143,6 +240,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     paddingTop: 60,
+    alignItems: "center",
+  },
+  logoIcon: {
+    width: 100,
+    height: 100,
+    marginBottom: 24,
   },
   mainTitle: {
     fontSize: 48,
@@ -150,6 +253,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     marginBottom: 8,
     letterSpacing: -0.5,
+    textAlign: "center",
   },
   subTitle: {
     fontSize: 32,
@@ -157,45 +261,71 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     marginBottom: 16,
     letterSpacing: -0.3,
+    textAlign: "center",
   },
   description: {
     fontSize: 16,
     color: "#e2e8f0",
     lineHeight: 24,
     maxWidth: "80%",
+    textAlign: "center",
+    alignSelf: "center",
   },
   buttonContainer: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 20,
+    paddingTop: 10,
+    gap: 16,
+    marginBottom: 100,
   },
-  outlineButton: {
-    flex: 1,
+  googleButton: {
     height: 56,
-    borderWidth: 2,
-    borderColor: "#ffffff",
-    borderRadius: 28,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "transparent",
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
   },
-  outlineButtonText: {
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1f2937",
+  },
+  appleButton: {
+    height: 56,
+    backgroundColor: "#000000",
+    borderRadius: 12,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+  },
+  appleButtonText: {
     fontSize: 16,
     fontWeight: "600",
     color: "#ffffff",
   },
-  filledButton: {
-    flex: 1,
-    height: 56,
-    backgroundColor: "#ffffff",
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
+  googleIcon: {
+    marginRight: 0,
   },
-  filledButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#0f172a",
+  appleIcon: {
+    marginRight: 0,
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 8,
+    gap: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.2)",
+  },
+  dividerText: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
   },
   guestButton: {
     alignSelf: "flex-start",

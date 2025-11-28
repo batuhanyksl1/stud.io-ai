@@ -23,3 +23,5 @@ export * from "./home";
 // Auth Components
 export { AuthScreen } from "./auth/AuthScreen";
 export { default as DisplayNameModal } from "./DisplayNameModal";
+export { GoogleLogo } from "./GoogleLogo";
+export { AppleLogo } from "./AppleLogo";

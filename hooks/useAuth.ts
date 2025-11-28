@@ -7,6 +7,7 @@ import {
   setLoading,
   signIn,
   signInAsGuest,
+  signInWithApple,
   signInWithGoogle,
   signOut,
   signUp,
@@ -34,6 +35,10 @@ export function useAuth() {
 
   const loginWithGoogle = async () => {
     return await dispatch(signInWithGoogle());
+  };
+
+  const loginWithApple = async () => {
+    return await dispatch(signInWithApple());
   };
 
   const logout = async () => {
@@ -74,6 +79,7 @@ export function useAuth() {
     register,
     loginAsGuest,
     loginWithGoogle,
+    loginWithApple,
     logout,
     resetPassword,
     updateUserName,

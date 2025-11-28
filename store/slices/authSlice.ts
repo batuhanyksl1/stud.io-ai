@@ -515,6 +515,38 @@ export const signInWithGoogle = createAsyncThunk(
   },
 );
 
+export const signInWithApple = createAsyncThunk(
+  "auth/signInWithApple",
+  async (_, { rejectWithValue }) => {
+    try {
+      // Apple Sign-In için placeholder
+      // Not: Apple authentication implementasyonu için expo-apple-authentication paketi gerekebilir
+      // veya Firebase'in kendi Apple authentication provider'ı kullanılabilir
+      
+      if (Platform.OS !== "ios") {
+        return rejectWithValue("Apple girişi sadece iOS'ta kullanılabilir");
+      }
+
+      // TODO: Apple authentication implementasyonu
+      // Şimdilik placeholder - gerçek implementasyon için:
+      // 1. expo-apple-authentication paketini yükleyin
+      // 2. Apple credential'ı alın
+      // 3. Firebase Auth ile signInWithCredential kullanın
+      
+      return rejectWithValue("Apple girişi henüz implement edilmemiş. Lütfen Google ile giriş yapın.");
+    } catch (error: any) {
+      let errorMessage = "Apple ile giriş yapılamadı";
+      
+      if (error.code === "auth/operation-not-allowed") {
+        errorMessage = "Apple girişi Firebase Console'da etkinleştirilmemiş.";
+      } else {
+        errorMessage = error.message || "Apple girişi yapılırken bir hata oluştu";
+      }
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -676,6 +708,25 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(signInWithGoogle.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Sign In With Apple
+    builder
+      .addCase(signInWithApple.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(signInWithApple.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.isVerified = action.payload.user.emailVerified;
+        state.needsDisplayName = action.payload.needsDisplayName;
+        state.error = null;
+      })
+      .addCase(signInWithApple.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

@@ -165,14 +165,14 @@
     "finish": "Bitir"
   },
   "welcome": {
-    "mainTitle": "Senin.",
-    "subTitle": "Hareket halinde.",
-    "description": "Sevdiğin hiçbir şeyi kaçırma. Hepsi Stud.io uygulamasında.",
+    "mainTitle": "Stud.io-AI",
+    "subTitle": "Profesyonel Editörün",
+    "description": "Yapay zeka ile fotoğraf düzenlemenin en gelişmiş yolu.",
     "logIn": "Giriş Yap",
     "signUp": "Kayıt Ol",
     "continueAsGuest": "Giriş Yapmadan Devam Et",
-    "curatedBy": "hazırlayan",
-    "craftexBrand": "CrafTex Yapay Zeka Stüdyosu"
+    "curatedBy": "Hazırlayan",
+    "craftexBrand": "Crafex AI Studio"
   },
   "errors": {
     "networkError": "Ağ bağlantı hatası",
