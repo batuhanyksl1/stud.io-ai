@@ -7,18 +7,13 @@ interface AppleLogoProps {
   style?: any;
 }
 
-export const AppleLogo: React.FC<AppleLogoProps> = ({ 
-  size = 24, 
+export const AppleLogo: React.FC<AppleLogoProps> = ({
+  size = 24,
   color = "#ffffff",
-  style 
+  style,
 }) => {
   return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      style={style}
-    >
+    <Svg width={size} height={size} viewBox="0 0 24 24" style={style}>
       {/* Apple Logo SVG Path - Apple'ın resmi logosu */}
       <Path
         fill={color}
@@ -27,4 +22,3 @@ export const AppleLogo: React.FC<AppleLogoProps> = ({
     </Svg>
   );
 };
-

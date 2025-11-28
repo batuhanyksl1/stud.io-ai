@@ -21,7 +21,14 @@ const { width, height } = Dimensions.get("window");
 export default function SignInScreen() {
   const { t } = useTranslation();
 
-  const { loginWithGoogle, loginWithApple, isLoading, updateUserName, isAuthenticated, user } = useAuth();
+  const {
+    loginWithGoogle,
+    loginWithApple,
+    isLoading,
+    updateUserName,
+    isAuthenticated,
+    user,
+  } = useAuth();
 
   const handleGoogleSignIn = async () => {
     try {
@@ -126,9 +133,7 @@ export default function SignInScreen() {
                 activeOpacity={0.8}
               >
                 <GoogleLogo size={24} style={styles.googleIcon} />
-                <Text style={styles.googleButtonText}>
-                  Google ile Devam Et
-                </Text>
+                <Text style={styles.googleButtonText}>Google ile Devam Et</Text>
               </TouchableOpacity>
 
               {/* Apple Sign-In button (sadece iOS'ta) */}
@@ -139,10 +144,12 @@ export default function SignInScreen() {
                   disabled={isLoading}
                   activeOpacity={0.8}
                 >
-                  <AppleLogo size={28} color="#ffffff" style={styles.appleIcon} />
-                  <Text style={styles.appleButtonText}>
-                    Apple ile Devam Et
-                  </Text>
+                  <AppleLogo
+                    size={28}
+                    color="#ffffff"
+                    style={styles.appleIcon}
+                  />
+                  <Text style={styles.appleButtonText}>Apple ile Devam Et</Text>
                 </TouchableOpacity>
               )}
             </View>

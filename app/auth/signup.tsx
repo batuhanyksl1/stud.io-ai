@@ -121,7 +121,10 @@ export default function SignUpScreen() {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
       {/* Arka plan görseli */}
       <Image
         source={require("@/assets/images/carousel/image-a-2.jpg")}
@@ -177,9 +180,7 @@ export default function SignUpScreen() {
                 activeOpacity={0.8}
               >
                 <GoogleLogo size={24} style={styles.googleIcon} />
-                <Text style={styles.googleButtonText}>
-                  Google ile Devam Et
-                </Text>
+                <Text style={styles.googleButtonText}>Google ile Devam Et</Text>
               </TouchableOpacity>
 
               {/* Apple Sign-In button (sadece iOS'ta) */}
@@ -190,10 +191,12 @@ export default function SignUpScreen() {
                   disabled={isLoading}
                   activeOpacity={0.8}
                 >
-                  <AppleLogo size={28} color="#ffffff" style={styles.appleIcon} />
-                  <Text style={styles.appleButtonText}>
-                    Apple ile Devam Et
-                  </Text>
+                  <AppleLogo
+                    size={28}
+                    color="#ffffff"
+                    style={styles.appleIcon}
+                  />
+                  <Text style={styles.appleButtonText}>Apple ile Devam Et</Text>
                 </TouchableOpacity>
               )}
 
