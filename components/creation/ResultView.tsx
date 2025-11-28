@@ -23,7 +23,6 @@ interface ResultViewProps {
   localImageUri?: string;
   localImageUris?: string[];
   hasMultipleInputImage: string;
-  autoSave?: boolean;
   onDownloadImage: () => void;
   onStartNew: () => void;
   onOpenImageViewer: (_imageUrl: string) => void;
@@ -37,7 +36,6 @@ export const ResultView: React.FC<ResultViewProps> = ({
   localImageUri,
   localImageUris,
   hasMultipleInputImage,
-  autoSave = true,
   onDownloadImage,
   onStartNew,
   onOpenImageViewer,
@@ -211,29 +209,27 @@ export const ResultView: React.FC<ResultViewProps> = ({
           </View>
 
           <View style={styles.resultActions}>
-            {!autoSave && (
-              <Pressable
+            <Pressable
+              style={[
+                styles.buttonPrimary,
+                styles.fullWidthButton,
+                styles.resultPrimaryAction,
+                { backgroundColor: colors.primary },
+              ]}
+              onPress={onDownloadImage}
+            >
+              <Text
                 style={[
-                  styles.buttonPrimary,
-                  styles.fullWidthButton,
-                  styles.resultPrimaryAction,
-                  { backgroundColor: colors.primary },
+                  styles.buttonTextPrimary,
+                  {
+                    color: colors.textOnPrimary,
+                    fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
+                  },
                 ]}
-                onPress={onDownloadImage}
               >
-                <Text
-                  style={[
-                    styles.buttonTextPrimary,
-                    {
-                      color: colors.textOnPrimary,
-                      fontSize: isTablet ? 18 : isSmallDevice ? 14 : 16,
-                    },
-                  ]}
-                >
-                  Cihaza indir
-                </Text>
-              </Pressable>
-            )}
+                Cihaza indir
+              </Text>
+            </Pressable>
 
             <Pressable
               style={[

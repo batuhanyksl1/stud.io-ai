@@ -7,7 +7,6 @@ import {
   LoadingModal,
   ResultView,
 } from "@/components/creation";
-import { useAutoSave } from "@/hooks/useAutoSave";
 import { useContentCreation } from "@/hooks/useContentCreation";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useImageGeneratorHandlers } from "@/hooks/useImageGeneratorHandlers";
@@ -120,9 +119,6 @@ const ImageGeneratorScreen = () => {
     setActiveExampleIndex,
   });
 
-  // Auto-save mantığı
-  const { autoSave } = useAutoSave(createdImageUrl, handleDownloadImage);
-
   // Hata yönetimi
   const { shouldShowError } = useErrorHandler(errorMessage, setErrorMessage);
 
@@ -200,7 +196,6 @@ const ImageGeneratorScreen = () => {
           localImageUri={localImageUri || undefined}
           localImageUris={localImageUris}
           hasMultipleInputImage={hasMultipleInputImage}
-          autoSave={autoSave}
           onDownloadImage={handleDownloadImage}
           onStartNew={handleStartNew}
           onOpenImageViewer={handleOpenImageViewer}

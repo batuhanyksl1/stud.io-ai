@@ -1,7 +1,6 @@
 import { Header, ThemedCard, ThemedText, ThemedView } from "@/components";
 import { useAuth, useTheme } from "@/hooks";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -38,32 +37,6 @@ export default function SettingsScreen() {
   const { colors, colorScheme, setTheme } = useTheme();
   const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState(true);
-  const [autoSave, setAutoSave] = useState(true);
-
-  // Otomatik kaydet ayarını yükle
-  React.useEffect(() => {
-    const loadAutoSaveSetting = async () => {
-      try {
-        const savedAutoSave = await AsyncStorage.getItem("autoSave");
-        if (savedAutoSave !== null) {
-          setAutoSave(JSON.parse(savedAutoSave));
-        }
-      } catch (error) {
-        console.error("Otomatik kaydet ayarı yüklenirken hata:", error);
-      }
-    };
-    loadAutoSaveSetting();
-  }, []);
-
-  // Otomatik kaydet ayarını kaydet
-  const handleAutoSaveToggle = async (value: boolean) => {
-    setAutoSave(value);
-    try {
-      await AsyncStorage.setItem("autoSave", JSON.stringify(value));
-    } catch (error) {
-      console.error("Otomatik kaydet ayarı kaydedilirken hata:", error);
-    }
-  };
 
   const handleSignOut = async () => {
     Alert.alert(
@@ -198,17 +171,6 @@ export default function SettingsScreen() {
           ),
           type: "theme",
           onPress: handleThemeSelection,
-        },
-        {
-          id: "auto-save",
-          title: "Otomatik Kaydet",
-          subtitle: "Çalışmalarınızı otomatik kaydedin",
-          icon: (
-            <Ionicons name="download" size={20} color={colors.textPrimary} />
-          ),
-          type: "toggle",
-          value: autoSave,
-          onToggle: handleAutoSaveToggle,
         },
       ],
     },
