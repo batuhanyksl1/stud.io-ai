@@ -1,10 +1,13 @@
 import "@/localization/i18n";
 import { AppProvider } from "@/providers";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAuth, onAuthStateChanged } from "@react-native-firebase/auth";
 import { router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect, useState } from "react";
 import SplashScreenComponent from "./splash";
+
+const ONBOARDING_KEY = "hasSeenOnboarding";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -14,6 +17,23 @@ function IndexPageContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(
+    null,
+  );
+
+  // Onboarding kontrolü
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const value = await AsyncStorage.getItem(ONBOARDING_KEY);
+        setHasSeenOnboarding(value === "true");
+      } catch (error) {
+        console.error("Error checking onboarding status:", error);
+        setHasSeenOnboarding(false);
+      }
+    };
+    checkOnboarding();
+  }, []);
 
   // Auth state'ini kontrol et
   useEffect(() => {
@@ -35,10 +55,22 @@ function IndexPageContent() {
 
   // Auth durumuna göre yönlendirme
   useEffect(() => {
+    // Onboarding kontrolü henüz yapılmadıysa bekle
+    if (hasSeenOnboarding === null) return;
+
     if (!isInitializing) {
       console.log("=== ROUTING DECISION ===");
+      console.log("hasSeenOnboarding:", hasSeenOnboarding);
       console.log("isAuthenticated:", isAuthenticated);
       console.log("isEmailVerified:", isEmailVerified);
+
+      // Onboarding görülmemişse oraya yönlendir
+      if (!hasSeenOnboarding) {
+        console.log("User has not seen onboarding - navigating to onboarding");
+        router.replace("/onboarding");
+        setIsReady(true);
+        return;
+      }
 
       if (isAuthenticated) {
         if (isEmailVerified) {
@@ -61,17 +93,17 @@ function IndexPageContent() {
           router.replace("/email-verification");
         }
       } else {
-        console.log("User not authenticated - going to signin");
+        console.log("User not authenticated - going to auth");
         router.replace("/auth");
       }
 
       // Yönlendirme yapıldıktan sonra ready state'i true yap
       setIsReady(true);
     }
-  }, [isInitializing, isAuthenticated, isEmailVerified]);
+  }, [isInitializing, isAuthenticated, isEmailVerified, hasSeenOnboarding]);
 
   // Auth state hala initialize ediliyorsa veya ready değilse splash screen göster
-  if (isInitializing || !isReady) {
+  if (isInitializing || !isReady || hasSeenOnboarding === null) {
     return <SplashScreenComponent />;
   }
 
