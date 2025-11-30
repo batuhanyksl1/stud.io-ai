@@ -516,8 +516,8 @@ export default function PremiumScreen() {
     () => [
       {
         icon: <Infinity size={24} color="#FFF" />,
-        title: "Sınırsız Düzenleme",
-        description: "İstediğin kadar fotoğraf düzenle",
+        title: "En Güncel Yapay Zeka Araçları",
+        description: "En güncel yapay zeka araçları ile fotoğrafını düzenle",
         gradient: ["#7c3aed", "#a855f7"] as [string, string],
       },
       {
@@ -875,63 +875,6 @@ export default function PremiumScreen() {
             Abonelik otomatik olarak yenilenir. İstediğiniz zaman
             Ayarlar&apos;dan iptal edebilirsiniz.
           </Animated.Text>
-        </View>
-
-        {/* Developer Tools (Hidden by default) */}
-        <View style={styles.devToolsSection}>
-          <Pressable
-            onPress={() => setShowDevTools(!showDevTools)}
-            style={styles.devToolsToggle}
-          >
-            <Text style={styles.devToolsToggleText}>Geliştirici Araçları</Text>
-            {showDevTools ? (
-              <ChevronUp size={16} color="rgba(255,255,255,0.3)" />
-            ) : (
-              <ChevronDown size={16} color="rgba(255,255,255,0.3)" />
-            )}
-          </Pressable>
-
-          {showDevTools && (
-            <Animated.View
-              entering={FadeInDown.duration(300)}
-              style={styles.devToolsContent}
-            >
-              <Text style={styles.devToolsLabel}>Customer ID:</Text>
-              <Text style={styles.devToolsValue}>
-                {customerInfo?.originalAppUserId ?? "-"}
-              </Text>
-
-              <Text style={styles.devToolsLabel}>Entitlements:</Text>
-              <Text style={styles.devToolsValue}>
-                {JSON.stringify(
-                  customerInfo?.entitlements.active ?? {},
-                  null,
-                  2,
-                )}
-              </Text>
-
-              <View style={styles.devToolsActions}>
-                <Button
-                  title="Console'a Logla"
-                  onPress={() => {
-                    console.log(
-                      "CustomerInfo:",
-                      JSON.stringify(customerInfo, null, 2),
-                    );
-                    Alert.alert("Başarılı", "Console'a loglandı!");
-                  }}
-                  variant="outline"
-                  size="sm"
-                />
-                <Button
-                  title="Bilgileri Yenile"
-                  onPress={fetchCustomerInfo}
-                  variant="outline"
-                  size="sm"
-                />
-              </View>
-            </Animated.View>
-          )}
         </View>
 
         {/* Bottom Spacing */}
