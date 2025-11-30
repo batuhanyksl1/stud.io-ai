@@ -30,13 +30,19 @@ export function useUserImages() {
         .get();
 
       if (querySnapshot.docs.length === 0) {
-        setError("Bu kullanıcı için doküman bulunamadı!");
         setDocuments([]);
       } else {
         const docs = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
+
+        // Tarihe göre sırala (yeni -> eski)
+        docs.sort((a: any, b: any) => {
+          const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+          const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+          return dateB - dateA;
+        });
 
         setDocuments(docs);
       }

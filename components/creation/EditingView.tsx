@@ -17,6 +17,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 
@@ -33,6 +34,9 @@ interface EditingViewProps {
   onRemoveSingleImage: () => void;
   fadeAnim: Animated.Value;
   scaleAnim: Animated.Value;
+  isCustomPrompt?: boolean;
+  currentPrompt?: string;
+  onPromptChange?: (text: string) => void;
 }
 
 export const EditingView: React.FC<EditingViewProps> = ({
@@ -48,6 +52,9 @@ export const EditingView: React.FC<EditingViewProps> = ({
   onRemoveSingleImage,
   fadeAnim,
   scaleAnim,
+  isCustomPrompt,
+  currentPrompt,
+  onPromptChange,
 }) => {
   const { colors } = useTheme();
   const { isTablet, isSmallDevice } = useDeviceDimensions();
@@ -177,6 +184,45 @@ export const EditingView: React.FC<EditingViewProps> = ({
                   </View>
                 ) : null}
               </ScrollView>
+            </View>
+          )}
+
+          {/* Custom Prompt Input */}
+          {isCustomPrompt && !hasResult && (
+            <View
+              style={[
+                styles.promptCard,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.sectionLabel,
+                  {
+                    color: colors.textSecondary,
+                    fontSize: isTablet ? 16 : isSmallDevice ? 12 : 14,
+                  },
+                ]}
+              >
+                İsteğiniz
+              </Text>
+              <TextInput
+                style={[
+                  styles.promptInput,
+                  {
+                    color: colors.textPrimary,
+                    borderColor: colors.border,
+                    backgroundColor: colors.surfaceElevated || colors.background, // Fallback if surfaceElevated not available
+                  },
+                ]}
+                value={currentPrompt}
+                onChangeText={onPromptChange}
+                placeholder="Yapay zekaya ne yapmasını istediğinizi detaylıca yazın..."
+                placeholderTextColor={colors.textTertiary || "#888"}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
             </View>
           )}
 
@@ -358,6 +404,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     lineHeight: 18,
     textAlign: "center",
+  },
+  promptCard: {
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  promptInput: {
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    padding: Spacing.md,
+    minHeight: 100,
+    fontSize: Typography.fontSize.md,
+    fontFamily: Typography.fontFamily.primary,
   },
   actionRow: {
     marginTop: Spacing.xl,

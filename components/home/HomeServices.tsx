@@ -32,6 +32,7 @@ export const HomeServices: React.FC = () => {
     gradient: string[],
     title: string,
     token: number,
+    isCustomPrompt?: boolean,
   ) => {
     clearAllImages();
     resetUIState();
@@ -48,6 +49,7 @@ export const HomeServices: React.FC = () => {
         gradient: JSON.stringify(gradient),
         title: title,
         token: token,
+        isCustomPrompt: isCustomPrompt ? "true" : "false",
       },
     });
   };
@@ -107,6 +109,7 @@ export const HomeServices: React.FC = () => {
               service.gradient as string[],
               service.title as string,
               service.token as number,
+              (service as any).isCustomPrompt,
             )
           }
           style={{ flex: 1 }}

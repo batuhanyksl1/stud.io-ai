@@ -96,24 +96,23 @@ export default function ProfileTab() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView>
-        <Header leftIconType="home" rightIconType="settings" />
-        <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
+      <Header leftIconType="home" rightIconType="settings" />
+      <StatusBar style={colorScheme === "dark" ? "dark" : "light"} />
 
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={colors.primary}
-              colors={[colors.primary]}
-              progressBackgroundColor={colors.surface}
-            />
-          }
-          showsVerticalScrollIndicator={false}
-        >
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+            progressBackgroundColor={colors.surface}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      >
           {/* Profile Header Section */}
           <View style={styles.profileHeaderSection}>
             <UserProfileCard userProfile={userProfile} />
@@ -261,6 +260,11 @@ export default function ProfileTab() {
               <View style={styles.galleryGrid}>
                 {documents
                   .filter((doc) => doc.result?.data?.images?.length > 0)
+                  .sort((a, b) => {
+                    const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+                    const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+                    return dateB - dateA;
+                  })
                   .map((doc) => {
                     const coverImageUrl = doc.result?.data?.images?.[0]?.url;
 
@@ -310,7 +314,6 @@ export default function ProfileTab() {
             )}
           </View>
         </ScrollView>
-      </ScrollView>
     </ThemedView>
   );
 }
@@ -445,12 +448,13 @@ const styles = StyleSheet.create({
   galleryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
+    gap: Spacing.xs,
     paddingHorizontal: 0,
   },
   galleryItem: {
-    width: (width - Spacing.sm * 2 - Spacing.xs) / 2,
-    marginBottom: Spacing.sm,
+    width: (width - Spacing.sm * 2 - Spacing.xs * 2) / 3,
+    marginBottom: Spacing.xs,
     borderRadius: BorderRadius.md,
     overflow: "hidden",
     shadowColor: "#000",
@@ -461,11 +465,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.1)",
     backgroundColor: "rgba(255, 255, 255, 0.02)",
+    aspectRatio: 1,
   },
   galleryImageContainer: {
     position: "relative",
     width: "100%",
-    height: 120,
+    height: "100%",
   },
   galleryImage: {
     width: "100%",

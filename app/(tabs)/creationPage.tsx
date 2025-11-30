@@ -30,6 +30,7 @@ const ImageGeneratorScreen = () => {
     gradient,
     title,
     token,
+    isCustomPrompt,
   } = useLocalSearchParams<{
     servicePrompt: string;
     aiRequestUrl: string;
@@ -40,6 +41,7 @@ const ImageGeneratorScreen = () => {
     gradient: string;
     title: string;
     token: string;
+    isCustomPrompt: string;
   }>();
 
   // Gradient renklerini parse et
@@ -186,6 +188,9 @@ const ImageGeneratorScreen = () => {
           onRemoveSingleImage={() => setLocalImageUri(null)}
           fadeAnim={fadeAnim}
           scaleAnim={scaleAnim}
+          isCustomPrompt={isCustomPrompt === "true"}
+          currentPrompt={currentPrompt}
+          onPromptChange={setCurrentPrompt}
         />
       )}
 
