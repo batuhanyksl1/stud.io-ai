@@ -1,37 +1,508 @@
 import { Button } from "@/components";
 import { RC_ENTITLEMENT_ID } from "@/constants";
-import { useTheme } from "@/hooks";
+import { BorderRadius, Typography } from "@/constants/DesignTokens";
+import { useDeviceDimensions, useTheme } from "@/hooks";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { ArrowLeft, Check, Crown, X, Zap } from "lucide-react-native";
+import {
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Crown,
+  Gift,
+  Infinity,
+  Shield,
+  Sparkles,
+  Star,
+  Wand2,
+  X,
+  Zap,
+} from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   Linking,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import Purchases, {
   CustomerInfo,
   PurchasesPackage,
 } from "react-native-purchases";
+import Animated, {
+  Easing,
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 
-interface PlanFeature {
-  name: string;
-  free: boolean;
-  premium: boolean;
-}
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-// Removed unused PricingPlan interface
+// Floating Particle Component
+const FloatingParticle: React.FC<{
+  delay: number;
+  size: number;
+  color: string;
+  startX: number;
+}> = ({ delay, size, color, startX }) => {
+  const translateY = useSharedValue(0);
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.5);
+
+  useEffect(() => {
+    opacity.value = withDelay(
+      delay,
+      withRepeat(
+        withSequence(
+          withTiming(0.8, { duration: 1000 }),
+          withTiming(0, { duration: 1000 }),
+        ),
+        -1,
+        false,
+      ),
+    );
+
+    translateY.value = withDelay(
+      delay,
+      withRepeat(
+        withTiming(-150, { duration: 2000, easing: Easing.out(Easing.quad) }),
+        -1,
+        false,
+      ),
+    );
+
+    scale.value = withDelay(
+      delay,
+      withRepeat(
+        withSequence(
+          withTiming(1.2, { duration: 1000 }),
+          withTiming(0.5, { duration: 1000 }),
+        ),
+        -1,
+        false,
+      ),
+    );
+  }, [delay, opacity, scale, translateY]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }, { scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View
+      style={[
+        styles.particle,
+        animatedStyle,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: color,
+          left: startX,
+          bottom: 0,
+        },
+      ]}
+    />
+  );
+};
+
+// Animated Crown Component
+const AnimatedCrown: React.FC = () => {
+  const rotation = useSharedValue(0);
+  const scale = useSharedValue(0);
+  const glowOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    scale.value = withSpring(1, { damping: 12, stiffness: 100 });
+
+    rotation.value = withRepeat(
+      withSequence(
+        withTiming(-5, { duration: 2000, easing: Easing.inOut(Easing.sin) }),
+        withTiming(5, { duration: 2000, easing: Easing.inOut(Easing.sin) }),
+      ),
+      -1,
+      true,
+    );
+
+    glowOpacity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1500 }),
+        withTiming(0.3, { duration: 1500 }),
+      ),
+      -1,
+      true,
+    );
+  }, [glowOpacity, rotation, scale]);
+
+  const crownStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }, { scale: scale.value }],
+  }));
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+    transform: [{ scale: interpolate(glowOpacity.value, [0.3, 1], [1, 1.3]) }],
+  }));
+
+  return (
+    <View style={styles.crownWrapper}>
+      {/* Glow Effect */}
+      <Animated.View style={[styles.crownGlow, glowStyle]}>
+        <LinearGradient
+          colors={["rgba(251, 191, 36, 0.4)", "transparent"]}
+          style={styles.crownGlowGradient}
+        />
+      </Animated.View>
+
+      {/* Crown */}
+      <Animated.View style={crownStyle}>
+        <LinearGradient
+          colors={["#fbbf24", "#f59e0b", "#d97706"]}
+          style={styles.crownContainer}
+        >
+          <Crown size={52} color="white" strokeWidth={1.5} />
+        </LinearGradient>
+      </Animated.View>
+
+      {/* Sparkles */}
+      <Animated.View
+        style={[styles.sparkle, styles.sparkle1]}
+        entering={FadeIn.delay(500)}
+      >
+        <Sparkles size={16} color="#fbbf24" />
+      </Animated.View>
+      <Animated.View
+        style={[styles.sparkle, styles.sparkle2]}
+        entering={FadeIn.delay(700)}
+      >
+        <Star size={12} color="#fbbf24" fill="#fbbf24" />
+      </Animated.View>
+      <Animated.View
+        style={[styles.sparkle, styles.sparkle3]}
+        entering={FadeIn.delay(900)}
+      >
+        <Sparkles size={14} color="#f59e0b" />
+      </Animated.View>
+    </View>
+  );
+};
+
+// Feature Item Component
+const FeatureItem: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  delay: number;
+  gradient: [string, string];
+}> = ({ icon, title, description, delay, gradient }) => {
+  return (
+    <Animated.View
+      entering={FadeInUp.delay(delay).duration(500).springify()}
+      style={styles.featureItem}
+    >
+      <LinearGradient
+        colors={gradient}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.featureIconContainer}
+      >
+        {icon}
+      </LinearGradient>
+      <View style={styles.featureTextContainer}>
+        <Text style={styles.featureTitle}>{title}</Text>
+        <Text style={styles.featureDescription}>{description}</Text>
+      </View>
+      <View style={styles.featureCheck}>
+        <Check size={18} color="#10B981" strokeWidth={3} />
+      </View>
+    </Animated.View>
+  );
+};
+
+// Pricing Card Component
+const PricingCard: React.FC<{
+  pack: PurchasesPackage;
+  isSelected: boolean;
+  isPopular: boolean;
+  isBestValue: boolean;
+  monthlyPrice?: number;
+  onSelect: () => void;
+  delay: number;
+}> = ({
+  pack,
+  isSelected,
+  isPopular,
+  isBestValue,
+  monthlyPrice,
+  onSelect,
+  delay,
+}) => {
+  const scale = useSharedValue(1);
+  const borderGlow = useSharedValue(0);
+  useEffect(() => {
+    console.log("pack", pack);
+  }, [pack]);
+
+  useEffect(() => {
+    if (isSelected) {
+      borderGlow.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 1000 }),
+          withTiming(0.5, { duration: 1000 }),
+        ),
+        -1,
+        true,
+      );
+    }
+  }, [borderGlow, isSelected]);
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.98);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1);
+  };
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: borderGlow.value,
+  }));
+
+  const formatPeriod = (period?: string | null): string => {
+    if (!period) return "";
+    switch (period) {
+      case "P1W":
+        return "hafta";
+      case "P1M":
+        return "ay";
+      case "P3M":
+        return "3 ay";
+      case "P6M":
+        return "6 ay";
+      case "P1Y":
+        return "yıl";
+      default:
+        return "";
+    }
+  };
+
+  return (
+    <Animated.View entering={FadeInUp.delay(delay).springify()}>
+      <Pressable
+        onPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onSelect();
+        }}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+      >
+        <Animated.View style={cardStyle}>
+          {/* Badge */}
+          {(isPopular || isBestValue) && (
+            <View style={styles.popularBadge}>
+              <LinearGradient
+                colors={
+                  isBestValue ? ["#10B981", "#059669"] : ["#ef4444", "#dc2626"]
+                }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.popularGradient}
+              >
+                <Text style={styles.popularText}>
+                  {isBestValue ? "💎 En Avantajlı" : "🔥 En Popüler"}
+                </Text>
+              </LinearGradient>
+            </View>
+          )}
+
+          {/* Card */}
+          <View
+            style={[
+              styles.pricingCard,
+              isSelected && styles.pricingCardSelected,
+              isBestValue && styles.pricingCardBestValue,
+            ]}
+          >
+            {/* Selection Glow */}
+            {isSelected && (
+              <Animated.View style={[styles.selectionGlow, glowStyle]}>
+                <LinearGradient
+                  colors={["rgba(124, 58, 237, 0.3)", "transparent"]}
+                  style={StyleSheet.absoluteFill}
+                />
+              </Animated.View>
+            )}
+
+            <View style={styles.pricingCardContent}>
+              {/* Left: Info */}
+              <View style={styles.pricingInfo}>
+                {/* Title & Description */}
+                <Text
+                  style={[
+                    styles.pricingName,
+                    isSelected && styles.pricingNameSelected,
+                  ]}
+                >
+                  {pack.product.title.replace(" (Stud.io AI)", "")}
+                </Text>
+
+                {/* Product Description (200 Görsel Üretme Şansı vb.) */}
+                <Text
+                  style={[
+                    styles.pricingDescription,
+                    isSelected && styles.pricingDescriptionSelected,
+                  ]}
+                >
+                  {pack.product.description}
+                </Text>
+
+                {/* Price */}
+                <View style={styles.priceRow}>
+                  <Text
+                    style={[
+                      styles.pricingPrice,
+                      isSelected && styles.pricingPriceSelected,
+                    ]}
+                  >
+                    {pack.product.priceString}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.pricingPeriod,
+                      isSelected && styles.pricingPeriodSelected,
+                    ]}
+                  >
+                    /{formatPeriod(pack.product.subscriptionPeriod)}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Right: Selection indicator */}
+              <View
+                style={[
+                  styles.selectionIndicator,
+                  isSelected && styles.selectionIndicatorSelected,
+                ]}
+              >
+                {isSelected && <Check size={20} color="#FFF" strokeWidth={3} />}
+              </View>
+            </View>
+          </View>
+        </Animated.View>
+      </Pressable>
+    </Animated.View>
+  );
+};
+
+// CTA Button Component
+const CTAButton: React.FC<{
+  onPress: () => void;
+  loading: boolean;
+  disabled: boolean;
+}> = ({ onPress, loading, disabled }) => {
+  const scale = useSharedValue(1);
+  const glowOpacity = useSharedValue(0.5);
+
+  useEffect(() => {
+    glowOpacity.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1500 }),
+        withTiming(0.5, { duration: 1500 }),
+      ),
+      -1,
+      true,
+    );
+  }, [glowOpacity]);
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.95);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1);
+  };
+
+  const buttonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+    transform: [{ scale: interpolate(glowOpacity.value, [0.5, 1], [1, 1.05]) }],
+  }));
+
+  return (
+    <Animated.View entering={FadeInUp.delay(800).springify()}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={disabled || loading}
+      >
+        <View style={styles.ctaWrapper}>
+          {/* Glow Effect */}
+          <Animated.View style={[styles.ctaGlow, glowStyle]}>
+            <LinearGradient
+              colors={["rgba(124, 58, 237, 0.5)", "rgba(219, 39, 119, 0.5)"]}
+              style={StyleSheet.absoluteFill}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
+          </Animated.View>
+
+          {/* Button */}
+          <Animated.View style={buttonStyle}>
+            <LinearGradient
+              colors={
+                disabled
+                  ? ["#6B7280", "#4B5563"]
+                  : ["#7c3aed", "#db2777", "#f59e0b"]
+              }
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.ctaButton}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFF" size="small" />
+              ) : (
+                <>
+                  <Zap size={24} color="#FFF" fill="#FFF" />
+                  <Text style={styles.ctaText}>Premium&apos;a Geç</Text>
+                </>
+              )}
+            </LinearGradient>
+          </Animated.View>
+        </View>
+      </Pressable>
+    </Animated.View>
+  );
+};
 
 export default function PremiumScreen() {
   const { t } = useTranslation();
-  const { colorScheme } = useTheme();
+  const _theme = useTheme();
+  const _dimensions = useDeviceDimensions();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState<boolean>(true);
   const [packages, setPackages] = useState<PurchasesPackage[]>([]);
@@ -39,303 +510,113 @@ export default function PremiumScreen() {
     null,
   );
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
-  const [customerInfoLoading, setCustomerInfoLoading] = useState<boolean>(true);
-  const [refreshingCustomerInfo, setRefreshingCustomerInfo] =
-    useState<boolean>(false);
-  const [showRawCustomerInfo, setShowRawCustomerInfo] =
-    useState<boolean>(false);
+  const [showDevTools, setShowDevTools] = useState(false);
 
-  const features: PlanFeature[] = [
-    { name: t("premium.unlimitedPhotos"), free: false, premium: true },
-    { name: t("premium.advancedFilters"), free: false, premium: true },
-    { name: t("premium.cloudStorage"), free: false, premium: true },
-    { name: t("premium.prioritySupport"), free: false, premium: true },
-    { name: t("premium.noAds"), free: false, premium: true },
-    { name: "Basic Editing", free: true, premium: true },
-    { name: "Standard Filters", free: true, premium: true },
-    { name: "Local Storage", free: true, premium: true },
-  ];
+  const features = useMemo(
+    () => [
+      {
+        icon: <Infinity size={24} color="#FFF" />,
+        title: "Sınırsız Düzenleme",
+        description: "İstediğin kadar fotoğraf düzenle",
+        gradient: ["#7c3aed", "#a855f7"] as [string, string],
+      },
+      {
+        icon: <Wand2 size={24} color="#FFF" />,
+        title: "Tüm AI Araçları",
+        description: "Premium filtreler ve efektler",
+        gradient: ["#db2777", "#ec4899"] as [string, string],
+      },
+      {
+        icon: <Shield size={24} color="#FFF" />,
+        title: "Öncelikli Destek",
+        description: "7/24 hızlı destek hattı",
+        gradient: ["#0ea5e9", "#38bdf8"] as [string, string],
+      },
+      {
+        icon: <Sparkles size={24} color="#FFF" />,
+        title: "Yeni Özellikler",
+        description: "İlk sen dene, ilk sen kullan",
+        gradient: ["#f59e0b", "#fbbf24"] as [string, string],
+      },
+    ],
+    [],
+  );
 
   const fetchOfferings = useCallback(async () => {
     try {
       setFetching(true);
       const offerings = await Purchases.getOfferings();
       const available = offerings.current?.availablePackages ?? [];
-      setPackages(available);
-      if (available.length > 0) {
-        setSelectedPackageId((prev) => {
-          if (prev && available.some((pack) => pack.identifier === prev)) {
-            return prev;
-          }
-          return available[0].identifier;
-        });
-      } else {
-        setSelectedPackageId(null);
+      // Fiyata göre büyükten küçüğe sırala
+      const sorted = [...available].sort(
+        (a, b) => b.product.price - a.product.price,
+      );
+      setPackages(sorted);
+      if (sorted.length > 0) {
+        // Varsayılan olarak en pahalı olanı seç (sıralamadan sonra ilk sıradaki)
+        setSelectedPackageId(sorted[0].identifier);
       }
     } catch (error: any) {
-      console.error("Paketler alınırken bir hata oluştu:", error);
-
-      // RevenueCat yapılandırılmamışsa kullanıcıya bilgi ver
-      if (
-        error?.message?.includes("configure") ||
-        error?.message?.includes("singleton instance")
-      ) {
-        Alert.alert(
-          t("common.error"),
-          "RevenueCat henüz yapılandırılmamış. Lütfen uygulamayı yeniden başlatın.",
-        );
-      } else {
-        Alert.alert(
-          t("common.error"),
-          "Paketler alınırken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.",
-        );
-      }
+      console.error("Paketler alınırken hata:", error);
     } finally {
       setFetching(false);
     }
-  }, [t]);
+  }, []);
 
-  const fetchCustomerDetails = useCallback(
-    async (withPrimaryLoader = true) => {
-      try {
-        if (withPrimaryLoader) {
-          setCustomerInfoLoading(true);
-        } else {
-          setRefreshingCustomerInfo(true);
-        }
-        const info = await Purchases.getCustomerInfo();
-        setCustomerInfo(info);
-      } catch (error: any) {
-        console.error("Abonelik bilgileri alınırken bir hata oluştu:", error);
-
-        // RevenueCat yapılandırılmamışsa kullanıcıya bilgi ver
-        if (
-          error?.message?.includes("configure") ||
-          error?.message?.includes("singleton instance")
-        ) {
-          Alert.alert(
-            t("common.error"),
-            "RevenueCat henüz yapılandırılmamış. Lütfen uygulamayı yeniden başlatın.",
-          );
-        } else {
-          Alert.alert(
-            t("common.error"),
-            "Abonelik bilgileri alınırken bir hata oluştu. Lütfen tekrar deneyin.",
-          );
-        }
-      } finally {
-        if (withPrimaryLoader) {
-          setCustomerInfoLoading(false);
-        } else {
-          setRefreshingCustomerInfo(false);
-        }
-      }
-    },
-    [t],
-  );
+  const fetchCustomerInfo = useCallback(async () => {
+    try {
+      const info = await Purchases.getCustomerInfo();
+      setCustomerInfo(info);
+    } catch (_error) {
+      console.error("Customer info hatası:", _error);
+    }
+  }, []);
 
   useEffect(() => {
     fetchOfferings();
-    fetchCustomerDetails();
-  }, [fetchOfferings, fetchCustomerDetails]);
+    fetchCustomerInfo();
+  }, [fetchOfferings, fetchCustomerInfo]);
 
   const selectedPackage = useMemo(
     () => packages.find((p) => p.identifier === selectedPackageId) ?? null,
     [packages, selectedPackageId],
   );
 
-  // Premium durumunu kontrol et - aktif entitlement varsa premium aktif
-  const activeEntitlements = customerInfo
-    ? Object.values(customerInfo.entitlements.active ?? {})
-    : [];
-  const isPremiumActive =
-    activeEntitlements.length > 0 &&
-    activeEntitlements.some((ent) => ent.isActive === true);
-
-  useEffect(() => {
-    if (customerInfo) {
-      console.log(
-        "[PremiumScreen] CustomerInfo:",
-        JSON.stringify(customerInfo, null, 2),
-      );
-    }
+  const isPremiumActive = useMemo(() => {
+    if (!customerInfo) return false;
+    const activeEntitlements = Object.values(
+      customerInfo.entitlements.active ?? {},
+    );
+    return activeEntitlements.some((ent) => ent.isActive);
   }, [customerInfo]);
 
-  const subscriptionDetails = useMemo(() => {
-    if (!customerInfo) return [];
-
-    const activeEnts = Object.values(customerInfo.entitlements.active ?? {});
-    const firstActiveEntitlement = activeEnts.find((ent) => ent.isActive);
-    const subscriptions = customerInfo.subscriptionsByProductIdentifier ?? {};
-    const firstSubscription =
-      customerInfo.activeSubscriptions.length > 0
-        ? subscriptions[customerInfo.activeSubscriptions[0]]
-        : null;
-
-    return [
-      {
-        label: "Premium Durumu",
-        value: isPremiumActive ? "✅ Aktif" : "❌ Pasif",
-        highlight: isPremiumActive,
-      },
-      {
-        label: "Entitlement",
-        value: firstActiveEntitlement?.identifier ?? "-",
-      },
-      {
-        label: "Ürün Kimliği",
-        value:
-          firstActiveEntitlement?.productIdentifier ??
-          firstSubscription?.productIdentifier ??
-          "-",
-      },
-      {
-        label: "Aktif Abonelikler",
-        value:
-          customerInfo.activeSubscriptions.length > 0
-            ? customerInfo.activeSubscriptions.join(", ")
-            : "Bulunamadı",
-      },
-      {
-        label: "Mağaza",
-        value:
-          firstSubscription?.store === "APP_STORE"
-            ? "App Store"
-            : (firstSubscription?.store ?? "-"),
-      },
-      {
-        label: "Ortam",
-        value: firstSubscription?.isSandbox
-          ? "🧪 Sandbox (Test)"
-          : "🚀 Production",
-      },
-      {
-        label: "Fiyat",
-        value:
-          firstSubscription && "price" in firstSubscription
-            ? `${(firstSubscription as any).price.amount} ${(firstSubscription as any).price.currency}`
-            : "-",
-      },
-      {
-        label: "İlk Satın Alma",
-        value: formatDateTime(
-          firstActiveEntitlement?.originalPurchaseDate ??
-            firstSubscription?.originalPurchaseDate,
-        ),
-      },
-      {
-        label: "Son Satın Alma",
-        value: formatDateTime(
-          firstActiveEntitlement?.latestPurchaseDate ??
-            firstSubscription?.purchaseDate,
-        ),
-      },
-      {
-        label: "Bitiş Tarihi",
-        value: formatDateTime(
-          firstActiveEntitlement?.expirationDate ??
-            firstSubscription?.expiresDate,
-        ),
-      },
-      {
-        label: "Otomatik Yenileme",
-        value:
-          firstActiveEntitlement?.willRenew || firstSubscription?.willRenew
-            ? "✅ Evet"
-            : "❌ Hayır",
-      },
-      {
-        label: "Kullanıcı ID",
-        value: customerInfo.originalAppUserId ?? "-",
-      },
-      {
-        label: "İlk Görülme",
-        value: formatDateTime(customerInfo.firstSeen),
-      },
-      {
-        label: "Son Güncelleme",
-        value: formatDateTime(customerInfo.requestDate),
-      },
-    ];
-  }, [customerInfo, isPremiumActive]);
-
-  const customerInfoJson = useMemo(
-    () =>
-      customerInfo
-        ? JSON.stringify(customerInfo, null, 2)
-        : "RevenueCat üzerinden veri alınamadı.",
-    [customerInfo],
-  );
-
-  function formatDateTime(dateInput?: string | null): string {
-    if (!dateInput) return "-";
-    const date = new Date(dateInput);
-    if (Number.isNaN(date.getTime())) return "-";
-    try {
-      const datePart = date.toLocaleDateString("tr-TR");
-      const timePart = date.toLocaleTimeString("tr-TR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      return `${datePart} ${timePart}`;
-    } catch (_e) {
-      return date.toISOString();
-    }
-  }
-
-  function formatPeriod(period?: string | null): string {
-    if (!period) return "";
-    switch (period) {
-      case "P1W":
-        return "/hafta";
-      case "P1M":
-        return "/ay";
-      case "P3M":
-        return "/3 ay";
-      case "P6M":
-        return "/6 ay";
-      case "P1Y":
-        return "/yıl";
-      default:
-        return "";
-    }
-  }
-
   const handleSubscribe = async () => {
-    setLoading(true);
+    if (!selectedPackage) {
+      Alert.alert(t("common.error"), "Lütfen bir plan seçin.");
+      return;
+    }
 
+    setLoading(true);
     try {
-      if (!selectedPackage) {
-        Alert.alert(t("common.error"), "Lütfen bir plan seçin.");
-        return;
-      }
-      const { customerInfo: purchaseCustomerInfo } =
+      const { customerInfo: purchaseInfo } =
         await Purchases.purchasePackage(selectedPackage);
-      setCustomerInfo(purchaseCustomerInfo);
+      setCustomerInfo(purchaseInfo);
+
       const isActive = Boolean(
-        purchaseCustomerInfo.entitlements.active[RC_ENTITLEMENT_ID],
+        purchaseInfo.entitlements.active[RC_ENTITLEMENT_ID],
       );
-      void fetchOfferings();
+
       if (isActive) {
-        Alert.alert(t("common.success"), "Premium'a hoş geldiniz!", [
-          { text: "OK", onPress: () => router.back() },
-        ]);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert(
+          "🎉 Hoş Geldin!",
+          "Premium'a başarıyla geçtin! Tüm özellikler artık senin.",
+          [{ text: "Harika!", onPress: () => router.back() }],
+        );
       }
     } catch (e: any) {
-      if (e?.userCancelled) return; // kullanıcı iptali
-
-      // RevenueCat yapılandırılmamışsa kullanıcıya bilgi ver
-      if (
-        e?.message?.includes("configure") ||
-        e?.message?.includes("singleton instance")
-      ) {
-        Alert.alert(
-          t("common.error"),
-          "RevenueCat henüz yapılandırılmamış. Lütfen uygulamayı yeniden başlatın.",
-        );
-      } else {
-        Alert.alert(t("common.error"), "Satın alma işlemi başarısız oldu.");
-      }
+      if (e?.userCancelled) return;
+      Alert.alert(t("common.error"), "Satın alma işlemi başarısız oldu.");
     } finally {
       setLoading(false);
     }
@@ -343,478 +624,318 @@ export default function PremiumScreen() {
 
   const handleRestore = async () => {
     try {
-      const restoredCustomerInfo = await Purchases.restorePurchases();
-      setCustomerInfo(restoredCustomerInfo);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const restoredInfo = await Purchases.restorePurchases();
+      setCustomerInfo(restoredInfo);
+
       const isActive = Boolean(
-        restoredCustomerInfo.entitlements.active[RC_ENTITLEMENT_ID],
+        restoredInfo.entitlements.active[RC_ENTITLEMENT_ID],
       );
-      void fetchOfferings();
+
       if (isActive) {
-        Alert.alert(t("common.success"), "Satın alımlar geri yüklendi.", [
-          { text: "OK", onPress: () => router.back() },
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert("✅ Başarılı", "Satın alımlarınız geri yüklendi!", [
+          { text: "Tamam", onPress: () => router.back() },
         ]);
       } else {
-        Alert.alert("Restore Purchases", "Aktif satın alma bulunamadı.");
+        Alert.alert("Bilgi", "Aktif bir satın alma bulunamadı.");
       }
-    } catch (error: any) {
-      console.error("Geri yükleme hatası:", error);
-
-      // RevenueCat yapılandırılmamışsa kullanıcıya bilgi ver
-      if (
-        error?.message?.includes("configure") ||
-        error?.message?.includes("singleton instance")
-      ) {
-        Alert.alert(
-          t("common.error"),
-          "RevenueCat henüz yapılandırılmamış. Lütfen uygulamayı yeniden başlatın.",
-        );
-      } else {
-        Alert.alert(t("common.error"), "Geri yükleme başarısız oldu.");
-      }
+    } catch (_error) {
+      Alert.alert(t("common.error"), "Geri yükleme başarısız oldu.");
     }
   };
 
-  const handleOpenManagementURL = useCallback(() => {
+  const handleManageSubscription = useCallback(() => {
     const url = customerInfo?.managementURL;
-    if (!url) {
-      Alert.alert("Bilgi", "Yönetim bağlantısı şu anda mevcut değil.");
-      return;
+    if (url) {
+      Linking.openURL(url);
+    } else {
+      Alert.alert("Bilgi", "Yönetim bağlantısı mevcut değil.");
     }
-    Linking.openURL(url).catch(() => {
-      Alert.alert("Hata", "Yönetim bağlantısı açılamadı.");
-    });
   }, [customerInfo]);
 
-  const handleLogCustomerInfo = useCallback(() => {
-    if (!customerInfo) {
-      console.log("[PremiumScreen] CustomerInfo: null");
-      Alert.alert("Bilgi", "CustomerInfo henüz yüklenmedi.");
-      return;
-    }
-    console.log(
-      "[PremiumScreen] CustomerInfo:",
-      JSON.stringify(customerInfo, null, 2),
+  // Zaten premium ise farklı bir görünüm göster
+  if (isPremiumActive) {
+    return (
+      <LinearGradient
+        colors={["#0f0f23", "#1a1a2e", "#0f0f23"]}
+        style={styles.container}
+      >
+        <View style={styles.header}>
+          <Pressable
+            onPress={() => router.back()}
+            style={styles.backButton}
+            hitSlop={20}
+          >
+            <ArrowLeft size={24} color="#FFF" />
+          </Pressable>
+        </View>
+
+        <View style={styles.premiumActiveContainer}>
+          <AnimatedCrown />
+
+          <Animated.Text
+            entering={FadeInUp.delay(300)}
+            style={styles.premiumActiveTitle}
+          >
+            Premium Üyesin! 🎉
+          </Animated.Text>
+
+          <Animated.Text
+            entering={FadeInUp.delay(400)}
+            style={styles.premiumActiveSubtitle}
+          >
+            Tüm özelliklerin kilidi açık
+          </Animated.Text>
+
+          <Animated.View
+            entering={FadeInUp.delay(600)}
+            style={styles.premiumActiveActions}
+          >
+            <Button
+              title="Aboneliği Yönet"
+              onPress={handleManageSubscription}
+              variant="outline"
+              size="md"
+            />
+            <Button
+              title="Geri Dön"
+              onPress={() => router.back()}
+              variant="primary"
+              size="md"
+            />
+          </Animated.View>
+        </View>
+      </LinearGradient>
     );
-    Alert.alert("Başarılı", "CustomerInfo konsola loglandı!");
-  }, [customerInfo]);
+  }
 
   return (
     <LinearGradient
-      colors={
-        colorScheme === "dark"
-          ? ["#0f0f23", "#1a1a2e", "#16213e"]
-          : ["#667eea", "#764ba2", "#f093fb"]
-      }
+      colors={["#0f0f23", "#1a1a2e", "#0f0f23"]}
       style={styles.container}
     >
+      {/* Float ing Particles */}
+      <View style={styles.particlesContainer}>
+        {[...Array(8)].map((_, i) => (
+          <FloatingParticle
+            key={i}
+            delay={i * 400}
+            size={4 + Math.random() * 4}
+            color={
+              i % 2 === 0
+                ? "rgba(124, 58, 237, 0.6)"
+                : "rgba(251, 191, 36, 0.6)"
+            }
+            startX={Math.random() * SCREEN_WIDTH}
+          />
+        ))}
+      </View>
+
+      {/* Header */}
+      <View style={styles.header}>
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            router.back();
+          }}
+          style={styles.backButton}
+          hitSlop={20}
+        >
+          <ArrowLeft size={24} color="#FFF" />
+        </Pressable>
+
+        <Pressable
+          onPress={handleRestore}
+          style={styles.restoreButton}
+          hitSlop={20}
+        >
+          <Text style={styles.restoreText}>Geri Yükle</Text>
+        </Pressable>
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <Button
-              title=""
-              onPress={() => router.back()}
-              variant="ghost"
-              icon={<ArrowLeft size={24} color="white" />}
-            />
-          </View>
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <AnimatedCrown />
 
-          <View style={styles.headerContent}>
-            {/* Premium Crown with Glow Effect */}
-            <View style={styles.crownContainer}>
-              <LinearGradient
-                colors={["#fbbf24", "#f59e0b", "#d97706"]}
-                style={styles.crownGradient}
-              >
-                <Crown size={48} color="white" />
-              </LinearGradient>
+          <Animated.Text
+            entering={FadeInUp.delay(200).springify()}
+            style={styles.heroTitle}
+          >
+            Premium&apos;a Geç
+          </Animated.Text>
 
-              {/* Glow rings */}
-              <View style={styles.glowRing1} />
-              <View style={styles.glowRing2} />
-            </View>
-
-            <Text style={styles.title}>{t("premium.upgradeToPremium")}</Text>
-
-            <Text style={styles.subtitle}>
-              Fotoğraflarınızı bir sonraki seviyeye taşıyın
-            </Text>
-
-            {/* Premium Benefits Pills */}
-            <View style={styles.benefitsContainer}>
-              <View style={styles.benefitPill}>
-                <Text style={styles.benefitText}>✨ Sınırsız Fotoğraf</Text>
-              </View>
-              <View style={styles.benefitPill}>
-                <Text style={styles.benefitText}>🚀 Gelişmiş Filtreler</Text>
-              </View>
-              <View style={styles.benefitPill}>
-                <Text style={styles.benefitText}>☁️ Bulut Depolama</Text>
-              </View>
-            </View>
-          </View>
+          <Animated.Text
+            entering={FadeInUp.delay(300).springify()}
+            style={styles.heroSubtitle}
+          >
+            Fotoğraflarını bir üst seviyeye taşı
+          </Animated.Text>
         </View>
 
-        {/* Subscription Status */}
-        <View style={styles.statusSection}>
-          <View style={styles.statusCard}>
-            <View style={styles.statusHeader}>
-              <Text style={styles.statusTitle}>Abonelik Durumunuz</Text>
-              <View
-                style={[
-                  styles.statusBadge,
-                  isPremiumActive
-                    ? styles.statusBadgeActive
-                    : styles.statusBadgeInactive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.statusBadgeText,
-                    isPremiumActive
-                      ? styles.statusBadgeTextActive
-                      : styles.statusBadgeTextInactive,
-                  ]}
-                >
-                  {isPremiumActive ? "Aktif" : "Pasif"}
-                </Text>
-              </View>
-            </View>
-
-            {customerInfoLoading ? (
-              <View style={styles.statusLoading}>
-                <ActivityIndicator color="#667eea" />
-                <Text style={styles.statusLoadingText}>
-                  Abonelik bilgileriniz yükleniyor...
-                </Text>
-              </View>
-            ) : customerInfo ? (
-              <View style={styles.statusDetails}>
-                {subscriptionDetails.map((detail) => (
-                  <View
-                    key={detail.label}
-                    style={[
-                      styles.statusRow,
-                      detail.highlight && styles.statusRowHighlight,
-                    ]}
-                  >
-                    <Text style={styles.statusLabel}>{detail.label}</Text>
-                    <Text
-                      style={[
-                        styles.statusValue,
-                        detail.highlight && styles.statusValueHighlight,
-                      ]}
-                    >
-                      {detail.value}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            ) : (
-              <View style={styles.statusLoading}>
-                <Text style={styles.statusLoadingText}>
-                  RevenueCat üzerinden abonelik bilginiz bulunamadı.
-                </Text>
-              </View>
-            )}
-
-            <View style={styles.statusActions}>
-              <Button
-                title={refreshingCustomerInfo ? "" : "Bilgileri Yenile"}
-                onPress={() => fetchCustomerDetails(false)}
-                loading={refreshingCustomerInfo}
-                variant="outline"
-                size="sm"
-              />
-              <Button
-                title="Aboneliği Yönet"
-                onPress={handleOpenManagementURL}
-                variant="outline"
-                size="sm"
-                disabled={!customerInfo?.managementURL}
-              />
-              <Button
-                title="Console'a Logla"
-                onPress={handleLogCustomerInfo}
-                variant="outline"
-                size="sm"
-                disabled={!customerInfo}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={styles.rawDataToggle}
-              onPress={() => setShowRawCustomerInfo((prev) => !prev)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.rawDataToggleText}>
-                {showRawCustomerInfo
-                  ? "RevenueCat çıktısını gizle"
-                  : "RevenueCat çıktısını göster"}
-              </Text>
-              <Text style={styles.rawDataToggleHint}>
-                {showRawCustomerInfo
-                  ? "Gizlemek için dokunun"
-                  : "Ham JSON verisini görüntüleyin"}
-              </Text>
-            </TouchableOpacity>
-
-            {showRawCustomerInfo && (
-              <View style={styles.rawDataContainer}>
-                <Text style={styles.rawDataText}>{customerInfoJson}</Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {/* Features Comparison */}
+        {/* Features Section */}
         <View style={styles.featuresSection}>
-          <View style={styles.featuresCard}>
-            <Text style={styles.featuresTitle}>
-              {t("premium.premiumFeatures")}
-            </Text>
+          <Animated.Text
+            entering={FadeIn.delay(400)}
+            style={styles.sectionTitle}
+          >
+            Neler Kazanırsın?
+          </Animated.Text>
 
-            {/* Column Headers */}
-            <View style={styles.columnHeaders}>
-              <View style={styles.featureColumn}>
-                <Text style={styles.columnTitle}>Özellik</Text>
-              </View>
-              <View style={styles.priceColumn}>
-                <View style={styles.freeBadge}>
-                  <Text style={styles.freeBadgeText}>Ücretsiz</Text>
-                </View>
-              </View>
-              <View style={styles.priceColumn}>
-                <LinearGradient
-                  colors={["#667eea", "#764ba2"]}
-                  style={styles.premiumBadge}
-                >
-                  <Text style={styles.premiumBadgeText}>Premium</Text>
-                </LinearGradient>
-              </View>
-            </View>
-
-            {/* Feature Rows */}
-            <View style={styles.featureRows}>
-              {features.map((feature, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.featureRow,
-                    feature.premium &&
-                      !feature.free &&
-                      styles.premiumFeatureRow,
-                  ]}
-                >
-                  <View style={styles.featureInfo}>
-                    <Text style={styles.featureName}>{feature.name}</Text>
-                    {feature.premium && !feature.free && (
-                      <Text style={styles.premiumLabel}>
-                        🌟 Premium Özelliği
-                      </Text>
-                    )}
-                  </View>
-
-                  <View style={styles.featureIcons}>
-                    <View style={styles.iconContainer}>
-                      {feature.free ? (
-                        <View style={styles.checkIcon}>
-                          <Check size={18} color="#16a34a" />
-                        </View>
-                      ) : (
-                        <View style={styles.xIcon}>
-                          <X size={18} color="#dc2626" />
-                        </View>
-                      )}
-                    </View>
-
-                    <View style={styles.iconContainer}>
-                      <View style={styles.premiumCheckIcon}>
-                        <Check size={18} color="white" />
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              ))}
-            </View>
-
-            {/* Bottom CTA */}
-            <View style={styles.bottomCTA}>
-              <Text style={styles.ctaTitle}>
-                Premium&apos;a geçin ve tüm özelliklerin kilidini açın! 🚀
-              </Text>
-              <Text style={styles.ctaSubtitle}>
-                7 gün ücretsiz deneme ile başlayın
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Pricing Plans */}
-        <View style={styles.pricingSection}>
-          <Text style={styles.pricingTitle}>Planınızı Seçin</Text>
-
-          <View style={styles.plansContainer}>
-            {packages.map((pack) => (
-              <View
-                key={pack.identifier}
-                style={[
-                  styles.planCard,
-                  selectedPackageId === pack.identifier &&
-                    styles.selectedPlanCard,
-                ]}
-              >
-                {/* Popular Badge */}
-                {pack.packageType === "MONTHLY" && (
-                  <View style={styles.popularBadge}>
-                    <LinearGradient
-                      colors={["#ff6b6b", "#ee5a24"]}
-                      style={styles.popularGradient}
-                    >
-                      <Text style={styles.popularText}>🔥 En Popüler</Text>
-                    </LinearGradient>
-                  </View>
-                )}
-
-                {/* Card Content */}
-                <LinearGradient
-                  colors={
-                    selectedPackageId === pack.identifier
-                      ? ["#667eea", "#764ba2"]
-                      : ["#ffffff", "#f8f9fa"]
-                  }
-                  style={styles.planContent}
-                >
-                  <View style={styles.planHeader}>
-                    <View style={styles.planInfo}>
-                      <Text
-                        style={[
-                          styles.planName,
-                          selectedPackageId === pack.identifier &&
-                            styles.selectedPlanText,
-                        ]}
-                      >
-                        {pack.product.title}
-                      </Text>
-
-                      <View style={styles.priceContainer}>
-                        <Text
-                          style={[
-                            styles.planPrice,
-                            selectedPackageId === pack.identifier &&
-                              styles.selectedPlanText,
-                          ]}
-                        >
-                          {pack.product.priceString}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.planPeriod,
-                            selectedPackageId === pack.identifier &&
-                              styles.selectedPlanPeriod,
-                          ]}
-                        >
-                          {formatPeriod(pack.product.subscriptionPeriod)}
-                        </Text>
-                      </View>
-
-                      {/* Plan Benefits */}
-                      <View style={styles.planBenefits}>
-                        <Text
-                          style={[
-                            styles.benefitItem,
-                            selectedPackageId === pack.identifier &&
-                              styles.selectedBenefitItem,
-                          ]}
-                        >
-                          📱 Tüm premium özellikler
-                        </Text>
-                      </View>
-                    </View>
-
-                    <View style={styles.selectButton}>
-                      <Button
-                        title={
-                          selectedPackageId === pack.identifier
-                            ? "✓ Seçildi"
-                            : "Seç"
-                        }
-                        onPress={() => setSelectedPackageId(pack.identifier)}
-                        variant={
-                          selectedPackageId === pack.identifier
-                            ? "outline"
-                            : "primary"
-                        }
-                        size="sm"
-                      />
-                    </View>
-                  </View>
-                </LinearGradient>
-              </View>
+          <View style={styles.featuresList}>
+            {features.map((feature, index) => (
+              <FeatureItem
+                key={index}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                gradient={feature.gradient}
+                delay={500 + index * 100}
+              />
             ))}
           </View>
         </View>
 
-        {/* CTA Buttons */}
-        <View style={styles.ctaSection}>
-          {/* Main CTA Button */}
-          <View style={styles.mainCTA}>
-            <LinearGradient
-              colors={["#667eea", "#764ba2", "#f093fb"]}
-              style={styles.ctaGradient}
-            >
-              <Button
-                title={loading ? "" : "🚀 7 Gün Ücretsiz Deneyin"}
-                onPress={handleSubscribe}
-                loading={loading}
-                disabled={fetching || !selectedPackage}
-                variant="primary"
-                size="lg"
-                icon={!loading && <Zap size={24} color="white" />}
-              />
-            </LinearGradient>
-          </View>
+        {/* Pricing Section */}
+        <View style={styles.pricingSection}>
+          <Animated.Text
+            entering={FadeIn.delay(700)}
+            style={styles.sectionTitle}
+          >
+            Planını Seç
+          </Animated.Text>
 
-          {/* Secondary Actions */}
-          <View style={styles.secondaryActions}>
-            <Button
-              title="📱 Satın Alımları Geri Yükle"
-              onPress={handleRestore}
-              variant="ghost"
-              size="md"
-            />
-
-            {/* Trust Indicators */}
-            <View style={styles.trustIndicators}>
-              <View style={styles.trustRow}>
-                <View style={styles.trustItem}>
-                  <Text style={styles.trustIcon}>🔒</Text>
-                  <Text style={styles.trustText}>Güvenli Ödeme</Text>
-                </View>
-                <View style={styles.trustItem}>
-                  <Text style={styles.trustIcon}>⭐</Text>
-                  <Text style={styles.trustText}>4.8/5 Puan</Text>
-                </View>
-                <View style={styles.trustItem}>
-                  <Text style={styles.trustIcon}>👥</Text>
-                  <Text style={styles.trustText}>10K+ Kullanıcı</Text>
-                </View>
-              </View>
+          {fetching ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator color="#7c3aed" size="large" />
+              <Text style={styles.loadingText}>Planlar yükleniyor...</Text>
             </View>
+          ) : (
+            <View style={styles.pricingList}>
+              {packages.map((pack, index) => {
+                // Aylık fiyatı bul (tasarruf hesabı için)
+                const monthlyPack = packages.find(
+                  (p) => p.packageType === "MONTHLY",
+                );
+                const monthlyPrice = monthlyPack?.product.price;
 
-            {/* Terms */}
-            <Text style={styles.termsText}>
-              7 gün ücretsiz deneme • İstediğiniz zaman iptal edin • Otomatik
-              yenileme Hesap Ayarları&apos;ndan kapatılabilir
-            </Text>
-          </View>
-
-          {/* Bottom Spacing for Safe Area */}
-          <View style={styles.bottomSpacing} />
+                return (
+                  <PricingCard
+                    key={pack.identifier}
+                    pack={pack}
+                    isSelected={selectedPackageId === pack.identifier}
+                    isPopular={pack.product.title === "Studio"}
+                    isBestValue={pack.product.title === "Studio"}
+                    monthlyPrice={monthlyPrice}
+                    onSelect={() => setSelectedPackageId(pack.identifier)}
+                    delay={750 + index * 100}
+                  />
+                );
+              })}
+            </View>
+          )}
         </View>
+
+        {/* CTA Section */}
+        <View style={styles.ctaSection}>
+          <CTAButton
+            onPress={handleSubscribe}
+            loading={loading}
+            disabled={fetching || !selectedPackage}
+          />
+
+          {/* Trial Info */}
+          <Animated.View entering={FadeIn.delay(900)} style={styles.trialInfo}>
+            <Gift size={16} color="#10B981" />
+            <Text style={styles.trialText}>7 gün ücretsiz dene</Text>
+          </Animated.View>
+
+          {/* Trust Indicators */}
+          <Animated.View
+            entering={FadeInUp.delay(1000)}
+            style={styles.trustSection}
+          >
+            <View style={styles.trustItem}>
+              <Shield size={20} color="rgba(255,255,255,0.6)" />
+              <Text style={styles.trustText}>Güvenli Ödeme</Text>
+            </View>
+            <View style={styles.trustDivider} />
+            <View style={styles.trustItem}>
+              <X size={20} color="rgba(255,255,255,0.6)" />
+              <Text style={styles.trustText}>İstediğin Zaman İptal</Text>
+            </View>
+          </Animated.View>
+
+          {/* Terms */}
+          <Animated.Text entering={FadeIn.delay(1100)} style={styles.termsText}>
+            Abonelik otomatik olarak yenilenir. İstediğiniz zaman
+            Ayarlar&apos;dan iptal edebilirsiniz.
+          </Animated.Text>
+        </View>
+
+        {/* Developer Tools (Hidden by default) */}
+        <View style={styles.devToolsSection}>
+          <Pressable
+            onPress={() => setShowDevTools(!showDevTools)}
+            style={styles.devToolsToggle}
+          >
+            <Text style={styles.devToolsToggleText}>Geliştirici Araçları</Text>
+            {showDevTools ? (
+              <ChevronUp size={16} color="rgba(255,255,255,0.3)" />
+            ) : (
+              <ChevronDown size={16} color="rgba(255,255,255,0.3)" />
+            )}
+          </Pressable>
+
+          {showDevTools && (
+            <Animated.View
+              entering={FadeInDown.duration(300)}
+              style={styles.devToolsContent}
+            >
+              <Text style={styles.devToolsLabel}>Customer ID:</Text>
+              <Text style={styles.devToolsValue}>
+                {customerInfo?.originalAppUserId ?? "-"}
+              </Text>
+
+              <Text style={styles.devToolsLabel}>Entitlements:</Text>
+              <Text style={styles.devToolsValue}>
+                {JSON.stringify(
+                  customerInfo?.entitlements.active ?? {},
+                  null,
+                  2,
+                )}
+              </Text>
+
+              <View style={styles.devToolsActions}>
+                <Button
+                  title="Console'a Logla"
+                  onPress={() => {
+                    console.log(
+                      "CustomerInfo:",
+                      JSON.stringify(customerInfo, null, 2),
+                    );
+                    Alert.alert("Başarılı", "Console'a loglandı!");
+                  }}
+                  variant="outline"
+                  size="sm"
+                />
+                <Button
+                  title="Bilgileri Yenile"
+                  onPress={fetchCustomerInfo}
+                  variant="outline"
+                  size="sm"
+                />
+              </View>
+            </Animated.View>
+          )}
+        </View>
+
+        {/* Bottom Spacing */}
+        <View style={{ height: 40 }} />
       </ScrollView>
     </LinearGradient>
   );
@@ -824,536 +945,438 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
+  particlesContainer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: "hidden",
+  },
+  particle: {
+    position: "absolute",
   },
   header: {
-    paddingTop: 64,
-    paddingBottom: 48,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  backButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  restoreButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  restoreText: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+  },
+  scrollContent: {
     paddingHorizontal: 24,
   },
-  headerTop: {
-    flexDirection: "row",
+
+  // Hero Section
+  heroSection: {
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 32,
+    paddingTop: 20,
+    paddingBottom: 40,
   },
-  headerContent: {
-    alignItems: "center",
+  crownWrapper: {
+    position: "relative",
+    marginBottom: 24,
+  },
+  crownGlow: {
+    position: "absolute",
+    width: 160,
+    height: 160,
+    left: -30,
+    top: -30,
+    borderRadius: 80,
+    overflow: "hidden",
+  },
+  crownGlowGradient: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 80,
   },
   crownContainer: {
-    position: "relative",
-    marginBottom: 32,
-  },
-  crownGradient: {
-    width: 112,
-    height: 112,
-    borderRadius: 56,
-    alignItems: "center",
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     justifyContent: "center",
-    shadowColor: "#f59e0b",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 20,
+    alignItems: "center",
   },
-  glowRing1: {
+  sparkle: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: 112,
-    height: 112,
-    borderRadius: 56,
-    borderWidth: 2,
-    borderColor: "rgba(252, 211, 77, 0.3)",
   },
-  glowRing2: {
-    position: "absolute",
-    top: -8,
-    left: -8,
-    right: -8,
-    bottom: -8,
-    width: 128,
-    height: 128,
-    borderRadius: 64,
-    borderWidth: 1,
-    borderColor: "rgba(254, 240, 138, 0.2)",
+  sparkle1: {
+    top: -5,
+    right: -10,
   },
-  title: {
-    fontSize: 36,
-    fontFamily: "Inter-Black",
+  sparkle2: {
+    bottom: 10,
+    left: -15,
+  },
+  sparkle3: {
+    top: 20,
+    right: -20,
+  },
+  heroTitle: {
+    fontFamily: Typography.fontFamily.oswaldBold,
+    fontSize: 42,
+    color: "#FFF",
     textAlign: "center",
-    marginBottom: 12,
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    textTransform: "uppercase",
+    letterSpacing: 2,
   },
-  subtitle: {
-    fontSize: 18,
-    fontFamily: "Inter-Medium",
+  heroSubtitle: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: 16,
+    color: "rgba(255,255,255,0.6)",
     textAlign: "center",
-    color: "white",
-    paddingHorizontal: 16,
-    lineHeight: 24,
-    opacity: 0.9,
-  },
-  benefitsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    marginTop: 24,
-    gap: 8,
-  },
-  benefitPill: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  benefitText: {
-    color: "white",
-    fontFamily: "Inter-SemiBold",
-    fontSize: 14,
-  },
-  statusSection: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
-  },
-  statusCard: {
-    backgroundColor: "white",
-    borderRadius: 24,
-    padding: 24,
-  },
-  statusHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  statusTitle: {
-    fontSize: 22,
-    fontFamily: "Inter-Black",
-    color: "#1f2937",
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  statusBadgeActive: {
-    backgroundColor: "rgba(34, 197, 94, 0.15)",
-    borderWidth: 1,
-    borderColor: "rgba(34, 197, 94, 0.35)",
-  },
-  statusBadgeInactive: {
-    backgroundColor: "rgba(239, 68, 68, 0.15)",
-    borderWidth: 1,
-    borderColor: "rgba(239, 68, 68, 0.35)",
-  },
-  statusBadgeText: {
-    fontFamily: "Inter-SemiBold",
-    fontSize: 14,
-  },
-  statusBadgeTextActive: {
-    color: "#15803d",
-  },
-  statusBadgeTextInactive: {
-    color: "#b91c1c",
-  },
-  statusLoading: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 24,
-    gap: 8,
-  },
-  statusLoadingText: {
-    fontFamily: "Inter-Medium",
-    color: "#4b5563",
-    textAlign: "center",
-  },
-  statusDetails: {
-    gap: 12,
     marginTop: 8,
   },
-  statusRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-  },
-  statusRowHighlight: {
-    backgroundColor: "rgba(34, 197, 94, 0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(34, 197, 94, 0.2)",
-  },
-  statusLabel: {
-    fontFamily: "Inter-SemiBold",
-    color: "#4b5563",
-    flex: 1,
-    flexShrink: 1,
-    fontSize: 14,
-  },
-  statusValue: {
-    fontFamily: "Inter-Medium",
-    color: "#1f2937",
-    flex: 1.1,
-    fontSize: 14,
-    textAlign: "right",
-    flexShrink: 1,
-  },
-  statusValueHighlight: {
-    fontFamily: "Inter-Bold",
-    color: "#15803d",
-    fontSize: 15,
-  },
-  statusActions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    marginTop: 24,
-  },
-  rawDataToggle: {
-    marginTop: 16,
-  },
-  rawDataToggleText: {
-    fontFamily: "Inter-SemiBold",
-    color: "#4338ca",
-    fontSize: 14,
-  },
-  rawDataToggleHint: {
-    fontFamily: "Inter-Regular",
-    color: "#6b7280",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  rawDataContainer: {
-    marginTop: 16,
-    backgroundColor: "#0f172a",
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "rgba(148, 163, 184, 0.4)",
-  },
-  rawDataText: {
-    fontFamily: "Inter-Regular",
-    fontSize: 12,
-    color: "#e0f2fe",
-    lineHeight: 18,
-  },
+
+  // Features Section
   featuresSection: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
+    marginBottom: 40,
   },
-  featuresCard: {
-    backgroundColor: "white",
-    borderRadius: 24,
-    padding: 24,
+  sectionTitle: {
+    fontFamily: Typography.fontFamily.bold,
+    fontSize: 20,
+    color: "#FFF",
+    marginBottom: 20,
   },
-  featuresTitle: {
-    fontSize: 24,
-    fontFamily: "Inter-Black",
-    textAlign: "center",
-    marginBottom: 32,
-    color: "#1f2937",
-  },
-  columnHeaders: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-    paddingHorizontal: 16,
-  },
-  featureColumn: {
-    flex: 1,
-  },
-  columnTitle: {
-    fontSize: 18,
-    fontFamily: "Inter-Bold",
-    color: "#4b5563",
-    textAlign: "center",
-  },
-  priceColumn: {
-    width: 80,
-  },
-  freeBadge: {
-    backgroundColor: "#f3f4f6",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  freeBadgeText: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: "#4b5563",
-    textAlign: "center",
-  },
-  premiumBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-  },
-  premiumBadgeText: {
-    fontSize: 14,
-    fontFamily: "Inter-Bold",
-    color: "white",
-    textAlign: "center",
-  },
-  featureRows: {
+  featuresList: {
     gap: 12,
   },
-  featureRow: {
+  featureItem: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: BorderRadius.lg,
     padding: 16,
-    borderRadius: 16,
-    backgroundColor: "#f9fafb",
-  },
-  premiumFeatureRow: {
-    backgroundColor: "#faf5ff",
     borderWidth: 1,
-    borderColor: "#e9d5ff",
+    borderColor: "rgba(255,255,255,0.1)",
   },
-  featureInfo: {
-    flex: 1,
-  },
-  featureName: {
-    fontFamily: "Inter-SemiBold",
-    color: "#1f2937",
-    fontSize: 16,
-  },
-  premiumLabel: {
-    fontSize: 12,
-    color: "#9333ea",
-    fontFamily: "Inter-Medium",
-    marginTop: 4,
-  },
-  featureIcons: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconContainer: {
-    width: 80,
-    alignItems: "center",
-  },
-  checkIcon: {
-    backgroundColor: "#dcfce7",
-    padding: 8,
-    borderRadius: 20,
-  },
-  xIcon: {
-    backgroundColor: "#fee2e2",
-    padding: 8,
-    borderRadius: 20,
-  },
-  premiumCheckIcon: {
-    backgroundColor: "#22c55e",
-    padding: 8,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  bottomCTA: {
-    marginTop: 32,
-    padding: 16,
-    backgroundColor: "#8b5cf6",
-    borderRadius: 16,
-  },
-  ctaTitle: {
-    color: "white",
-    fontFamily: "Inter-Bold",
-    textAlign: "center",
-    fontSize: 18,
-    marginBottom: 8,
-  },
-  ctaSubtitle: {
-    color: "white",
-    fontFamily: "Inter-Medium",
-    textAlign: "center",
-    fontSize: 14,
-    opacity: 0.9,
-  },
-  pricingSection: {
-    paddingHorizontal: 24,
-    marginBottom: 48,
-  },
-  pricingTitle: {
-    fontSize: 24,
-    fontFamily: "Inter-Black",
-    textAlign: "center",
-    marginBottom: 32,
-    color: "white",
-  },
-  plansContainer: {
-    gap: 16,
-  },
-  planCard: {
-    position: "relative",
-    overflow: "hidden",
+  featureIconContainer: {
+    width: 48,
+    height: 48,
     borderRadius: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 4,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  selectedPlanCard: {
-    transform: [{ scale: 1.05 }],
-    shadowColor: "#667eea",
-    shadowOpacity: 0.3,
-    elevation: 12,
+  featureTextContainer: {
+    flex: 1,
+    marginLeft: 16,
+  },
+  featureTitle: {
+    fontFamily: Typography.fontFamily.semiBold,
+    fontSize: 16,
+    color: "#FFF",
+  },
+  featureDescription: {
+    fontFamily: Typography.fontFamily.primary,
+    fontSize: 13,
+    color: "rgba(255,255,255,0.5)",
+    marginTop: 2,
+  },
+  featureCheck: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(16, 185, 129, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // Pricing Section
+  pricingSection: {
+    marginBottom: 32,
+  },
+  loadingContainer: {
+    alignItems: "center",
+    paddingVertical: 40,
+    gap: 12,
+  },
+  loadingText: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: 14,
+    color: "rgba(255,255,255,0.5)",
+  },
+  pricingList: {
+    gap: 12,
   },
   popularBadge: {
     position: "absolute",
-    top: -8,
-    right: -8,
+    top: -12,
+    right: 16,
     zIndex: 10,
   },
   popularGradient: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    transform: [{ rotate: "12deg" }],
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.full,
   },
   popularText: {
-    color: "white",
-    fontFamily: "Inter-Bold",
+    fontFamily: Typography.fontFamily.semiBold,
     fontSize: 12,
+    color: "#FFF",
   },
-  planContent: {
-    padding: 24,
+  pricingCard: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: BorderRadius.xl,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.1)",
+    overflow: "hidden",
   },
-  planHeader: {
+  pricingCardSelected: {
+    borderColor: "#7c3aed",
+    backgroundColor: "rgba(124, 58, 237, 0.1)",
+  },
+  pricingCardBestValue: {
+    borderColor: "rgba(16, 185, 129, 0.5)",
+  },
+  selectionGlow: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: BorderRadius.xl,
+  },
+  pricingCardContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    padding: 20,
   },
-  planInfo: {
+  pricingInfo: {
     flex: 1,
   },
-  planName: {
-    fontSize: 20,
-    fontFamily: "Inter-Black",
-    marginBottom: 8,
-    color: "#1f2937",
+  pricingName: {
+    fontFamily: Typography.fontFamily.bold,
+    fontSize: 18,
+    color: "#FFF",
+    marginBottom: 2,
   },
-  selectedPlanText: {
-    color: "white",
+  pricingNameSelected: {
+    color: "#FFF",
   },
-  priceContainer: {
-    flexDirection: "row",
-    alignItems: "baseline",
+  pricingDescription: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: 13,
+    color: "rgba(255,255,255,0.5)",
     marginBottom: 12,
   },
-  planPrice: {
-    fontSize: 32,
-    fontFamily: "Inter-Black",
-    color: "#111827",
+  pricingDescriptionSelected: {
+    color: "rgba(255,255,255,0.6)",
   },
-  planPeriod: {
-    fontSize: 16,
-    fontFamily: "Inter-Medium",
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+  },
+  pricingPrice: {
+    fontFamily: Typography.fontFamily.bold,
+    fontSize: 28,
+    color: "#FFF",
+  },
+  pricingPriceSelected: {
+    color: "#FFF",
+  },
+  pricingPeriod: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: 14,
+    color: "rgba(255,255,255,0.5)",
     marginLeft: 4,
-    color: "#4b5563",
   },
-  selectedPlanPeriod: {
-    color: "white",
-    opacity: 0.8,
+  pricingPeriodSelected: {
+    color: "rgba(255,255,255,0.7)",
+  },
+  pricePerMonth: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: 13,
+    color: "#a78bfa",
+    marginTop: 4,
   },
   savingsBadge: {
-    backgroundColor: "#22c55e",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 10,
+    backgroundColor: "rgba(16, 185, 129, 0.15)",
     paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 20,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.full,
     alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: "rgba(16, 185, 129, 0.3)",
   },
   savingsText: {
-    color: "white",
-    fontFamily: "Inter-Bold",
-    fontSize: 14,
+    fontFamily: Typography.fontFamily.bold,
+    fontSize: 13,
+    color: "#10B981",
   },
-  planBenefits: {
-    marginTop: 16,
-    gap: 8,
+  selectionIndicator: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  benefitItem: {
-    fontSize: 14,
-    fontFamily: "Inter-Medium",
-    color: "#4b5563",
+  selectionIndicatorSelected: {
+    borderColor: "#7c3aed",
+    backgroundColor: "#7c3aed",
   },
-  selectedBenefitItem: {
-    color: "white",
-    opacity: 0.9,
-  },
-  selectButton: {
-    marginLeft: 16,
-  },
+
+  // CTA Section
   ctaSection: {
-    paddingHorizontal: 24,
-    paddingBottom: 48,
+    alignItems: "center",
+    marginBottom: 32,
   },
-  mainCTA: {
-    marginBottom: 24,
+  ctaWrapper: {
+    position: "relative",
+    width: "100%",
   },
-  ctaGradient: {
-    borderRadius: 16,
-    padding: 4,
-    shadowColor: "#667eea",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 12,
+  ctaGlow: {
+    position: "absolute",
+    top: -10,
+    left: -10,
+    right: -10,
+    bottom: -10,
+    borderRadius: BorderRadius.xl,
+    overflow: "hidden",
   },
-  secondaryActions: {
-    gap: 12,
-  },
-  trustIndicators: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 24,
-    opacity: 0.2,
-  },
-  trustRow: {
+  ctaButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 24,
+    gap: 12,
+    height: 60,
+    borderRadius: BorderRadius.lg,
+  },
+  ctaText: {
+    fontFamily: Typography.fontFamily.bold,
+    fontSize: 18,
+    color: "#FFF",
+  },
+  trialInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 16,
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.full,
+  },
+  trialText: {
+    fontFamily: Typography.fontFamily.semiBold,
+    fontSize: 14,
+    color: "#10B981",
+  },
+  trustSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 24,
+    gap: 16,
   },
   trustItem: {
+    flexDirection: "row",
     alignItems: "center",
-  },
-  trustIcon: {
-    fontSize: 24,
-    marginBottom: 4,
+    gap: 6,
   },
   trustText: {
-    color: "white",
-    fontFamily: "Inter-SemiBold",
-    fontSize: 12,
-    textAlign: "center",
-    opacity: 0.9,
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: 13,
+    color: "rgba(255,255,255,0.5)",
+  },
+  trustDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
   },
   termsText: {
+    fontFamily: Typography.fontFamily.primary,
     fontSize: 12,
-    fontFamily: "Inter-Regular",
+    color: "rgba(255,255,255,0.3)",
     textAlign: "center",
-    lineHeight: 20,
-    color: "white",
-    paddingHorizontal: 16,
-    marginTop: 16,
-    opacity: 0.7,
+    marginTop: 20,
+    lineHeight: 18,
+    paddingHorizontal: 20,
   },
-  bottomSpacing: {
-    height: 32,
+
+  // Dev Tools
+  devToolsSection: {
+    marginTop: 40,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
+    paddingTop: 20,
+  },
+  devToolsToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+  },
+  devToolsToggleText: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: 13,
+    color: "rgba(255,255,255,0.3)",
+  },
+  devToolsContent: {
+    backgroundColor: "rgba(0,0,0,0.3)",
+    borderRadius: BorderRadius.md,
+    padding: 16,
+    marginTop: 8,
+  },
+  devToolsLabel: {
+    fontFamily: Typography.fontFamily.semiBold,
+    fontSize: 12,
+    color: "rgba(255,255,255,0.5)",
+    marginTop: 8,
+  },
+  devToolsValue: {
+    fontFamily: Typography.fontFamily.primary,
+    fontSize: 11,
+    color: "rgba(255,255,255,0.7)",
+    marginTop: 4,
+  },
+  devToolsActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 16,
+  },
+
+  // Premium Active State
+  premiumActiveContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  premiumActiveTitle: {
+    fontFamily: Typography.fontFamily.oswaldBold,
+    fontSize: 36,
+    color: "#FFF",
+    textAlign: "center",
+    marginTop: 24,
+  },
+  premiumActiveSubtitle: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: 16,
+    color: "rgba(255,255,255,0.6)",
+    textAlign: "center",
+    marginTop: 8,
+  },
+  premiumActiveActions: {
+    flexDirection: "row",
+    gap: 16,
+    marginTop: 40,
   },
 });
