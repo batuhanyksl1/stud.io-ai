@@ -121,24 +121,6 @@ export default function ProfileTab() {
           {/* Stats Section */}
           <View style={styles.statsContainer}>
             <View style={styles.statsSection}>
-              <View
-                style={[styles.statCard, { backgroundColor: colors.surface }]}
-              >
-                <ThemedText
-                  weight="bold"
-                  color="primary"
-                  style={styles.statNumber}
-                >
-                  {creationsCount}
-                </ThemedText>
-                <ThemedText
-                  variant="caption"
-                  color="secondary"
-                  style={styles.statLabel}
-                >
-                  Yaratım
-                </ThemedText>
-              </View>
 
               <View
                 style={[styles.statCard, { backgroundColor: colors.surface }]}

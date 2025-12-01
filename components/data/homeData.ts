@@ -20,7 +20,7 @@ export const editingServices = [
     usageCount: "2.5K+",
     isPopular: true,
     badge: "En Popüler",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -52,7 +52,7 @@ export const editingServices = [
     usageCount: "1.2K+",
     isPopular: false,
     badge: "Kaliteli",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/ccsr",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/ccsr/requests/${requestId}/status",
@@ -87,7 +87,7 @@ export const editingServices = [
     usageCount: "1.1K+",
     isPopular: true,
     badge: "Favori",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -114,7 +114,7 @@ export const editingServices = [
     usageCount: "980+",
     isPopular: false,
     badge: "Estetik",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -142,7 +142,7 @@ export const editingServices = [
     usageCount: "640+",
     isPopular: false,
     badge: "Hassas",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -171,7 +171,7 @@ export const editingServices = [
     usageCount: "1.0K+",
     isPopular: true,
     badge: "Popüler",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -199,7 +199,7 @@ export const editingServices = [
   //   usageCount: "720+",
   //   isPopular: false,
   //   badge: "Yaratıcı",
-  //   token: 4,
+  //   token: 1,
   //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
   //   aiStatusUrl:
   //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -226,7 +226,7 @@ export const editingServices = [
   //   usageCount: "1.4K+",
   //   isPopular: true,
   //   badge: "Portre",
-  //   token: 4,
+  //   token: 1,
   //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
   //   aiStatusUrl:
   //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -253,7 +253,7 @@ export const editingServices = [
   //   usageCount: "1.6K+",
   //   isPopular: false,
   //   badge: "Profesyonel",
-  //   token: 4,
+  //   token: 1,
   //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
   //   aiStatusUrl:
   //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -280,7 +280,7 @@ export const editingServices = [
   //   usageCount: "1.3K+",
   //   isPopular: true,
   //   badge: "Sihirli",
-  //   token: 4,
+  //   token: 1,
   //   aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
   //   aiStatusUrl:
   //     "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -307,7 +307,7 @@ export const editingServices = [
     usageCount: "870+",
     isPopular: false,
     badge: "Sinematik",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -334,7 +334,7 @@ export const editingServices = [
     usageCount: "520+",
     isPopular: false,
     badge: "Tematik",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -361,7 +361,7 @@ export const editingServices = [
     usageCount: "690+",
     isPopular: true,
     badge: "Nostalji",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -388,7 +388,7 @@ export const editingServices = [
     usageCount: "1.1K+",
     isPopular: true,
     badge: "Eğlenceli",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -415,7 +415,7 @@ export const editingServices = [
     usageCount: "430+",
     isPopular: false,
     badge: "Deneysel",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",
@@ -445,7 +445,7 @@ export const editingServices = [
     usageCount: "Yeni",
     isPopular: true,
     badge: "Özel",
-    token: 4,
+    token: 1,
     aiRequestUrl: "https://queue.fal.run/fal-ai/nano-banana-pro/edit",
     aiStatusUrl:
       "https://queue.fal.run/fal-ai/nano-banana-pro/requests/${requestId}/status",

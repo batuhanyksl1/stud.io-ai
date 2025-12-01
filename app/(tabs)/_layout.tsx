@@ -19,7 +19,6 @@ export default function TabLayout() {
 
   const screenOptions = {
     headerShown: false,
-    animation: "none" as const,
     tabBarStyle: [
       tabBarStyles.tabBar,
       {
