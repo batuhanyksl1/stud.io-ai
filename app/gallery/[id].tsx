@@ -1,5 +1,8 @@
 import { Header, ThemedCard, ThemedText, ThemedView } from "@/components";
+import { ImageViewer } from "@/components/creation/ImageViewer";
 import { useTheme } from "@/hooks";
+import { useAppDispatch } from "@/store/hooks";
+import { downloadImage } from "@/store/slices/contentCreationSlice";
 import firestore from "@react-native-firebase/firestore";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -8,6 +11,7 @@ import {
   Image,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -15,6 +19,7 @@ type AnyDoc = Record<string, any>;
 
 export default function GalleryItemDetailScreen() {
   const { colors } = useTheme();
+  const dispatch = useAppDispatch();
   const params = useLocalSearchParams();
   const id = useMemo(
     () => (Array.isArray(params.id) ? params.id[0] : params.id),
@@ -24,6 +29,19 @@ export default function GalleryItemDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [docData, setDocData] = useState<AnyDoc | null>(null);
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
+
+  const handleOpenImage = (url: string) => {
+    setViewingImage(url);
+    setViewerVisible(true);
+  };
+
+  const handleDownload = async () => {
+    if (viewingImage) {
+      await dispatch(downloadImage({ imageUrl: viewingImage }));
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -156,13 +174,17 @@ export default function GalleryItemDetailScreen() {
                 >
                   Sonuç
                 </ThemedText>
-                <View style={styles.coverWrapper}>
+                <TouchableOpacity
+                  style={styles.coverWrapper}
+                  onPress={() => handleOpenImage(coverUrl)}
+                  activeOpacity={0.9}
+                >
                   <Image
                     source={{ uri: coverUrl }}
                     style={styles.coverImage}
                     resizeMode="cover"
                   />
-                </View>
+                </TouchableOpacity>
               </ThemedCard>
             )}
 
@@ -178,7 +200,12 @@ export default function GalleryItemDetailScreen() {
                 </ThemedText>
                 <View style={styles.imageGrid}>
                   {referenceImageUrls.map((url, idx) => (
-                    <View key={idx} style={styles.imageItem}>
+                    <TouchableOpacity
+                      key={idx}
+                      style={styles.imageItem}
+                      onPress={() => handleOpenImage(url)}
+                      activeOpacity={0.9}
+                    >
                       {!!url && (
                         <Image
                           source={{ uri: url }}
@@ -186,7 +213,7 @@ export default function GalleryItemDetailScreen() {
                           resizeMode="cover"
                         />
                       )}
-                    </View>
+                    </TouchableOpacity>
                   ))}
                 </View>
               </ThemedCard>
@@ -228,6 +255,13 @@ export default function GalleryItemDetailScreen() {
           </View>
         </ScrollView>
       )}
+
+      <ImageViewer
+        visible={viewerVisible}
+        imageUrl={viewingImage || undefined}
+        onClose={() => setViewerVisible(false)}
+        onDownload={handleDownload}
+      />
     </ThemedView>
   );
 }
