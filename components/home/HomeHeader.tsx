@@ -27,7 +27,7 @@ export const HomeHeader: React.FC = () => {
           justifyContent: "center",
           flexDirection: "row",
         }}
-        onPress={() => router.push("/(tabs)/settings")}
+        onPress={() => router.push("/settings")}
       >
         <Ionicons name="information" size={24} color={colors.textPrimary} />
       </TouchableOpacity>
@@ -43,7 +43,7 @@ export const HomeHeader: React.FC = () => {
           justifyContent: "center",
           flexDirection: "row",
         }}
-        onPress={() => router.push("/(tabs)/settings")}
+        onPress={() => router.push("/settings")}
       >
         <Ionicons
           name="settings-outline"

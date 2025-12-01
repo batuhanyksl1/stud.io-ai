@@ -1,6 +1,6 @@
 import { createTabIcon } from "@/components/tabs/TabIcon";
 
-export type TabName = "index" | "creationPage" | "settings" | "profile";
+export type TabName = "index" | "creationPage" | "profile";
 
 export type TabConfig = {
   name: TabName;
@@ -19,12 +19,6 @@ export const tabConfigs = [
     name: "creationPage" as const,
     title: "creationPage",
     href: null, //href null ise tabBarIcon gösterilmez
-  },
-  {
-    name: "settings" as const,
-    title: "Settings",
-    href: null,
-    tabBarIcon: createTabIcon("settings", "settings-outline"),
   },
   {
     name: "profile" as const,

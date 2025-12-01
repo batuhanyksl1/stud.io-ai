@@ -43,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
   }
   switch (rightIconType) {
     case "settings":
-      rightIconPath = "/(tabs)/settings";
+      rightIconPath = "/settings";
       break;
     case "home":
       rightIconPath = "/(tabs)/index";

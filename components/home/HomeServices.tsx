@@ -38,7 +38,7 @@ export const HomeServices: React.FC = () => {
     resetUIState();
 
     router.push({
-      pathname: "/(tabs)/creationPage",
+      pathname: "/creationPage",
       params: {
         servicePrompt: servicePrompt,
         aiRequestUrl: aiRequestUrl,
