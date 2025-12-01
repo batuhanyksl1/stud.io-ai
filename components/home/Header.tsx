@@ -31,7 +31,8 @@ export const Header: React.FC<HeaderProps> = ({
 
   switch (leftIconType) {
     case "arrow-back":
-      leftIconPath = "/(tabs)";
+      // Back button disabled globally
+      leftIconExists = false;
       break;
     case "home":
       leftIconPath = "/(tabs)";

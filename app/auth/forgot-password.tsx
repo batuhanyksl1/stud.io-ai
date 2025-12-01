@@ -68,10 +68,6 @@ export default function ForgotPasswordScreen() {
     }
   };
 
-  const handleGoBack = () => {
-    router.back();
-  };
-
   const handleGoToSignIn = () => {
     router.push("/auth/signin");
   };
@@ -102,13 +98,7 @@ export default function ForgotPasswordScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={handleGoBack}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="arrow-back" size={24} color="#ffffff" />
-            </TouchableOpacity>
+            <View style={{ width: 40 }} /> {/* Spacer */}
 
             <View style={styles.logoContainer}>
               <Text style={styles.logo}>Stud.io</Text>

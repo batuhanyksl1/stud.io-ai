@@ -662,13 +662,7 @@ export default function PremiumScreen() {
         style={styles.container}
       >
         <View style={styles.header}>
-          <Pressable
-            onPress={() => router.back()}
-            style={styles.backButton}
-            hitSlop={20}
-          >
-            <ArrowLeft size={24} color="#FFF" />
-          </Pressable>
+          <View style={{ width: 44 }} />
         </View>
 
         <View style={styles.premiumActiveContainer}>
@@ -698,12 +692,7 @@ export default function PremiumScreen() {
               variant="outline"
               size="md"
             />
-            <Button
-              title="Geri Dön"
-              onPress={() => router.back()}
-              variant="primary"
-              size="md"
-            />
+            {/* Back button removed */}
           </Animated.View>
         </View>
       </LinearGradient>
@@ -734,16 +723,7 @@ export default function PremiumScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <Pressable
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            router.back();
-          }}
-          style={styles.backButton}
-          hitSlop={20}
-        >
-          <ArrowLeft size={24} color="#FFF" />
-        </Pressable>
+        <View style={{ width: 44 }} /> {/* Spacer to keep layout if needed, or just remove button */}
 
         <Pressable
           onPress={handleRestore}
