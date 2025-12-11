@@ -3,6 +3,7 @@ import { BorderRadius, Spacing, Typography } from "@/constants/DesignTokens";
 import { useDeviceDimensions } from "@/hooks";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
@@ -15,14 +16,7 @@ import {
   Zap,
 } from "lucide-react-native";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Dimensions,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Easing,
@@ -391,11 +385,11 @@ const BeforeAfterSlider: React.FC<{
         {/* After Image */}
         <View style={styles.imageLayer}>
           <Image
-            source={
-              typeof afterImage === "string" ? { uri: afterImage } : afterImage
-            }
+            source={afterImage}
             style={[styles.sliderImage, { width: size, height: size }]}
-            resizeMode="cover"
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={200}
           />
           <View style={[styles.imageLabel, styles.afterLabel]}>
             <LinearGradient
@@ -412,13 +406,11 @@ const BeforeAfterSlider: React.FC<{
           style={[styles.beforeImageWrapper, beforeClipStyle, { height: size }]}
         >
           <Image
-            source={
-              typeof beforeImage === "string"
-                ? { uri: beforeImage }
-                : beforeImage
-            }
+            source={beforeImage}
             style={[styles.sliderImage, { width: size, height: size }]}
-            resizeMode="cover"
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={200}
           />
           <View style={[styles.imageLabel, styles.beforeLabel]}>
             <LinearGradient
