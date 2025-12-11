@@ -14,24 +14,16 @@ import {
   Wand2,
   Zap,
 } from "lucide-react-native";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
-  GestureResponderEvent,
   Image,
-  PanResponder,
-  PanResponderGestureState,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Easing,
   FadeIn,
@@ -100,8 +92,7 @@ const onboardingSlides = [
     type: "cta",
     title: "Başlamaya\nHazır mısın?",
     subtitle: "Ücretsiz Dene",
-    description:
-      "Hemen başla, ilk düzenlemen bizden. Kredi kartı gerekmez.",
+    description: "Hemen başla, ilk düzenlemen bizden. Kredi kartı gerekmez.",
     icon: Zap,
     gradient: ["#00d2ff", "#3a7bd5", "#7c3aed"],
     features: [
@@ -265,28 +256,43 @@ const FloatingOrb: React.FC<{
   );
 };
 
-// Before/After Slider Component
+// Before/After Slider Component - Optimized with Gesture Handler
 const BeforeAfterSlider: React.FC<{
   beforeImage: any;
   afterImage: any;
   size: number;
 }> = ({ beforeImage, afterImage, size }) => {
-  const [sliderPosition, setSliderPosition] = useState(0.5);
-  const sliderAnim = useSharedValue(0.5);
+  // All state managed via shared values for native thread performance
+  const sliderPosition = useSharedValue(0.5);
   const isDragging = useSharedValue(false);
   const pulseAnim = useSharedValue(1);
   const glowAnim = useSharedValue(0);
 
   useEffect(() => {
-    // Pulse animation
-    const runPulse = () => {
-      pulseAnim.value = withSequence(
+    // #region agent log
+    fetch("http://127.0.0.1:7242/ingest/040edaf9-f922-4df9-b5a3-a90cee06775d", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        location: "onboarding.tsx:BeforeAfterSlider:useEffect",
+        message: "BeforeAfterSlider mounted successfully",
+        data: { size },
+        timestamp: Date.now(),
+        sessionId: "debug-session",
+        hypothesisId: "A",
+      }),
+    }).catch(() => {});
+    // #endregion
+
+    // Pulse animation - continuous with withRepeat instead of interval
+    pulseAnim.value = withRepeat(
+      withSequence(
         withTiming(1.15, { duration: 800 }),
         withTiming(1, { duration: 800 }),
-      );
-    };
-    runPulse();
-    const interval = setInterval(runPulse, 2000);
+      ),
+      -1,
+      true,
+    );
 
     // Glow animation
     glowAnim.value = withRepeat(
@@ -297,50 +303,65 @@ const BeforeAfterSlider: React.FC<{
       -1,
       true,
     );
-
-    return () => clearInterval(interval);
   }, [glowAnim, pulseAnim]);
 
-  const handleSliderChange = useCallback(
-    (gestureX: number, containerWidth: number) => {
-      const newPosition = Math.max(
-        0.05,
-        Math.min(0.95, gestureX / containerWidth),
-      );
-      setSliderPosition(newPosition);
-      sliderAnim.value = newPosition;
-    },
-    [sliderAnim],
+  // Haptic feedback helpers (must be called from JS thread)
+  const triggerLightHaptic = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, []);
+
+  const triggerMediumHaptic = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, []);
+
+  // Pan gesture - runs on native thread
+  const panGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .onBegin((event) => {
+          isDragging.value = true;
+          runOnJS(triggerLightHaptic)();
+          // Set initial position based on touch
+          const newPosition = Math.max(0.05, Math.min(0.95, event.x / size));
+          sliderPosition.value = newPosition;
+        })
+        .onUpdate((event) => {
+          // Update position directly on native thread - no JS bridge
+          const newPosition = Math.max(0.05, Math.min(0.95, event.x / size));
+          sliderPosition.value = newPosition;
+        })
+        .onEnd(() => {
+          isDragging.value = false;
+          runOnJS(triggerMediumHaptic)();
+        })
+        .onFinalize(() => {
+          isDragging.value = false;
+        }),
+    [isDragging, sliderPosition, size, triggerLightHaptic, triggerMediumHaptic],
   );
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        isDragging.value = true;
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      },
-      onPanResponderMove: (
-        event: GestureResponderEvent,
-        _: PanResponderGestureState,
-      ) => {
-        const { locationX } = event.nativeEvent;
-        handleSliderChange(locationX, size);
-      },
-      onPanResponderRelease: () => {
-        isDragging.value = false;
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      },
-    }),
-  ).current;
-
+  // All animated styles use shared values directly - no setState
   const handleAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: isDragging.value ? 1.2 : pulseAnim.value }],
+    transform: [
+      {
+        scale: withSpring(isDragging.value ? 1.2 : pulseAnim.value, {
+          damping: 15,
+          stiffness: 150,
+        }),
+      },
+    ],
   }));
 
   const beforeClipStyle = useAnimatedStyle(() => ({
-    width: `${sliderAnim.value * 100}%`,
+    width: `${sliderPosition.value * 100}%`,
+  }));
+
+  const sliderLineStyle = useAnimatedStyle(() => ({
+    left: `${sliderPosition.value * 100}%`,
+  }));
+
+  const sliderHandlePositionStyle = useAnimatedStyle(() => ({
+    left: `${sliderPosition.value * 100}%`,
   }));
 
   const glowStyle = useAnimatedStyle(() => ({
@@ -349,88 +370,91 @@ const BeforeAfterSlider: React.FC<{
   }));
 
   return (
-    <Animated.View
-      style={[
-        styles.sliderContainer,
-        { width: size, height: size },
-        glowStyle,
-      ]}
-      {...panResponder.panHandlers}
-    >
-      {/* After Image */}
-      <View style={styles.imageLayer}>
-        <Image
-          source={
-            typeof afterImage === "string" ? { uri: afterImage } : afterImage
-          }
-          style={[styles.sliderImage, { width: size, height: size }]}
-          resizeMode="cover"
-        />
-        <View style={[styles.imageLabel, styles.afterLabel]}>
-          <LinearGradient
-            colors={["#10B981", "#059669"]}
-            style={styles.labelGradient}
-          >
-            <Text style={styles.imageLabelText}>SONRA</Text>
-          </LinearGradient>
-        </View>
-      </View>
-
-      {/* Before Image */}
-      <Animated.View
-        style={[styles.beforeImageWrapper, beforeClipStyle, { height: size }]}
-      >
-        <Image
-          source={
-            typeof beforeImage === "string" ? { uri: beforeImage } : beforeImage
-          }
-          style={[styles.sliderImage, { width: size, height: size }]}
-          resizeMode="cover"
-        />
-        <View style={[styles.imageLabel, styles.beforeLabel]}>
-          <LinearGradient
-            colors={["#6B7280", "#4B5563"]}
-            style={styles.labelGradient}
-          >
-            <Text style={styles.imageLabelText}>ÖNCE</Text>
-          </LinearGradient>
-        </View>
-      </Animated.View>
-
-      {/* Slider Line */}
-      <View style={[styles.sliderLine, { left: `${sliderPosition * 100}%` }]}>
-        <LinearGradient
-          colors={["transparent", "#FFFFFF", "#FFFFFF", "transparent"]}
-          style={styles.sliderLineGradient}
-        />
-      </View>
-
-      {/* Slider Handle */}
+    <GestureDetector gesture={panGesture}>
       <Animated.View
         style={[
-          styles.sliderHandle,
-          { left: `${sliderPosition * 100}%` },
-          handleAnimatedStyle,
+          styles.sliderContainer,
+          { width: size, height: size },
+          glowStyle,
         ]}
       >
-        <LinearGradient
-          colors={["#7c3aed", "#db2777"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.sliderHandleGradient}
-        >
-          <View style={styles.sliderHandleInner}>
-            <ChevronLeft size={12} color="#FFF" strokeWidth={3} />
-            <ChevronRight size={12} color="#FFF" strokeWidth={3} />
+        {/* After Image */}
+        <View style={styles.imageLayer}>
+          <Image
+            source={
+              typeof afterImage === "string" ? { uri: afterImage } : afterImage
+            }
+            style={[styles.sliderImage, { width: size, height: size }]}
+            resizeMode="cover"
+          />
+          <View style={[styles.imageLabel, styles.afterLabel]}>
+            <LinearGradient
+              colors={["#10B981", "#059669"]}
+              style={styles.labelGradient}
+            >
+              <Text style={styles.imageLabelText}>SONRA</Text>
+            </LinearGradient>
           </View>
-        </LinearGradient>
-      </Animated.View>
+        </View>
 
-      {/* Hint */}
-      <View style={styles.hintContainer}>
-        <Text style={styles.hintText}>← Kaydırarak karşılaştır →</Text>
-      </View>
-    </Animated.View>
+        {/* Before Image */}
+        <Animated.View
+          style={[styles.beforeImageWrapper, beforeClipStyle, { height: size }]}
+        >
+          <Image
+            source={
+              typeof beforeImage === "string"
+                ? { uri: beforeImage }
+                : beforeImage
+            }
+            style={[styles.sliderImage, { width: size, height: size }]}
+            resizeMode="cover"
+          />
+          <View style={[styles.imageLabel, styles.beforeLabel]}>
+            <LinearGradient
+              colors={["#6B7280", "#4B5563"]}
+              style={styles.labelGradient}
+            >
+              <Text style={styles.imageLabelText}>ÖNCE</Text>
+            </LinearGradient>
+          </View>
+        </Animated.View>
+
+        {/* Slider Line - Now animated */}
+        <Animated.View style={[styles.sliderLine, sliderLineStyle]}>
+          <LinearGradient
+            colors={["transparent", "#FFFFFF", "#FFFFFF", "transparent"]}
+            style={styles.sliderLineGradient}
+          />
+        </Animated.View>
+
+        {/* Slider Handle - Now fully animated */}
+        <Animated.View
+          style={[
+            styles.sliderHandle,
+            sliderHandlePositionStyle,
+            handleAnimatedStyle,
+          ]}
+        >
+          <LinearGradient
+            colors={["#7c3aed", "#db2777"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.sliderHandleGradient}
+          >
+            <View style={styles.sliderHandleInner}>
+              <ChevronLeft size={12} color="#FFF" strokeWidth={3} />
+              <ChevronRight size={12} color="#FFF" strokeWidth={3} />
+            </View>
+          </LinearGradient>
+        </Animated.View>
+
+        {/* Hint */}
+        <View style={styles.hintContainer}>
+          <Text style={styles.hintText}>← Kaydırarak karşılaştır →</Text>
+        </View>
+      </Animated.View>
+    </GestureDetector>
   );
 };
 
@@ -908,122 +932,120 @@ export default function OnboardingScreen() {
     opacity: slideOpacity.value,
   }));
 
-  // Swipe gesture handler
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (_, gestureState) => {
-        return Math.abs(gestureState.dx) > 20 && Math.abs(gestureState.dy) < 50;
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        if (gestureState.dx < -50) {
-          handleNext();
-        } else if (gestureState.dx > 50) {
-          handlePrev();
-        }
-      },
-    }),
-  ).current;
+  // Swipe gesture handler using GestureHandler for better performance
+  const swipeGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .activeOffsetX([-20, 20])
+        .failOffsetY([-50, 50])
+        .onEnd((event) => {
+          if (event.translationX < -50) {
+            runOnJS(handleNext)();
+          } else if (event.translationX > 50) {
+            runOnJS(handlePrev)();
+          }
+        }),
+    [handleNext, handlePrev],
+  );
 
   const isLastSlide = currentIndex === onboardingSlides.length - 1;
 
   return (
-    <View style={styles.container} {...panResponder.panHandlers}>
-      {/* Background Gradient */}
-      <LinearGradient
-        colors={
-          (currentSlide.gradient as [string, string, ...string[]]) || [
-            "#0f0f23",
-            "#1a1a2e",
-            "#16213e",
-          ]
-        }
-        style={StyleSheet.absoluteFill}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      />
-
-      {/* Dark overlay for better readability */}
-      <View style={styles.darkOverlay} />
-
-      {/* Skip Button */}
-      {!isLastSlide && (
-        <Animated.View
-          entering={FadeIn.delay(800).duration(400)}
-          style={styles.skipContainer}
-        >
-          <Pressable onPress={handleSkip} style={styles.skipButton}>
-            <Text style={styles.skipText}>Atla</Text>
-          </Pressable>
-        </Animated.View>
-      )}
-
-      {/* Main Content */}
-      <Animated.View style={[styles.mainContent, slideAnimatedStyle]}>
-        {currentSlide.type === "intro" && (
-          <IntroSlide
-            slide={currentSlide}
-            isActive={currentIndex === 0}
-          />
-        )}
-        {currentSlide.type === "showcase" && (
-          <ShowcaseSlide
-            slide={currentSlide}
-            isActive={true}
-            imageSize={imageSize}
-          />
-        )}
-        {currentSlide.type === "cta" && (
-          <CTASlide
-            slide={currentSlide}
-            isActive={currentIndex === onboardingSlides.length - 1}
-            onGetStarted={handleGetStarted}
-          />
-        )}
-      </Animated.View>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNav}>
-        {/* Page Indicators */}
-        <PageIndicator
-          total={onboardingSlides.length}
-          current={currentIndex}
-          onPress={handleDotPress}
+    <GestureDetector gesture={swipeGesture}>
+      <View style={styles.container}>
+        {/* Background Gradient */}
+        <LinearGradient
+          colors={
+            (currentSlide.gradient as [string, string, ...string[]]) || [
+              "#0f0f23",
+              "#1a1a2e",
+              "#16213e",
+            ]
+          }
+          style={StyleSheet.absoluteFill}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
         />
 
-        {/* Navigation Arrows (hidden on last slide) */}
-        {!isLastSlide && (
-          <View style={styles.navArrows}>
-            <Pressable
-              onPress={handlePrev}
-              style={[
-                styles.navArrow,
-                currentIndex === 0 && styles.navArrowDisabled,
-              ]}
-              disabled={currentIndex === 0}
-            >
-              <ChevronLeft
-                size={28}
-                color={currentIndex === 0 ? "#4B5563" : "#FFF"}
-                strokeWidth={2}
-              />
-            </Pressable>
+        {/* Dark overlay for better readability */}
+        <View style={styles.darkOverlay} />
 
-            <Pressable onPress={handleNext} style={styles.navArrowPrimary}>
-              <LinearGradient
-                colors={["#7c3aed", "#db2777"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.navArrowGradient}
-              >
-                <Text style={styles.nextText}>Devam</Text>
-                <ChevronRight size={20} color="#FFF" strokeWidth={2} />
-              </LinearGradient>
+        {/* Skip Button */}
+        {!isLastSlide && (
+          <Animated.View
+            entering={FadeIn.delay(800).duration(400)}
+            style={styles.skipContainer}
+          >
+            <Pressable onPress={handleSkip} style={styles.skipButton}>
+              <Text style={styles.skipText}>Atla</Text>
             </Pressable>
-          </View>
+          </Animated.View>
         )}
+
+        {/* Main Content */}
+        <Animated.View style={[styles.mainContent, slideAnimatedStyle]}>
+          {currentSlide.type === "intro" && (
+            <IntroSlide slide={currentSlide} isActive={currentIndex === 0} />
+          )}
+          {currentSlide.type === "showcase" && (
+            <ShowcaseSlide
+              slide={currentSlide}
+              isActive={true}
+              imageSize={imageSize}
+            />
+          )}
+          {currentSlide.type === "cta" && (
+            <CTASlide
+              slide={currentSlide}
+              isActive={currentIndex === onboardingSlides.length - 1}
+              onGetStarted={handleGetStarted}
+            />
+          )}
+        </Animated.View>
+
+        {/* Bottom Navigation */}
+        <View style={styles.bottomNav}>
+          {/* Page Indicators */}
+          <PageIndicator
+            total={onboardingSlides.length}
+            current={currentIndex}
+            onPress={handleDotPress}
+          />
+
+          {/* Navigation Arrows (hidden on last slide) */}
+          {!isLastSlide && (
+            <View style={styles.navArrows}>
+              <Pressable
+                onPress={handlePrev}
+                style={[
+                  styles.navArrow,
+                  currentIndex === 0 && styles.navArrowDisabled,
+                ]}
+                disabled={currentIndex === 0}
+              >
+                <ChevronLeft
+                  size={28}
+                  color={currentIndex === 0 ? "#4B5563" : "#FFF"}
+                  strokeWidth={2}
+                />
+              </Pressable>
+
+              <Pressable onPress={handleNext} style={styles.navArrowPrimary}>
+                <LinearGradient
+                  colors={["#7c3aed", "#db2777"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.navArrowGradient}
+                >
+                  <Text style={styles.nextText}>Devam</Text>
+                  <ChevronRight size={20} color="#FFF" strokeWidth={2} />
+                </LinearGradient>
+              </Pressable>
+            </View>
+          )}
+        </View>
       </View>
-    </View>
+    </GestureDetector>
   );
 }
 
@@ -1413,4 +1435,3 @@ const styles = StyleSheet.create({
     color: "#FFF",
   },
 });
-
