@@ -1,8 +1,8 @@
 import { AppleLogo, DisplayNameModal, GoogleLogo } from "@/components";
 import { useAuth, useTheme } from "@/hooks";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
 import React, { useEffect } from "react";
 import {
   Alert,
@@ -126,6 +126,8 @@ export default function SignUpScreen() {
         source={require("@/assets/images/carousel/image-a-2.jpg")}
         style={styles.backgroundImage}
         blurRadius={2}
+        contentFit="cover"
+        cachePolicy="memory-disk"
       />
 
       {/* Gradient overlay */}
@@ -146,7 +148,6 @@ export default function SignUpScreen() {
           {/* Header */}
           <View style={styles.header}>
             <View style={{ width: 40 }} /> {/* Spacer */}
-
             <View style={styles.logoContainer}>
               <Text style={styles.logo}>Stud.io</Text>
             </View>
@@ -248,7 +249,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: width,
     height: height,
-    resizeMode: "cover",
   },
   gradientOverlay: {
     position: "absolute",

@@ -1,9 +1,9 @@
 import { BorderRadius, Spacing, Typography } from "@/constants/DesignTokens";
 import { useTheme } from "@/hooks/useTheme";
+import { Image } from "expo-image";
 import React from "react";
 import {
   Dimensions,
-  Image,
   Modal,
   Pressable,
   SafeAreaView,
@@ -47,7 +47,8 @@ export const ImageViewer: React.FC<ImageViewerProps> = ({
           <Image
             source={{ uri: imageUrl || "" }}
             style={styles.fullscreenImage}
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory-disk"
           />
         </ScrollView>
 

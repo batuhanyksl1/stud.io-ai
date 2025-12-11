@@ -2,6 +2,7 @@ import { editingServices } from "@/components/data/homeData";
 import { BorderRadius, Spacing, Typography } from "@/constants/DesignTokens";
 import { useDeviceDimensions, useTheme } from "@/hooks";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react-native";
 import React, {
@@ -14,7 +15,6 @@ import React, {
 import {
   Dimensions,
   GestureResponderEvent,
-  Image,
   Modal,
   PanResponder,
   PanResponderGestureState,
@@ -121,11 +121,10 @@ const BeforeAfterSlider: React.FC<{
       {/* After Image (Background) */}
       <View style={styles.imageLayer}>
         <Image
-          source={
-            typeof afterImage === "string" ? { uri: afterImage } : afterImage
-          }
+          source={afterImage}
           style={[styles.sliderImage, { width: size, height: size }]}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="memory-disk"
         />
         {/* "SONRA" label */}
         <View
@@ -148,11 +147,10 @@ const BeforeAfterSlider: React.FC<{
         ]}
       >
         <Image
-          source={
-            typeof beforeImage === "string" ? { uri: beforeImage } : beforeImage
-          }
+          source={beforeImage}
           style={[styles.sliderImage, { width: size, height: size }]}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="memory-disk"
         />
         {/* "ÖNCE" label */}
         <View

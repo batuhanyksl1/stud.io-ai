@@ -6,11 +6,11 @@ import {
   Typography,
 } from "@/constants/DesignTokens";
 import { useDeviceDimensions, useTheme } from "@/hooks";
+import { Image } from "expo-image";
 import React from "react";
 import {
   ActivityIndicator,
   Animated,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -91,6 +91,8 @@ export const EditingView: React.FC<EditingViewProps> = ({
               <Image
                 source={{ uri: createdImageUrl || "" }}
                 style={styles.createdImagePreview}
+                contentFit="contain"
+                cachePolicy="memory-disk"
               />
             </View>
           )}
@@ -128,6 +130,8 @@ export const EditingView: React.FC<EditingViewProps> = ({
                       <Image
                         source={{ uri }}
                         style={styles.selectedImagePreview}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
                       />
                       {/* Çarpı işareti sadece editing aşamasında (yaratım yapılmamışken) */}
                       {!hasResult && (
@@ -158,6 +162,8 @@ export const EditingView: React.FC<EditingViewProps> = ({
                     <Image
                       source={{ uri: localImageUri }}
                       style={styles.selectedImagePreview}
+                      contentFit="cover"
+                      cachePolicy="memory-disk"
                     />
                     {/* Çarpı işareti sadece editing aşamasında (yaratım yapılmamışken) */}
                     {!hasResult && (
@@ -212,7 +218,8 @@ export const EditingView: React.FC<EditingViewProps> = ({
                   {
                     color: colors.textPrimary,
                     borderColor: colors.border,
-                    backgroundColor: colors.surfaceElevated || colors.background, // Fallback if surfaceElevated not available
+                    backgroundColor:
+                      colors.surfaceElevated || colors.background, // Fallback if surfaceElevated not available
                   },
                 ]}
                 value={currentPrompt}
@@ -351,7 +358,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 280,
     borderRadius: BorderRadius.md,
-    resizeMode: "contain",
   },
   selectedImagesCard: {
     borderRadius: BorderRadius.lg,

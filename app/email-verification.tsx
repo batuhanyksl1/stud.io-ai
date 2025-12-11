@@ -1,17 +1,17 @@
+import { useAuth } from "@/hooks";
 import auth, { sendEmailVerification } from "@react-native-firebase/auth";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
   Dimensions,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAuth } from "@/hooks";
 
 const { width, height } = Dimensions.get("window");
 
@@ -91,6 +91,8 @@ export default function EmailVerificationScreen() {
         source={require("@/assets/images/carousel/image-a-2.jpg")}
         style={styles.backgroundImage}
         blurRadius={3}
+        contentFit="cover"
+        cachePolicy="memory-disk"
       />
 
       {/* Gradient overlay */}
@@ -183,7 +185,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: width,
     height: height,
-    resizeMode: "cover",
   },
   gradientOverlay: {
     position: "absolute",

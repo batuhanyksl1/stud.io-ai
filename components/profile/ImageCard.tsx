@@ -1,16 +1,17 @@
 import { ThemedCard, ThemedText } from "@/components";
-import {
-  BorderRadius,
-  Shadows,
-  Spacing,
-  Typography,
-} from "@/constants/DesignTokens";
+import { Typography } from "@/constants/DesignTokens";
 import { useAccount, useTheme } from "@/hooks";
-import { formatDate } from "@/utils";
-import { Dimensions } from "react-native";
-import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { UserImage } from "@/types/profile";
+import { formatDate } from "@/utils";
+import { Image } from "expo-image";
+import React from "react";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const { width } = Dimensions.get("window");
 
@@ -30,7 +31,13 @@ export const ImageCard = React.memo<ImageCardProps>(
     return (
       <ThemedCard style={styles.imageCard} padding="sm" elevation="sm">
         <View style={styles.imageContainer}>
-          <Image source={{ uri: image.url }} style={styles.image} />
+          <Image
+            source={{ uri: image.url }}
+            style={styles.image}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={200}
+          />
           <TouchableOpacity
             style={[
               styles.favoriteButton,
@@ -137,4 +144,3 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.xs,
   },
 });
-

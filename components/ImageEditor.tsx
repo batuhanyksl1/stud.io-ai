@@ -8,10 +8,10 @@ import {
   takePhoto,
   uploadImageToStorage,
 } from "@/store/slices/contentCreationSlice";
+import { Image } from "expo-image";
 import React from "react";
 import {
   Alert,
-  Image,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -179,6 +179,8 @@ export const ImageEditor: React.FC = () => {
             <Image
               source={{ uri: selectedImage.uri }}
               style={styles.selectedImage}
+              contentFit="cover"
+              cachePolicy="memory-disk"
             />
             <View style={styles.imageInfo}>
               <ThemedText style={styles.imageName}>
@@ -260,6 +262,8 @@ export const ImageEditor: React.FC = () => {
                   <Image
                     source={{ uri: image.uri }}
                     style={styles.galleryImage}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
                   />
                   {image.isUploaded && (
                     <View style={styles.uploadedBadge}>

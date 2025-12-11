@@ -1,5 +1,6 @@
 import { AppleLogo, DisplayNameModal, GoogleLogo } from "@/components";
 import { useAuth } from "@/hooks";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useSegments } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -8,7 +9,6 @@ import {
   ActivityIndicator,
   Alert,
   Dimensions,
-  Image,
   Modal,
   Platform,
   StyleSheet,
@@ -154,6 +154,8 @@ export default function OnboardingScreen() {
         source={require("@/assets/images/carousel/image-a-2.jpg")}
         style={styles.backgroundImage}
         blurRadius={3}
+        contentFit="cover"
+        cachePolicy="memory-disk"
       />
 
       {/* Gradient overlay */}
@@ -185,7 +187,8 @@ export default function OnboardingScreen() {
           <Image
             source={require("@/assets/images/splash-icon.png")}
             style={styles.logoIcon}
-            resizeMode="contain"
+            contentFit="contain"
+            cachePolicy="memory-disk"
           />
           <Text style={styles.mainTitle}>{t("welcome.mainTitle")}</Text>
           <Text style={styles.subTitle}>{t("welcome.subTitle")}</Text>
@@ -271,7 +274,8 @@ export default function OnboardingScreen() {
                 <Image
                   source={require("@/assets/images/splash-icon.png")}
                   style={styles.loadingIcon}
-                  resizeMode="contain"
+                  contentFit="contain"
+                  cachePolicy="memory-disk"
                 />
                 <View style={styles.loadingSpinnerContainer}>
                   <ActivityIndicator size="large" color="#ffffff" />
@@ -308,7 +312,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: width,
     height: height,
-    resizeMode: "cover",
   },
   gradientOverlay: {
     position: "absolute",

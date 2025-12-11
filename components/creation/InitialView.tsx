@@ -7,11 +7,11 @@ import {
   Typography,
 } from "@/constants/DesignTokens";
 import { useDeviceDimensions, useTheme } from "@/hooks";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -361,6 +361,8 @@ export const InitialView: React.FC<InitialViewProps> = ({
                       <Image
                         source={item.beforeImage}
                         style={styles.exampleImage}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
                       />
                     </View>
                     <Text
@@ -389,6 +391,8 @@ export const InitialView: React.FC<InitialViewProps> = ({
                       <Image
                         source={item.afterImage}
                         style={styles.exampleImage}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
                       />
                     </View>
                   </View>

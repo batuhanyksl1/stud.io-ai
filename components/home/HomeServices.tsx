@@ -3,13 +3,13 @@ import ThemedView from "@/components/ThemedView";
 import { editingServices } from "@/components/data";
 import { useContentCreation, useDeviceDimensions, useTheme } from "@/hooks";
 import Ionicon from "@expo/vector-icons/Ionicons";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useRef } from "react";
 import {
   Animated,
   FlatList,
-  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -129,12 +129,10 @@ export const HomeServices: React.FC = () => {
             {/* Arka plan görseli */}
             <View style={styles.bgImageContainer}>
               <Image
-                source={
-                  typeof service.image2 === "string"
-                    ? { uri: service.image2 }
-                    : (service.image2 as any)
-                }
+                source={service.image2}
                 style={styles.bgImage}
+                contentFit="cover"
+                cachePolicy="memory-disk"
               />
               <LinearGradient
                 colors={["transparent", "rgba(0,0,0,0.5)"]}
@@ -380,7 +378,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     opacity: 0.12,
-    resizeMode: "cover",
   },
   imageOverlay: {
     position: "absolute",

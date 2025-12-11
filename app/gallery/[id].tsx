@@ -4,11 +4,11 @@ import { useTheme } from "@/hooks";
 import { useAppDispatch } from "@/store/hooks";
 import { downloadImage } from "@/store/slices/contentCreationSlice";
 import firestore from "@react-native-firebase/firestore";
+import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -182,7 +182,9 @@ export default function GalleryItemDetailScreen() {
                   <Image
                     source={{ uri: coverUrl }}
                     style={styles.coverImage}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    transition={200}
                   />
                 </TouchableOpacity>
               </ThemedCard>
@@ -210,7 +212,9 @@ export default function GalleryItemDetailScreen() {
                         <Image
                           source={{ uri: url }}
                           style={styles.image}
-                          resizeMode="cover"
+                          contentFit="cover"
+                          cachePolicy="memory-disk"
+                          transition={200}
                         />
                       )}
                     </TouchableOpacity>

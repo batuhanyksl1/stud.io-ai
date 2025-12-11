@@ -3,12 +3,12 @@ import { editingServices } from "@/components/data";
 import { useContentCreation, useDeviceDimensions, useTheme } from "@/hooks";
 import Ionicon from "@expo/vector-icons/Ionicons";
 import { BlurView } from "expo-blur";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Image,
   Platform,
   StyleSheet,
   TouchableOpacity,
@@ -127,11 +127,7 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
           <View style={styles.carouselImagesContainer}>
             <View style={[styles.imageWrapper, styles.imageLeft]}>
               <Image
-                source={
-                  typeof item.image1 === "string"
-                    ? { uri: item.image1 }
-                    : (item.image1 as any)
-                }
+                source={item.image1}
                 style={[
                   styles.carouselImage,
                   {
@@ -139,17 +135,15 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
                     height: imageHeight,
                   },
                 ]}
+                contentFit="cover"
+                cachePolicy="memory-disk"
               />
               {/* Görsel gölgesi */}
             </View>
 
             <View style={[styles.imageWrapper, styles.imageRight]}>
               <Image
-                source={
-                  typeof item.image2 === "string"
-                    ? { uri: item.image2 }
-                    : (item.image2 as any)
-                }
+                source={item.image2}
                 style={[
                   styles.carouselImage,
                   {
@@ -157,6 +151,8 @@ export const HomeCarousel: React.FC<HomeCarouselProps> = ({ onPageChange }) => {
                     height: imageHeight,
                   },
                 ]}
+                contentFit="cover"
+                cachePolicy="memory-disk"
               />
             </View>
           </View>

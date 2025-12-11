@@ -6,10 +6,10 @@ import {
   Typography,
 } from "@/constants/DesignTokens";
 import { useDeviceDimensions, useTheme } from "@/hooks";
+import { Image } from "expo-image";
 import React from "react";
 import {
   Animated,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -146,6 +146,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
               <Image
                 source={{ uri: createdImageUrl || "" }}
                 style={styles.mainResultImage}
+                contentFit="cover"
+                cachePolicy="memory-disk"
               />
             </Pressable>
           </View>
@@ -179,7 +181,12 @@ export const ResultView: React.FC<ResultViewProps> = ({
                     ]}
                     onPress={() => onOpenImageViewer(uri)}
                   >
-                    <Image source={{ uri }} style={styles.referenceImage} />
+                    <Image
+                      source={{ uri }}
+                      style={styles.referenceImage}
+                      contentFit="cover"
+                      cachePolicy="memory-disk"
+                    />
                   </Pressable>
                 ))
               ) : (
@@ -202,6 +209,8 @@ export const ResultView: React.FC<ResultViewProps> = ({
                       uri: originalImageForResult || localImageUri || "",
                     }}
                     style={styles.referenceImage}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
                   />
                 </Pressable>
               )}

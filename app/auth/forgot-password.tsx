@@ -1,6 +1,7 @@
 import { useAuth, useTheme } from "@/hooks";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useState } from "react";
@@ -8,7 +9,6 @@ import { Controller, useForm } from "react-hook-form";
 import {
   Alert,
   Dimensions,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -79,6 +79,8 @@ export default function ForgotPasswordScreen() {
         source={require("@/assets/images/carousel/image-a-1.png")}
         style={styles.backgroundImage}
         blurRadius={2}
+        contentFit="cover"
+        cachePolicy="memory-disk"
       />
 
       {/* Gradient overlay */}
@@ -99,7 +101,6 @@ export default function ForgotPasswordScreen() {
           {/* Header */}
           <View style={styles.header}>
             <View style={{ width: 40 }} /> {/* Spacer */}
-
             <View style={styles.logoContainer}>
               <Text style={styles.logo}>Stud.io</Text>
             </View>
@@ -216,7 +217,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: width,
     height: height,
-    resizeMode: "cover",
   },
   gradientOverlay: {
     position: "absolute",

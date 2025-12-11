@@ -2,8 +2,9 @@ import { ThemedCard, ThemedText } from "@/components";
 import { useTheme } from "@/hooks/useTheme";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import React from "react";
-import { Alert, Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 
 interface AvatarSectionProps {
   userPhotoURL?: string | null;
@@ -44,6 +45,9 @@ export const AvatarSection: React.FC<AvatarSectionProps> = ({
                 "https://via.placeholder.com/120x120/0077B5/FFFFFF?text=U",
             }}
             style={styles.avatar}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            transition={200}
           />
           <View
             style={[

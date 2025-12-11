@@ -1,5 +1,6 @@
 import { AppleLogo, DisplayNameModal, GoogleLogo } from "@/components";
 import { useAuth } from "@/hooks";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useEffect } from "react";
@@ -91,6 +92,8 @@ export default function SignInScreen() {
         source={require("@/assets/images/carousel/image-a-1.png")}
         style={styles.backgroundImage}
         blurRadius={2}
+        contentFit="cover"
+        cachePolicy="memory-disk"
       />
 
       {/* Gradient overlay */}
@@ -181,7 +184,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: width,
     height: height,
-    resizeMode: "cover",
   },
   gradientOverlay: {
     position: "absolute",

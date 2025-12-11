@@ -9,13 +9,13 @@ import {
 import { useAccount, useAuth, useTheme, useUserImages } from "@/hooks";
 import { UserProfile } from "@/types";
 import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
-  Image,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -269,7 +269,9 @@ export default function ProfileTab() {
                         <Image
                           source={{ uri: coverImageUrl }}
                           style={styles.galleryImage}
-                          resizeMode="cover"
+                          contentFit="cover"
+                          cachePolicy="memory-disk"
+                          transition={200}
                         />
                         <View style={styles.galleryGradient} />
                       </View>
