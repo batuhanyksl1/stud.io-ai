@@ -265,6 +265,7 @@ const BeforeAfterSlider: React.FC<{
   // All state managed via shared values for native thread performance
   const sliderPosition = useSharedValue(0.5);
   const isDragging = useSharedValue(false);
+  const handleScale = useSharedValue(1); // Separate shared value for handle scale
   const pulseAnim = useSharedValue(1);
   const glowAnim = useSharedValue(0);
 
@@ -303,7 +304,10 @@ const BeforeAfterSlider: React.FC<{
       -1,
       true,
     );
-  }, [glowAnim, pulseAnim]);
+
+    // Initialize handle scale with pulse animation
+    handleScale.value = pulseAnim.value;
+  }, [glowAnim, handleScale, pulseAnim]);
 
   // Haptic feedback helpers (must be called from JS thread)
   const triggerLightHaptic = useCallback(() => {
@@ -320,6 +324,8 @@ const BeforeAfterSlider: React.FC<{
       Gesture.Pan()
         .onBegin((event) => {
           isDragging.value = true;
+          // Animate handle scale when dragging starts
+          handleScale.value = withSpring(1.2, { damping: 15, stiffness: 150 });
           runOnJS(triggerLightHaptic)();
           // Set initial position based on touch
           const newPosition = Math.max(0.05, Math.min(0.95, event.x / size));
@@ -332,23 +338,27 @@ const BeforeAfterSlider: React.FC<{
         })
         .onEnd(() => {
           isDragging.value = false;
+          // Return to pulse animation when dragging ends
+          handleScale.value = withSpring(1, { damping: 15, stiffness: 150 });
           runOnJS(triggerMediumHaptic)();
         })
         .onFinalize(() => {
           isDragging.value = false;
         }),
-    [isDragging, sliderPosition, size, triggerLightHaptic, triggerMediumHaptic],
+    [
+      handleScale,
+      isDragging,
+      sliderPosition,
+      size,
+      triggerLightHaptic,
+      triggerMediumHaptic,
+    ],
   );
 
-  // All animated styles use shared values directly - no setState
+  // Handle scale now reads from shared value directly (no withSpring inside)
   const handleAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
-      {
-        scale: withSpring(isDragging.value ? 1.2 : pulseAnim.value, {
-          damping: 15,
-          stiffness: 150,
-        }),
-      },
+      { scale: isDragging.value ? handleScale.value : pulseAnim.value },
     ],
   }));
 
