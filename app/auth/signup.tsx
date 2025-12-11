@@ -176,9 +176,9 @@ export default function SignUpScreen() {
               {/* Apple Sign-In button (sadece iOS'ta) */}
               {Platform.OS === "ios" && (
                 <TouchableOpacity
-                  style={styles.appleButton}
+                  style={[styles.appleButton, { opacity: 0.5 }]}
                   onPress={handleAppleSignIn}
-                  disabled={isLoading}
+                  disabled={true}
                   activeOpacity={0.8}
                 >
                   <AppleLogo
