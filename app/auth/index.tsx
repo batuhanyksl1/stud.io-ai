@@ -39,13 +39,17 @@ export default function OnboardingScreen() {
     try {
       // Google sign-in başladığında flag'i set et
       setIsSigningIn(true);
+      setShowLoading(true);
 
-      // Google sign-in başladığında loading göstermiyoruz
       const result = await loginWithGoogle();
 
       // Google'dan dönünce result kontrolü yap
       if (result.meta.requestStatus !== "fulfilled") {
         Alert.alert("Hata", result.payload as string);
+        setIsSigningIn(false);
+        setShowLoading(false);
+      } else {
+        // Başarılı olduğunda flag'leri temizle, yönlendirme useEffect'te yapılacak
         setIsSigningIn(false);
       }
     } catch (error) {
@@ -53,6 +57,7 @@ export default function OnboardingScreen() {
         error instanceof Error ? error.message : "Google ile giriş yapılamadı";
       Alert.alert("Hata", errorMessage);
       setIsSigningIn(false);
+      setShowLoading(false);
     }
   };
 
@@ -60,6 +65,7 @@ export default function OnboardingScreen() {
     try {
       // Apple sign-in başladığında flag'i set et
       setIsSigningIn(true);
+      setShowLoading(true);
 
       const result = await loginWithApple();
 
@@ -67,12 +73,17 @@ export default function OnboardingScreen() {
       if (result.meta.requestStatus !== "fulfilled") {
         Alert.alert("Hata", result.payload as string);
         setIsSigningIn(false);
+        setShowLoading(false);
+      } else {
+        // Başarılı olduğunda flag'leri temizle, yönlendirme useEffect'te yapılacak
+        setIsSigningIn(false);
       }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Apple ile giriş yapılamadı";
       Alert.alert("Hata", errorMessage);
       setIsSigningIn(false);
+      setShowLoading(false);
     }
   };
 
@@ -85,19 +96,23 @@ export default function OnboardingScreen() {
     }
 
     // isLoading false olduğunda ve önceden true ise
-    if (prevIsLoadingRef.current && !isLoading && showLoading) {
+    if (prevIsLoadingRef.current && !isLoading) {
+      // Loading'i kapat
+      setShowLoading(false);
+
       // Eğer authentication başarılı olduysa ve display name varsa tabs'a git
       if (isAuthenticated && user) {
         const hasDisplayName =
           user.displayName && user.displayName.trim() !== "";
         if (hasDisplayName) {
+          setIsSigningIn(false);
           router.replace("/(tabs)");
         }
       }
     }
 
     prevIsLoadingRef.current = isLoading;
-  }, [isLoading, isAuthenticated, user, showLoading, isSigningIn]);
+  }, [isLoading, isAuthenticated, user, isSigningIn]);
 
   // Sayfa değiştiğinde loading'i kapat
   useEffect(() => {
@@ -110,16 +125,18 @@ export default function OnboardingScreen() {
 
   // Authentication durumu değiştiğinde kontrol et
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && !isLoading) {
       const hasDisplayName = user.displayName && user.displayName.trim() !== "";
       if (hasDisplayName && !prevIsAuthenticatedRef.current) {
         // İlk kez authenticate olduysa ve display name varsa tabs'a git
+        setIsSigningIn(false);
+        setShowLoading(false);
         router.replace("/(tabs)");
       }
     }
 
     prevIsAuthenticatedRef.current = isAuthenticated;
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, isLoading]);
 
   const handleDisplayNameConfirm = async (displayName: string) => {
     try {
@@ -211,9 +228,9 @@ export default function OnboardingScreen() {
           {/* Apple Sign-In button (sadece iOS'ta) */}
           {Platform.OS === "ios" && (
             <TouchableOpacity
-              style={[styles.appleButton, { opacity: 0.5 }]}
+              style={styles.appleButton}
               onPress={handleAppleSignIn}
-              disabled={true}
+              disabled={showLoading}
               activeOpacity={0.8}
             >
               <AppleLogo size={28} color="#ffffff" style={styles.appleIcon} />

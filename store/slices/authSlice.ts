@@ -14,6 +14,7 @@ import auth, {
 import firestore from "@react-native-firebase/firestore";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { Platform } from "react-native";
 import Purchases from "react-native-purchases";
 
@@ -519,29 +520,166 @@ export const signInWithApple = createAsyncThunk(
   "auth/signInWithApple",
   async (_, { rejectWithValue }) => {
     try {
-      // Apple Sign-In için placeholder
-      // Not: Apple authentication implementasyonu için expo-apple-authentication paketi gerekebilir
-      // veya Firebase'in kendi Apple authentication provider'ı kullanılabilir
-      
       if (Platform.OS !== "ios") {
         return rejectWithValue("Apple girişi sadece iOS'ta kullanılabilir");
       }
 
-      // TODO: Apple authentication implementasyonu
-      // Şimdilik placeholder - gerçek implementasyon için:
-      // 1. expo-apple-authentication paketini yükleyin
-      // 2. Apple credential'ı alın
-      // 3. Firebase Auth ile signInWithCredential kullanın
-      
-      return rejectWithValue("Apple girişi henüz implement edilmemiş. Lütfen Google ile giriş yapın.");
+      // iOS versiyonunu kontrol et
+      const iosVersion = parseInt(String(Platform.Version), 10);
+      console.log(
+        "[Apple Sign-In] iOS Version:",
+        Platform.Version,
+        "Parsed:",
+        iosVersion,
+      );
+
+      // Apple Sign In'in kullanılabilir olup olmadığını kontrol et
+      const isAvailable = await AppleAuthentication.isAvailableAsync();
+      console.log("[Apple Sign-In] isAvailableAsync result:", isAvailable);
+
+      if (!isAvailable) {
+        // iOS versiyonu yeterliyse ama hala çalışmıyorsa, capability sorunu var demektir
+        if (iosVersion >= 13) {
+          console.error(
+            "[Apple Sign-In] iOS version is sufficient but isAvailableAsync returned false.",
+            "This usually means 'Sign in with Apple' capability is not properly configured.",
+            "Check: 1) Apple Developer Portal capability, 2) Provisioning profile, 3) Entitlements file",
+          );
+          return rejectWithValue(
+            "Apple ile giriş yapılandırması eksik. Lütfen uygulama ayarlarını kontrol edin veya destek ile iletişime geçin.",
+          );
+        }
+        return rejectWithValue(
+          `Apple ile giriş bu cihazda kullanılamıyor. iOS 13 veya üzeri gerekli. (Mevcut: iOS ${iosVersion})`,
+        );
+      }
+
+      // Apple credential'ı al
+      const appleCredential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      // identityToken kontrolü
+      if (!appleCredential.identityToken) {
+        return rejectWithValue("Apple'dan kimlik doğrulama tokenı alınamadı");
+      }
+
+      // Firebase credential oluştur
+      const firebaseCredential = auth.AppleAuthProvider.credential(
+        appleCredential.identityToken,
+        appleCredential.authorizationCode || undefined,
+      );
+
+      // Firebase ile giriş yap
+      const userCredential =
+        await auth().signInWithCredential(firebaseCredential);
+
+      // Apple ilk girişte isim bilgisini verir, sonraki girişlerde vermez
+      // Bu yüzden ilk girişte ismi Firebase'e kaydetmemiz gerekir
+      let displayName = userCredential.user.displayName;
+
+      if (
+        !displayName &&
+        appleCredential.fullName?.givenName &&
+        appleCredential.fullName?.familyName
+      ) {
+        displayName = `${appleCredential.fullName.givenName} ${appleCredential.fullName.familyName}`;
+        await userCredential.user.updateProfile({ displayName });
+      }
+
+      // Check if display name is empty
+      const needsDisplayName = !displayName || displayName.trim() === "";
+
+      // Firestore'da kullanıcı belgesi var mı kontrol et, yoksa oluştur
+      const userDoc = await firestore()
+        .collection("Account")
+        .doc(userCredential.user.uid)
+        .get();
+
+      if (!userDoc.exists) {
+        // Yeni kullanıcı - Firestore'a kaydet
+        try {
+          await firestore()
+            .collection("Account")
+            .doc(userCredential.user.uid)
+            .set({
+              id: displayName || userCredential.user.uid,
+              email: userCredential.user.email || appleCredential.email || "",
+              displayName: displayName || "",
+              createdAt: firestore.FieldValue.serverTimestamp(),
+              emailVerified: true, // Apple ile giriş yapan kullanıcılar doğrulanmış kabul edilir
+              lastLoginAt: firestore.FieldValue.serverTimestamp(),
+              currentToken: 12,
+              isPremium: false,
+              premiumPlan: "free",
+              premiumExpirationDate: null,
+              premiumPlanStartDate: null,
+              premiumPlanEndDate: null,
+              premiumPlanStatus: null,
+              premiumPlanType: null,
+              premiumPlanAmount: null,
+              premiumPlanCurrency: null,
+            });
+        } catch (firestoreError) {
+          console.error("Firestore'a kullanıcı kaydedilemedi:", firestoreError);
+        }
+      } else {
+        // Mevcut kullanıcı - son giriş tarihini güncelle
+        try {
+          await firestore()
+            .collection("Account")
+            .doc(userCredential.user.uid)
+            .update({
+              lastLoginAt: firestore.FieldValue.serverTimestamp(),
+            });
+        } catch (firestoreError) {
+          console.error("Firestore güncellenemedi:", firestoreError);
+        }
+      }
+
+      // RevenueCat'e kullanıcı ID'sini bağla
+      try {
+        await Purchases.logIn(userCredential.user.uid);
+        console.log(
+          "[Auth] RevenueCat'e kullanıcı ID'si bağlandı (signInWithApple):",
+          userCredential.user.uid,
+        );
+      } catch (rcError: any) {
+        if (
+          !rcError?.message?.includes("singleton instance") &&
+          !rcError?.message?.includes("configure")
+        ) {
+          console.error(
+            "[Auth] RevenueCat logIn error (signInWithApple):",
+            rcError,
+          );
+        }
+      }
+
+      return {
+        user: userCredential.user,
+        needsDisplayName,
+      };
     } catch (error: any) {
       let errorMessage = "Apple ile giriş yapılamadı";
-      
-      if (error.code === "auth/operation-not-allowed") {
+
+      // Apple Sign In hata kodları
+      if (error.code === "ERR_REQUEST_CANCELED") {
+        errorMessage = "Apple girişi iptal edildi";
+      } else if (error.code === "ERR_INVALID_RESPONSE") {
+        errorMessage = "Apple'dan geçersiz yanıt alındı";
+      } else if (error.code === "auth/operation-not-allowed") {
         errorMessage = "Apple girişi Firebase Console'da etkinleştirilmemiş.";
+      } else if (error.code === "auth/invalid-credential") {
+        errorMessage = "Geçersiz kimlik bilgileri. Lütfen tekrar deneyin.";
       } else {
-        errorMessage = error.message || "Apple girişi yapılırken bir hata oluştu";
+        errorMessage =
+          error.message || "Apple girişi yapılırken bir hata oluştu";
       }
+
       return rejectWithValue(errorMessage);
     }
   },
