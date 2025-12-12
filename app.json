@@ -19,7 +19,8 @@
       "bundleIdentifier": "com.batuhanyksl.stud.ioai",
       "usesAppleSignIn": true,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "stud.io-ai, fotoğraflarınızı seçmek ve AI ile düzenlenmiş sonuçlarınızı cihazınıza kaydetmek için fotoğraf kütüphanenize erişim gerektirir. Profesyonel profil fotoğrafları, fotoğraf iyileştirmeleri ve diğer AI düzenlemelerinizi kaydedip paylaşabilirsiniz."
       }
     },
     "android": {

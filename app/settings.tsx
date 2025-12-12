@@ -7,6 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
   Alert,
+  Linking,
   Platform,
   ScrollView,
   Share,
@@ -104,6 +105,49 @@ export default function SettingsScreen() {
     ]);
   };
 
+  const handleRateApp = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+    const APP_STORE_ID = "6745631335"; // App Store'daki uygulama ID'si
+    const PACKAGE_NAME = "com.batuhanyksl.stud.ioai";
+
+    try {
+      if (Platform.OS === "ios") {
+        // iOS App Store değerlendirme sayfası
+        const appStoreUrl = `itms-apps://itunes.apple.com/app/id${APP_STORE_ID}?action=write-review`;
+        const canOpen = await Linking.canOpenURL(appStoreUrl);
+
+        if (canOpen) {
+          await Linking.openURL(appStoreUrl);
+        } else {
+          // Fallback: Web URL
+          await Linking.openURL(
+            `https://apps.apple.com/app/id${APP_STORE_ID}?action=write-review`,
+          );
+        }
+      } else {
+        // Android Play Store değerlendirme sayfası
+        const playStoreUrl = `market://details?id=${PACKAGE_NAME}`;
+        const canOpen = await Linking.canOpenURL(playStoreUrl);
+
+        if (canOpen) {
+          await Linking.openURL(playStoreUrl);
+        } else {
+          // Fallback: Web URL
+          await Linking.openURL(
+            `https://play.google.com/store/apps/details?id=${PACKAGE_NAME}`,
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Rate app error:", error);
+      Alert.alert(
+        "Hata",
+        "Uygulama mağazası açılamadı. Lütfen daha sonra tekrar deneyin.",
+      );
+    }
+  };
+
   const settingSections: SettingSection[] = [
     {
       title: "Hesap",
@@ -188,12 +232,13 @@ export default function SettingsScreen() {
         {
           id: "rate",
           title: "Uygulamayı Değerlendir",
-          subtitle: "App Store'da puan verin",
+          subtitle:
+            Platform.OS === "ios"
+              ? "App Store'da puan verin"
+              : "Play Store'da puan verin",
           icon: <Ionicons name="star" size={20} color={colors.textPrimary} />,
           type: "action",
-          onPress: () => {
-            // App Store'a yönlendir
-          },
+          onPress: handleRateApp,
         },
         {
           id: "help",
