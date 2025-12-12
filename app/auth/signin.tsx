@@ -2,7 +2,7 @@ import { AppleLogo, DisplayNameModal, GoogleLogo } from "@/components";
 import { useAuth } from "@/hooks";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -21,6 +21,7 @@ const { width, height } = Dimensions.get("window");
 
 export default function SignInScreen() {
   const { t } = useTranslation();
+  const { returnUrl } = useLocalSearchParams();
 
   const {
     loginWithGoogle,
@@ -61,16 +62,24 @@ export default function SignInScreen() {
     if (isAuthenticated && user) {
       const hasDisplayName = user.displayName && user.displayName.trim() !== "";
       if (hasDisplayName) {
-        router.replace("/(tabs)");
+        if (returnUrl) {
+          router.replace(decodeURIComponent(returnUrl as string) as any);
+        } else {
+          router.replace("/(tabs)");
+        }
       }
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, returnUrl]);
 
   const handleDisplayNameConfirm = async (displayName: string) => {
     try {
       const result = await updateUserName(displayName);
       if (result.meta.requestStatus === "fulfilled") {
-        router.replace("/(tabs)");
+        if (returnUrl) {
+          router.replace(decodeURIComponent(returnUrl as string) as any);
+        } else {
+          router.replace("/(tabs)");
+        }
       } else {
         Alert.alert("Hata", result.payload as string);
       }

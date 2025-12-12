@@ -2,7 +2,7 @@ import { AppleLogo, DisplayNameModal, GoogleLogo } from "@/components";
 import { useAuth } from "@/hooks";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useSegments } from "expo-router";
+import { router, useLocalSearchParams, useSegments } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -22,6 +22,7 @@ const { width, height } = Dimensions.get("window");
 export default function OnboardingScreen() {
   const { t } = useTranslation();
   const segments = useSegments();
+  const { returnUrl } = useLocalSearchParams();
   const {
     loginWithGoogle,
     loginWithApple,
@@ -106,13 +107,17 @@ export default function OnboardingScreen() {
           user.displayName && user.displayName.trim() !== "";
         if (hasDisplayName) {
           setIsSigningIn(false);
-          router.replace("/(tabs)");
+          if (returnUrl) {
+            router.replace(decodeURIComponent(returnUrl as string) as any);
+          } else {
+            router.replace("/(tabs)");
+          }
         }
       }
     }
 
     prevIsLoadingRef.current = isLoading;
-  }, [isLoading, isAuthenticated, user, isSigningIn]);
+  }, [isLoading, isAuthenticated, user, isSigningIn, returnUrl]);
 
   // Sayfa değiştiğinde loading'i kapat
   useEffect(() => {
@@ -131,12 +136,16 @@ export default function OnboardingScreen() {
         // İlk kez authenticate olduysa ve display name varsa tabs'a git
         setIsSigningIn(false);
         setShowLoading(false);
-        router.replace("/(tabs)");
+        if (returnUrl) {
+          router.replace(decodeURIComponent(returnUrl as string) as any);
+        } else {
+          router.replace("/(tabs)");
+        }
       }
     }
 
     prevIsAuthenticatedRef.current = isAuthenticated;
-  }, [isAuthenticated, user, isLoading]);
+  }, [isAuthenticated, user, isLoading, returnUrl]);
 
   const handleDisplayNameConfirm = async (displayName: string) => {
     try {
@@ -144,7 +153,11 @@ export default function OnboardingScreen() {
       if (result.meta.requestStatus === "fulfilled") {
         setShowLoading(false);
         setIsSigningIn(false);
-        router.replace("/(tabs)");
+        if (returnUrl) {
+          router.replace(decodeURIComponent(returnUrl as string) as any);
+        } else {
+          router.replace("/(tabs)");
+        }
       } else {
         Alert.alert("Hata", result.payload as string);
         setShowLoading(false);

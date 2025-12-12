@@ -2,14 +2,12 @@ import ThemedText from "@/components/ThemedText";
 import ThemedView from "@/components/ThemedView";
 import { editingServices } from "@/components/data";
 import { useContentCreation, useDeviceDimensions, useTheme } from "@/hooks";
-import { useAppSelector } from "@/store/hooks";
 import Ionicon from "@expo/vector-icons/Ionicons";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useRef } from "react";
 import {
-  Alert,
   Animated,
   FlatList,
   Platform,
@@ -23,7 +21,6 @@ export const HomeServices: React.FC = () => {
   const { isDark } = useTheme();
   const { clearAllImages, resetUIState } = useContentCreation();
   const { isTablet, isSmallDevice } = useDeviceDimensions();
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   const handleServicePress = (
     servicePrompt: string,
@@ -38,30 +35,8 @@ export const HomeServices: React.FC = () => {
     serviceId?: string,
     isCustomPrompt?: boolean,
   ) => {
-    // Ücretsiz servisler (ilk 2 servis ücretsiz, diğerleri premium)
-    const freeServiceIds = ["profile-picture", "photo-enhancement"];
-    const isFreeService = serviceId && freeServiceIds.includes(serviceId);
-    const requiresLogin = !isFreeService; // Ücretsiz servisler için login gerekmez
-
-    if (requiresLogin && !isAuthenticated) {
-      Alert.alert(
-        "Giriş Gerekli",
-        "Bu özelliği kullanmak için lütfen giriş yapın veya hesap oluşturun.",
-        [
-          {
-            text: "İptal",
-            style: "cancel",
-          },
-          {
-            text: "Giriş Yap",
-            onPress: () => router.push("/auth"),
-            style: "default",
-          },
-        ],
-      );
-      return;
-    }
-
+    // Tüm servisler creationPage'e yönlendirilir.
+    // Auth kontrolü creationPage içindeki useAuthProtection hook'u tarafından yapılır.
     clearAllImages();
     resetUIState();
 

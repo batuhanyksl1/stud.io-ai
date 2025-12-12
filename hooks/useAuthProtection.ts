@@ -1,5 +1,5 @@
 import { useAppSelector } from "@/store/hooks";
-import { router } from "expo-router";
+import { router, useLocalSearchParams, usePathname } from "expo-router";
 import { useEffect, useMemo } from "react";
 
 interface UseAuthProtectionOptions {
@@ -22,7 +22,7 @@ interface UseAuthProtectionReturn {
   isFreeService: boolean;
 }
 
-const DEFAULT_FREE_SERVICES = ["profile-picture", "photo-enhancement"];
+const DEFAULT_FREE_SERVICES: string[] = [];
 const DEFAULT_REDIRECT_PATH = "/auth";
 
 export const useAuthProtection = (
@@ -35,6 +35,8 @@ export const useAuthProtection = (
     skip = false,
   } = options;
 
+  const pathname = usePathname();
+  const params = useLocalSearchParams();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   const isFreeService = useMemo(() => {
@@ -53,8 +55,9 @@ export const useAuthProtection = (
     // serviceId yoksa ve login değilse, koruma aktif
     if (!serviceId) return true;
 
-    // Ücretsiz servisler için de şimdilik auth gerekli
-    if (isFreeService) return true;
+    // Ücretsiz servis listesi boş olsa bile auth gerekli
+    // Bu mantık yukarıdaki serviceId check ile zaten kapsanıyor ama netlik için kalsın
+    if (isFreeService) return false;
 
     return false;
   }, [skip, isAuthenticated, serviceId, isFreeService]);
@@ -62,9 +65,14 @@ export const useAuthProtection = (
   // Yönlendirme effect'i
   useEffect(() => {
     if (isProtecting) {
-      router.replace(redirectPath);
+      // Mevcut path ve parametreleri alıp returnUrl oluştur
+      const queryString = new URLSearchParams(params as any).toString();
+      const currentPath = pathname + (queryString ? `?${queryString}` : "");
+      const returnUrl = encodeURIComponent(currentPath);
+      
+      router.replace(`${redirectPath}?returnUrl=${returnUrl}`);
     }
-  }, [isProtecting, redirectPath]);
+  }, [isProtecting, redirectPath, pathname, params]);
 
   return {
     isAuthenticated,

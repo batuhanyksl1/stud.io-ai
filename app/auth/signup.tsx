@@ -2,7 +2,7 @@ import { AppleLogo, DisplayNameModal, GoogleLogo } from "@/components";
 import { useAuth, useTheme } from "@/hooks";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect } from "react";
 import {
   Alert,
@@ -20,6 +20,7 @@ const { width, height } = Dimensions.get("window");
 
 export default function SignUpScreen() {
   const { colors } = useTheme();
+  const { returnUrl } = useLocalSearchParams();
   const {
     loginAsGuest,
     loginWithGoogle,
@@ -87,19 +88,27 @@ export default function SignUpScreen() {
       if (hasDisplayName) {
         // Display name varsa ana uygulamaya git
         console.log("✅ User has display name - navigating to main app");
-        router.replace("/(tabs)");
+        if (returnUrl) {
+          router.replace(decodeURIComponent(returnUrl as string) as any);
+        } else {
+          router.replace("/(tabs)");
+        }
       } else {
         // Display name yoksa modal göster
         console.log("🚨 User needs display name - modal should be visible");
       }
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, returnUrl]);
 
   const handleDisplayNameConfirm = async (displayName: string) => {
     try {
       const result = await updateUserName(displayName);
       if (result.meta.requestStatus === "fulfilled") {
-        router.replace("/(tabs)");
+        if (returnUrl) {
+          router.replace(decodeURIComponent(returnUrl as string) as any);
+        } else {
+          router.replace("/(tabs)");
+        }
       } else {
         Alert.alert("Hata", result.payload as string);
       }
@@ -373,25 +382,5 @@ const styles = StyleSheet.create({
   dividerText: {
     fontSize: 14,
     color: "rgba(255,255,255,0.6)",
-  },
-  googleButton: {
-    height: 56,
-    backgroundColor: "#ffffff",
-    borderRadius: 12,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 12,
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.1)",
-  },
-  googleIcon: {
-    width: 24,
-    height: 24,
-  },
-  googleButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1f2937",
   },
 });
