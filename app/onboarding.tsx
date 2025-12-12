@@ -912,10 +912,11 @@ export default function OnboardingScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, "true");
-      router.replace("/auth");
+      // Onboarding sonrası direkt ana uygulamaya yönlendir (login zorunlu değil)
+      router.replace("/(tabs)");
     } catch (error) {
       console.error("Error saving onboarding state:", error);
-      router.replace("/auth");
+      router.replace("/(tabs)");
     }
   }, []);
 
@@ -923,10 +924,11 @@ export default function OnboardingScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, "true");
-      router.replace("/auth");
+      // Onboarding sonrası direkt ana uygulamaya yönlendir (login zorunlu değil)
+      router.replace("/(tabs)");
     } catch (error) {
       console.error("Error saving onboarding state:", error);
-      router.replace("/auth");
+      router.replace("/(tabs)");
     }
   }, []);
 

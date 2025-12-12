@@ -828,12 +828,6 @@ export default function PremiumScreen() {
             disabled={fetching || !selectedPackage}
           />
 
-          {/* Trial Info */}
-          <Animated.View entering={FadeIn.delay(900)} style={styles.trialInfo}>
-            <Gift size={16} color="#10B981" />
-            <Text style={styles.trialText}>7 gün ücretsiz dene</Text>
-          </Animated.View>
-
           {/* Trust Indicators */}
           <Animated.View
             entering={FadeInUp.delay(1000)}

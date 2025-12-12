@@ -93,8 +93,11 @@ function IndexPageContent() {
           router.replace("/email-verification");
         }
       } else {
-        console.log("User not authenticated - going to auth");
-        router.replace("/auth");
+        // Kullanıcı authenticated değilse ana uygulamaya yönlendir (guest mode)
+        console.log(
+          "User not authenticated - navigating to main app in guest mode",
+        );
+        router.replace("/(tabs)");
       }
 
       // Yönlendirme yapıldıktan sonra ready state'i true yap

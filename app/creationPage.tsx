@@ -12,6 +12,7 @@ import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useImageGeneratorHandlers } from "@/hooks/useImageGeneratorHandlers";
 import { useScreenAnimations } from "@/hooks/useScreenAnimations";
 import { useTheme } from "@/hooks/useTheme";
+import { useAppSelector } from "@/store/hooks";
 import { parseGradient } from "@/utils/gradientParser";
 import { calculateViewState } from "@/utils/viewState";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -20,6 +21,7 @@ import { SafeAreaView, StyleSheet } from "react-native";
 
 const ImageGeneratorScreen = () => {
   const router = useRouter();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const {
     servicePrompt,
     aiRequestUrl,
@@ -30,6 +32,7 @@ const ImageGeneratorScreen = () => {
     gradient,
     title,
     token,
+    serviceId,
     isCustomPrompt,
   } = useLocalSearchParams<{
     servicePrompt: string;
@@ -41,11 +44,40 @@ const ImageGeneratorScreen = () => {
     gradient: string;
     title: string;
     token: string;
+    serviceId: string;
     isCustomPrompt: string;
   }>();
 
   // Gradient renklerini parse et
   const gradientColors = useMemo(() => parseGradient(gradient), [gradient]);
+
+  // Login kontrolü - eğer kullanıcı login değilse premium page'e yönlendir
+  useEffect(() => {
+    if (!isAuthenticated && serviceId) {
+      // Ücretsiz servisler için login kontrolü yapma
+      const freeServiceIds = ["profile-picture", "photo-enhancement"];
+      const isFreeService = freeServiceIds.includes(serviceId);
+      
+      // Sadece premium servisler için login kontrolü yap
+      if (!isFreeService) {
+        router.replace("/premium");
+      }
+    } else if (!isAuthenticated && !serviceId) {
+      // Eğer serviceId yoksa ve login değilse premium page'e yönlendir (güvenlik)
+      router.replace("/premium");
+    }
+  }, [isAuthenticated, router, serviceId]);
+
+  // Eğer login değilse ve premium servis ise hiçbir şey render etme (premium page'e yönlendiriliyor)
+  if (!isAuthenticated && serviceId) {
+    const freeServiceIds = ["profile-picture", "photo-enhancement"];
+    const isFreeService = freeServiceIds.includes(serviceId);
+    if (!isFreeService) {
+      return null;
+    }
+  } else if (!isAuthenticated && !serviceId) {
+    return null;
+  }
 
   const {
     createdImageUrl,

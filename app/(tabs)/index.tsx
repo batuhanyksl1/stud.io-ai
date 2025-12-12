@@ -11,11 +11,13 @@ import { useAppSelector } from "@/store/hooks";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import auth from "@react-native-firebase/auth";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -26,6 +28,7 @@ export default function HomeScreen() {
   const { colors, isDark } = useTheme();
   const { isTablet, isSmallDevice } = useDeviceDimensions();
   const user = useAppSelector((state) => state.auth.user);
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   // Animasyon değerleri
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -65,8 +68,9 @@ export default function HomeScreen() {
   const firebaseUser = auth().currentUser;
   const resolvedDisplayName =
     firebaseUser?.displayName?.trim() || user?.displayName?.trim() || "";
-  const userName =
-    resolvedDisplayName || firebaseUser?.email || user?.email || "Kullanıcı";
+  const userName = isAuthenticated
+    ? resolvedDisplayName || firebaseUser?.email || user?.email || "Kullanıcı"
+    : "Misafir";
 
   return (
     <ThemedView backgroundColor="background" style={styles.container}>
@@ -143,24 +147,45 @@ export default function HomeScreen() {
                 color="secondary"
                 style={styles.greetingText}
               >
-                {getGreeting()} 👋
+                {isAuthenticated ? `${getGreeting()} 👋` : "Hoş geldiniz 👋"}
               </ThemedText>
               <ThemedText variant="h3" weight="bold" style={styles.userName}>
                 {userName}
               </ThemedText>
+              {!isAuthenticated && (
+                <ThemedText
+                  variant="caption"
+                  color="secondary"
+                  style={styles.guestSubtext}
+                >
+                  Ücretsiz önizleme modunda. Daha fazlası için giriş yapın.
+                </ThemedText>
+              )}
             </View>
 
-            {/* Hızlı İşlem Butonu */}
-            {/* <TouchableOpacity activeOpacity={0.8}>
-              <LinearGradient
-                colors={["#3B82F6", "#8B5CF6"]}
-                style={styles.quickActionButton}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+            {/* Login Butonu (sadece guest mode'da) */}
+            {!isAuthenticated && (
+              <Pressable
+                onPress={() => router.push("/auth")}
+                style={styles.loginButton}
               >
-                <Ionicons name="add" size={22} color="#FFFFFF" />
-              </LinearGradient>
-            </TouchableOpacity> */}
+                <LinearGradient
+                  colors={["#7c3aed", "#db2777"]}
+                  style={styles.loginButtonGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Ionicons name="log-in" size={18} color="#FFFFFF" />
+                  <ThemedText
+                    variant="caption"
+                    weight="semiBold"
+                    style={styles.loginButtonText}
+                  >
+                    Giriş Yap
+                  </ThemedText>
+                </LinearGradient>
+              </Pressable>
+            )}
           </View>
 
           {/* Motivasyon kartı */}
@@ -288,6 +313,31 @@ const styles = StyleSheet.create({
     marginTop: 0,
     fontSize: 26,
     letterSpacing: -0.5,
+  },
+  guestSubtext: {
+    marginTop: 4,
+    fontSize: 13,
+  },
+  loginButton: {
+    borderRadius: 16,
+    overflow: "hidden",
+    shadowColor: "#7c3aed",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  loginButtonGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 16,
+  },
+  loginButtonText: {
+    color: "#FFFFFF",
+    fontSize: 14,
   },
   quickActionButton: {
     width: 48,
