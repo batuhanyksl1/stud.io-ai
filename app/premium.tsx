@@ -1,17 +1,14 @@
 import { Button } from "@/components";
-import { RC_ENTITLEMENT_ID } from "@/constants";
+import { LEGAL_LINKS, RC_ENTITLEMENT_ID } from "@/constants";
 import { BorderRadius, Typography } from "@/constants/DesignTokens";
 import { useDeviceDimensions, useTheme } from "@/hooks";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
-  ArrowLeft,
   Check,
-  ChevronDown,
-  ChevronUp,
   Crown,
-  Gift,
+  FileText,
   Infinity,
   Shield,
   Sparkles,
@@ -40,7 +37,6 @@ import Purchases, {
 import Animated, {
   Easing,
   FadeIn,
-  FadeInDown,
   FadeInUp,
   interpolate,
   useAnimatedStyle,
@@ -723,7 +719,8 @@ export default function PremiumScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <View style={{ width: 44 }} /> {/* Spacer to keep layout if needed, or just remove button */}
+        {/* Spacer to keep layout if needed, or just remove button */}
+        <View style={{ width: 44 }} />
 
         <Pressable
           onPress={handleRestore}
@@ -849,6 +846,32 @@ export default function PremiumScreen() {
             Abonelik otomatik olarak yenilenir. İstediğiniz zaman
             Ayarlar&apos;dan iptal edebilirsiniz.
           </Animated.Text>
+
+          {/* Legal Links - Apple Review Requirement */}
+          <Animated.View
+            entering={FadeInUp.delay(1200)}
+            style={styles.legalLinksContainer}
+          >
+            <Pressable
+              onPress={() => Linking.openURL(LEGAL_LINKS.PRIVACY_POLICY)}
+              style={styles.legalLinkButton}
+              hitSlop={10}
+            >
+              <Shield size={14} color="#a78bfa" />
+              <Text style={styles.legalLinkText}>Gizlilik Politikası</Text>
+            </Pressable>
+
+            <View style={styles.legalLinkDivider} />
+
+            <Pressable
+              onPress={() => Linking.openURL(LEGAL_LINKS.TERMS_OF_USE)}
+              style={styles.legalLinkButton}
+              hitSlop={10}
+            >
+              <FileText size={14} color="#a78bfa" />
+              <Text style={styles.legalLinkText}>Kullanım Şartları</Text>
+            </Pressable>
+          </Animated.View>
         </View>
 
         {/* Bottom Spacing */}
@@ -1226,6 +1249,33 @@ const styles = StyleSheet.create({
     marginTop: 20,
     lineHeight: 18,
     paddingHorizontal: 20,
+  },
+
+  // Legal Links - Privacy Policy & Terms of Use
+  legalLinksContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 16,
+    gap: 12,
+  },
+  legalLinkButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  legalLinkText: {
+    fontFamily: Typography.fontFamily.medium,
+    fontSize: 13,
+    color: "#a78bfa",
+    textDecorationLine: "underline",
+  },
+  legalLinkDivider: {
+    width: 1,
+    height: 16,
+    backgroundColor: "rgba(255,255,255,0.2)",
   },
 
   // Dev Tools

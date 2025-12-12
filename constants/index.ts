@@ -14,3 +14,6 @@ export {
   RC_APPLE_API_KEY,
   RC_ENTITLEMENT_ID,
 } from "./RevenueCat";
+
+// Legal Links
+export { LEGAL_LINKS, isValidUrl } from "./LegalLinks";

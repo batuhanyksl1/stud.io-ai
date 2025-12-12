@@ -187,47 +187,6 @@ export default function HomeScreen() {
               </Pressable>
             )}
           </View>
-
-          {/* Motivasyon kartı */}
-          {/* <Animated.View
-            style={[
-              styles.motivationCard,
-              {
-                backgroundColor: isDark
-                  ? "rgba(59, 130, 246, 0.12)"
-                  : "rgba(59, 130, 246, 0.08)",
-                borderColor: isDark
-                  ? "rgba(59, 130, 246, 0.2)"
-                  : "rgba(59, 130, 246, 0.15)",
-                transform: [{ scale: scaleAnim }],
-              },
-            ]}
-          >
-            <View style={styles.motivationIconWrapper}>
-              <Ionicons name="sparkles" size={18} color="#3B82F6" />
-            </View>
-            <View style={styles.motivationTextContainer}>
-              <ThemedText
-                variant="caption"
-                weight="semiBold"
-                style={{ color: "#3B82F6" }}
-              >
-                AI ile fotoğraflarınızı dönüştürün
-              </ThemedText>
-              <ThemedText
-                variant="caption"
-                color="secondary"
-                style={styles.motivationSubtext}
-              >
-                Profesyonel sonuçlar için bir servis seçin
-              </ThemedText>
-            </View>
-            <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={colors.textTertiary}
-            />
-          </Animated.View> */}
         </Animated.View>
 
         {/* Ana içerik */}

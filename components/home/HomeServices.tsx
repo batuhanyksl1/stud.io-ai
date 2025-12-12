@@ -20,7 +20,7 @@ import {
 
 export const HomeServices: React.FC = () => {
   const router = useRouter();
-  const { colors, isDark } = useTheme();
+  const { isDark } = useTheme();
   const { clearAllImages, resetUIState } = useContentCreation();
   const { isTablet, isSmallDevice } = useDeviceDimensions();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
@@ -92,7 +92,6 @@ export const HomeServices: React.FC = () => {
 
   const ServiceCard = ({
     service,
-    index,
   }: {
     service: (typeof editingServices)[0];
     index: number;

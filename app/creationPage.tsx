@@ -57,14 +57,17 @@ const ImageGeneratorScreen = () => {
       // Ücretsiz servisler için login kontrolü yapma
       const freeServiceIds = ["profile-picture", "photo-enhancement"];
       const isFreeService = freeServiceIds.includes(serviceId);
-      
+
       // Sadece premium servisler için login kontrolü yap
       if (!isFreeService) {
-        router.replace("/premium");
+        router.replace("/auth");
+      }
+      if (isFreeService) {
+        router.replace("/auth");
       }
     } else if (!isAuthenticated && !serviceId) {
       // Eğer serviceId yoksa ve login değilse premium page'e yönlendir (güvenlik)
-      router.replace("/premium");
+      router.replace("/auth");
     }
   }, [isAuthenticated, router, serviceId]);
 
