@@ -10,7 +10,7 @@ import { useAccount, useAuth, useTheme, useUserImages } from "@/hooks";
 import { UserProfile } from "@/types";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect, useState } from "react";
 import {
@@ -27,9 +27,18 @@ const { width } = Dimensions.get("window");
 
 export default function ProfileTab() {
   const { colors, colorScheme } = useTheme();
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
   const { documents, loading, error, refetch } = useUserImages();
   const { data: accountData, refetch: refetchAccount } = useAccount();
+
+  // Anonim kullanıcı kontrolü
+  useFocusEffect(
+    useCallback(() => {
+      if (!isAuthLoading && (!user || user.isAnonymous)) {
+        router.replace("/auth");
+      }
+    }, [user, isAuthLoading]),
+  );
 
   // accountData'dan türetilen değerler (local state DEĞİL artık)
   const tokenBalance =

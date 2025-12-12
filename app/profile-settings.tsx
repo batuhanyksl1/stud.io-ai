@@ -7,9 +7,9 @@ import {
 import { useAuth, useTheme } from "@/hooks";
 //
 import * as Haptics from "expo-haptics";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Alert, Platform, ScrollView, StyleSheet, View } from "react-native";
 
 interface ProfileData {
@@ -22,7 +22,20 @@ interface ProfileData {
 
 export default function ProfileSettingsScreen() {
   const { colors, colorScheme } = useTheme();
-  const { user, updateUserName, deleteUserAccount } = useAuth();
+  const {
+    user,
+    updateUserName,
+    deleteUserAccount,
+    isLoading: isAuthLoading,
+  } = useAuth();
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!isAuthLoading && (!user || user.isAnonymous)) {
+        router.replace("/auth");
+      }
+    }, [user, isAuthLoading]),
+  );
 
   const [profileData, setProfileData] = useState<ProfileData>({
     displayName: user?.displayName || "",
