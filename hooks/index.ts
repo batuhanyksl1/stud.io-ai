@@ -13,3 +13,9 @@ export { useFrameworkReady } from "./useFrameworkReady";
 export { useErrorHandler } from "./useErrorHandler";
 export { useImageGeneratorHandlers } from "./useImageGeneratorHandlers";
 export { useScreenAnimations } from "./useScreenAnimations";
+
+// Premium Hooks
+export { usePremiumSubscription } from "./usePremiumSubscription";
+
+// Auth Hooks
+export { useAuthProtection } from "./useAuthProtection";

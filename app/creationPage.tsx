@@ -7,12 +7,14 @@ import {
   LoadingModal,
   ResultView,
 } from "@/components/creation";
-import { useContentCreation } from "@/hooks/useContentCreation";
-import { useErrorHandler } from "@/hooks/useErrorHandler";
-import { useImageGeneratorHandlers } from "@/hooks/useImageGeneratorHandlers";
-import { useScreenAnimations } from "@/hooks/useScreenAnimations";
-import { useTheme } from "@/hooks/useTheme";
-import { useAppSelector } from "@/store/hooks";
+import {
+  useAuthProtection,
+  useContentCreation,
+  useErrorHandler,
+  useImageGeneratorHandlers,
+  useScreenAnimations,
+  useTheme,
+} from "@/hooks";
 import { parseGradient } from "@/utils/gradientParser";
 import { calculateViewState } from "@/utils/viewState";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -21,7 +23,6 @@ import { SafeAreaView, StyleSheet } from "react-native";
 
 const ImageGeneratorScreen = () => {
   const router = useRouter();
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const {
     servicePrompt,
     aiRequestUrl,
@@ -48,40 +49,13 @@ const ImageGeneratorScreen = () => {
     isCustomPrompt: string;
   }>();
 
+  // Auth protection - redirects to auth if not authenticated
+  const { isProtecting } = useAuthProtection({ serviceId });
+
   // Gradient renklerini parse et
   const gradientColors = useMemo(() => parseGradient(gradient), [gradient]);
 
-  // Login kontrolü - eğer kullanıcı login değilse premium page'e yönlendir
-  useEffect(() => {
-    if (!isAuthenticated && serviceId) {
-      // Ücretsiz servisler için login kontrolü yapma
-      const freeServiceIds = ["profile-picture", "photo-enhancement"];
-      const isFreeService = freeServiceIds.includes(serviceId);
-
-      // Sadece premium servisler için login kontrolü yap
-      if (!isFreeService) {
-        router.replace("/auth");
-      }
-      if (isFreeService) {
-        router.replace("/auth");
-      }
-    } else if (!isAuthenticated && !serviceId) {
-      // Eğer serviceId yoksa ve login değilse premium page'e yönlendir (güvenlik)
-      router.replace("/auth");
-    }
-  }, [isAuthenticated, router, serviceId]);
-
-  // Eğer login değilse ve premium servis ise hiçbir şey render etme (premium page'e yönlendiriliyor)
-  if (!isAuthenticated && serviceId) {
-    const freeServiceIds = ["profile-picture", "photo-enhancement"];
-    const isFreeService = freeServiceIds.includes(serviceId);
-    if (!isFreeService) {
-      return null;
-    }
-  } else if (!isAuthenticated && !serviceId) {
-    return null;
-  }
-
+  // Content creation state
   const {
     createdImageUrl,
     status,
@@ -160,7 +134,6 @@ const ImageGeneratorScreen = () => {
   const { shouldShowError } = useErrorHandler(errorMessage, setErrorMessage);
 
   // hasResult true olduğunda router parametrelerini temizle
-  // hasMultipleInputImage parametresini koruyoruz çünkü ResultView'da referans görselleri göstermek için gerekli
   useEffect(() => {
     if (viewState.hasResult) {
       router.setParams({
@@ -172,10 +145,14 @@ const ImageGeneratorScreen = () => {
         gradient: undefined,
         title: undefined,
         token: undefined,
-        // hasMultipleInputImage parametresini koruyoruz
       });
     }
   }, [viewState.hasResult, router]);
+
+  // Auth koruması aktifken hiçbir şey render etme
+  if (isProtecting) {
+    return null;
+  }
 
   return (
     <SafeAreaView
